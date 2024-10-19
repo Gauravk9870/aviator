@@ -10,17 +10,7 @@ const multipliers = [
   1.71, 1.59, 2.31, 2.15, 50.73, 1.31, 1.34, 2.36, 1.0, 2.75, 1.1, 1.64, 1.86,
   1.79,
 ];
-const colors = [
-  "text-red-500",
-  "text-green-500",
-  "text-blue-500",
-  "text-yellow-500",
-];
 
-function getMultiplierColor(value: number) {
-  if (value >= 10) return "bg-pink-500";
-  return value % 2 === 0 ? "bg-purple-600" : "bg-blue-500";
-}
 
 export default function Component() {
   const [expanded, setExpanded] = useState(false);

@@ -4,9 +4,6 @@ import { Plane } from "lucide-react";
 
 export default function Component() {
   const [waiting, setWaiting] = useState(true);
-  const [multiplier, setMultiplier] = useState(1.0);
-  const [betAmount, setBetAmount] = useState(1.0);
-  const [balance, setBalance] = useState(3000.0);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -15,11 +12,6 @@ export default function Component() {
 
     return () => clearTimeout(timer);
   }, []);
-
-  const handleBet = () => {
-    // Implement betting logic here
-    console.log(`Placed bet of ${betAmount}`);
-  };
 
   return (
     <div className=" bg-gray-900 text-white p-4">
@@ -39,9 +31,7 @@ export default function Component() {
                 <div className="text-2xl font-bold">WAITING FOR NEXT ROUND</div>
               </div>
             ) : (
-              <div className="text-6xl font-bold z-10">
-                {multiplier.toFixed(2)}x
-              </div>
+              <div className="text-6xl font-bold z-10">123x</div>
             )}
             <Plane
               className="absolute bottom-4 left-4 text-red-500"
