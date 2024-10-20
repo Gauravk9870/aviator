@@ -3,7 +3,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format } from "date-fns";
-import { Forward, ShieldCheck } from "lucide-react";
+import { Forward, ShieldCheck, History } from "lucide-react";
 
 type Bet = {
   id: string;
@@ -169,7 +169,7 @@ const bets: Bet[] = [
     date: "2023-10-07T12:45:00Z",
     round: "8093x",
   },
-  
+
   // Add more items as needed
 ];
 
@@ -581,35 +581,44 @@ const myBets = [
 
 export default function Sidebar() {
   return (
-    <div className=" w-96 bg-[#222] text-white flex flex-col p-2">
+    <div className=" w-96 text-white flex flex-col bg-[#1b1c1d] rounded-xl p-1">
       <Tabs defaultValue="all-bets" className="flex flex-col h-full">
-        <TabsList className="grid w-full grid-cols-3 bg-transparent">
+        <TabsList className="grid w-full grid-cols-3 bg-[#141516] rounded-3xl p-0">
           <TabsTrigger
             value="all-bets"
-            className="bg-[#222222] text-white hover:bg-[#333333] focus:bg-[#333333] data-[state=active]:bg-[#333333] data-[state=active]:text-white hover:text-red-600 rounded-3xl"
+            className="bg-[#141516] text-white  focus:bg-[#2c2d30] data-[state=active]:bg-[#2c2d30] data-[state=active]:text-white rounded-3xl data-[state=inactive]:hover:text-red-600"
           >
             All Bets
           </TabsTrigger>
           <TabsTrigger
             value="my-bets"
-            className="bg-[#222222] text-white hover:bg-[#333333] focus:bg-[#333333] data-[state=active]:bg-[#333333] data-[state=active]:text-white hover:text-red-600 rounded-3xl"
+            className="bg-[#141516] text-white  focus:bg-[#2c2d30] data-[state=active]:bg-[#2c2d30] data-[state=active]:text-white rounded-3xl data-[state=inactive]:hover:text-red-600"
           >
             My Bets
           </TabsTrigger>
           <TabsTrigger
             value="top"
-            className="bg-[#222222] text-white hover:bg-[#333333] focus:bg-[#333333] data-[state=active]:bg-[#333333] data-[state=active]:text-white hover:text-red-600 rounded-3xl"
+            className="bg-[#141516] text-white  focus:bg-[#2c2d30] data-[state=active]:bg-[#2c2d30] data-[state=active]:text-white rounded-3xl data-[state=inactive]:hover:text-red-600"
           >
             Top
           </TabsTrigger>
         </TabsList>
-        <TabsContent value="all-bets" className="flex-grow overflow-auto">
-          <div className="px-4 py-2 border-b border-zinc-800">
-            <h2 className="text-lg font-semibold">ALL BETS</h2>
-            <p className="text-sm text-zinc-400">351</p>
+        <TabsContent
+          value="all-bets"
+          className="flex-grow overflow-auto p-0 hide-scrollbar"
+        >
+          <div className=" flex items-center justify-between border-b-2 border-[#141516]">
+            <div className="px-2 py-1 border-b border-zinc-800">
+              <h2 className="text-sm font-medium">ALL BETS</h2>
+              <p className="text-sm text-zinc-400">351</p>
+            </div>
+            <button className="bg-[#252528] flex items-center justify-center gap-1 pl-1 pr-2 rounded-3xl border border-[#414148] mr-2">
+              <History size={14} stroke="#9ea0a3" />
+              <span className=" text-sm text-[#9ea0a3]">Previous hand</span>
+            </button>
           </div>
-          <ScrollArea className="flex-1">
-            <div className="py-2 min-h-full">
+          <ScrollArea className="flex-1 hide-scrollbar">
+            <div className="min-h-full">
               {bets.length > 0 ? (
                 <table className="min-w-full divide-y divide-gray-700">
                   <thead>
@@ -625,15 +634,15 @@ export default function Sidebar() {
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-[#1b1c1d] divide-y divide-gray-700">
+                  <tbody className="bg-[#1b1c1d] divide-y divide-gray-700 ">
                     {bets.map((bet) => (
                       <tr
                         key={bet.id}
                         className={
-                          bet.cashedOut > 0 ? "bg-[#1e3a1e]" : "bg-[#1b1c1d]"
+                          bet.cashedOut > 0 ? "bg-[#123405]" : "bg-[#1b1c1d]"
                         }
                       >
-                        <td className="px-4 py-2 whitespace-nowrap">
+                        <td className="whitespace-nowrap rounded-tl-xl rounded-bl-xl ">
                           <div className="flex items-center">
                             <Avatar className="w-6 h-6">
                               <AvatarImage src={bet.avatar} alt={bet.user} />
@@ -646,10 +655,10 @@ export default function Sidebar() {
                             </span>
                           </div>
                         </td>
-                        <td className="px-4 py-2 whitespace-nowrap text-center text-sm text-gray-300">
+                        <td className=" whitespace-nowrap text-center text-sm text-gray-300">
                           {bet.amount.toFixed(2)}
                         </td>
-                        <td className="px-4 py-2 whitespace-nowrap text-center text-sm text-gray-300">
+                        <td className=" whitespace-nowrap text-center text-sm text-gray-300">
                           {bet.cashedOut > 0 ? bet.cashedOut.toFixed(2) : "N/A"}
                         </td>
                       </tr>
@@ -761,7 +770,7 @@ export default function Sidebar() {
                             </span>
                           </p>
                           <p className="text-xs text-gray-300">
-                            Cashed Out: {" "}
+                            Cashed Out:{" "}
                             <span className="font-semibold text-violet-900">
                               {bet.cashedOut.toFixed(2)}x
                             </span>
@@ -783,7 +792,10 @@ export default function Sidebar() {
                             ? format(new Date(bet.date), "dd MMM, yy")
                             : "N/A"}
                         </p>
-                        <p>Round : <span className="text-white">{bet.round}</span></p>
+                        <p>
+                          Round :{" "}
+                          <span className="text-white">{bet.round}</span>
+                        </p>
                       </div>
                       <button className="text-xs text-blue-500 hover:text-blue-700">
                         <Forward className="h-4 w-4" />

@@ -20,8 +20,7 @@ export default function Component() {
   return (
     <div
       className={`
-      w-full bg-gray-900 p-4 relative
-      ${expanded ? "fixed top-0 left-0 right-0 z-50" : ""}
+      w-full p-4 
       transition-all duration-500 ease-in-out
     `}
     >
@@ -33,7 +32,6 @@ export default function Component() {
           className="text-white hover:bg-gray-700"
         >
           <History className="h-4 w-4" />
-          <span className="sr-only">Toggle History</span>
         </Button>
       </div>
       <div
@@ -64,7 +62,7 @@ export default function Component() {
               className={`
                  rounded-3xl px-2 
                 ${expanded ? "mb-2" : "inline-block mr-2"}
-                transition-all duration-500 ease-in-out bg-[#111111]
+                transition-all duration-500 ease-in-out bg-[#00000080]
               `}
             >
               <MulticolorText multiplier={multiplier} />

@@ -6,11 +6,26 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* Hide scrollbar for Chrome, Safari and Opera */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.hide-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
 }
+
+/* border-color: #427f00;
+  background-color: #123405;
+  color: #fff; */
 
 @layer base {
   :root {
@@ -76,3 +91,5 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+
