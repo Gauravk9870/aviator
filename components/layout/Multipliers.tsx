@@ -1,10 +1,9 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import { Button } from "@/components/ui/button";
 import { History } from "lucide-react";
 import MulticolorText from "../ui/MulticolorText";
-import { ChevronDown, Triangle } from "lucide-react";
+import { Triangle } from "lucide-react";
 
 const multipliers = [
   2.48, 3.72, 1.57, 6.02, 83.16, 2.75, 1.41, 2.19, 1.7, 1.0, 1.89, 4.14, 1.39,
