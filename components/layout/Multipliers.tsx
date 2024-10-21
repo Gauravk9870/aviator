@@ -48,7 +48,7 @@ export default function Component() {
       </div>
       <div
         className={`
-          absolute top-0 left-0 w-full bg-[#111111] z-50
+          absolute top-0 left-0 w-full bg-[#111111] z-20
           transition-all duration-500 ease-in-out
           ${expanded ? "opacity-100" : "opacity-0 pointer-events-none"}
           max-h-[calc(100vh-2rem)] overflow-auto scrollbar-hide
@@ -65,13 +65,19 @@ export default function Component() {
           </div>
         </div>
       </div>
-      <div className="absolute top-4 right-4 z-[60] border border-[#414148] bg-[#252528] rounded-3xl">
+      <div className="absolute top-4 right-4 z-[30] border border-[#414148] bg-[#252528] rounded-3xl">
         <button
           onClick={toggleExpanded}
           className=" flex items-center justify-center px-2 py-1 gap-1"
         >
           <History size={16} stroke="#ffffff80" />
-          <Triangle size={12} stroke="#ffffff80" fill="#ffffff80"   className={`transition-transform duration-300 ${expanded ? "rotate-0" : "rotate-180"}`}
+          <Triangle
+            size={12}
+            stroke="#ffffff80"
+            fill="#ffffff80"
+            className={`transition-transform duration-300 ${
+              expanded ? "rotate-0" : "rotate-180"
+            }`}
           />
         </button>
       </div>

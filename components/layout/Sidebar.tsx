@@ -325,7 +325,7 @@ const myBets = [
 
 export default function Sidebar() {
   return (
-    <div className=" lg:w-96 text-white flex flex-col bg-[#1b1c1d] rounded-xl p-1">
+    <div className=" lg:w-96 text-white flex flex-col bg-[#1b1c1d] rounded-xl p-1 m-2 lg:m-0">
       <Tabs defaultValue="all-bets" className="flex flex-col h-full">
         <TabsList className="grid w-full grid-cols-3 bg-[#141516] rounded-3xl p-0">
           <TabsTrigger
