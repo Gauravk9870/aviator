@@ -329,7 +329,7 @@ export default function Sidebar() {
   const [timeTab, setTimeTab] = useState("day");
 
   return (
-    <div className=" lg:w-96 text-white flex flex-col bg-[#1b1c1d] rounded-xl p-1 m-2 lg:m-0">
+    <div className=" lg:w-96 text-white flex flex-col bg-[#1b1c1d] rounded-xl p-1 lg:m-0">
       <Tabs
         defaultValue="all-bets"
         value={mainTab}
@@ -493,7 +493,7 @@ export default function Sidebar() {
         {/* Top Bets  */}
         <TabsContent
           value="top"
-          className="flex-grow overflow-auto p-0 hide-scrollbar w-full"
+          className="flex-grow overflow-y-scroll p-0 hide-scrollbar w-full "
         >
           <div className=" p-0">
             <Tabs
@@ -526,7 +526,7 @@ export default function Sidebar() {
             <Tabs
               value={timeTab}
               onValueChange={setTimeTab}
-              className="w-full m-2 flex items-center justify-center"
+              className="w-full  flex items-center justify-center"
             >
               <TabsList className="grid w-3/4 grid-cols-3 bg-[#141516] rounded-3xl p-0 h-auto">
                 <TabsTrigger
