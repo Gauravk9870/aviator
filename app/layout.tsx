@@ -34,7 +34,7 @@ export default function RootLayout({
         <Navbar />
         <div className="flex flex-1 overflow-hidden p-1 flex-col-reverse lg:flex-row">
           <Sidebar />
-          <main className="flex-1 overflow-auto relative lg:h-[calc(100vh-56px)]">
+          <main className="flex-1 overflow-hidden relative lg:h-[calc(100vh-56px)]">
             <Multipliers />
             {children}
           </main>
