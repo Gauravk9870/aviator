@@ -4,7 +4,7 @@ import Avitor from "@/components/layout/Avitor";
 
 export default function Home() {
   return (
-    <main className="h-screen flex flex-col bg-[#0e0e0e]">
+    <main className="h-screen flex flex-col bg-[#0e0e0e] lg:p-2">
       <div className="flex-1">
         <Avitor />
       </div>
