@@ -1,9 +1,10 @@
-import React from "react";
+"use client";
+import React, { useState } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format } from "date-fns";
-import { Forward, ShieldCheck, History } from "lucide-react";
+import { Forward, ShieldCheck, History, MessageCircle } from "lucide-react";
 
 type Bet = {
   id: string;
@@ -315,19 +316,27 @@ const myBets = [
   {
     id: "2",
     amount: 250,
-    cashedOut: 0,
+    cashedOut: 22,
     placedAt: "2023-10-04 18:20:00",
     status: "Lost",
     wonAmount: 0,
   },
-  
 ];
 
 export default function Sidebar() {
+  const [mainTab, setMainTab] = useState("all-bets");
+  const [categoryTab, setCategoryTab] = useState("huge-wins");
+  const [timeTab, setTimeTab] = useState("day");
+
   return (
     <div className=" lg:w-96 text-white flex flex-col bg-[#1b1c1d] rounded-xl p-1 m-2 lg:m-0">
-      <Tabs defaultValue="all-bets" className="flex flex-col h-full">
-        <TabsList className="grid w-full grid-cols-3 bg-[#141516] rounded-3xl p-0">
+      <Tabs
+        defaultValue="all-bets"
+        value={mainTab}
+        onValueChange={setMainTab}
+        className="flex flex-col h-full items-center justify-center"
+      >
+        <TabsList className="grid w-3/4 grid-cols-3 bg-[#141516] rounded-3xl p-0 m-1 h-auto">
           <TabsTrigger
             value="all-bets"
             className="bg-[#141516] text-white  focus:bg-[#2c2d30] data-[state=active]:bg-[#2c2d30] data-[state=active]:text-white rounded-3xl data-[state=inactive]:hover:text-red-600"
@@ -349,7 +358,7 @@ export default function Sidebar() {
         </TabsList>
         <TabsContent
           value="all-bets"
-          className="flex-grow overflow-auto p-0 hide-scrollbar"
+          className="flex-grow overflow-auto p-0 hide-scrollbar w-full"
         >
           <div className=" flex items-center justify-between border-b-2 border-[#141516]">
             <div className="px-2 py-1 border-b border-zinc-800">
@@ -383,7 +392,9 @@ export default function Sidebar() {
                       <tr
                         key={bet.id}
                         className={
-                          bet.cashedOut > 0 ? "bg-[#123405]" : "bg-[#1b1c1d]"
+                          bet.cashedOut > 0
+                            ? "bg-[#123405] border-2 border-[#427f00]"
+                            : ""
                         }
                       >
                         <td className="whitespace-nowrap rounded-tl-xl rounded-bl-xl ">
@@ -415,7 +426,7 @@ export default function Sidebar() {
             </div>
           </ScrollArea>
         </TabsContent>
-        <TabsContent value="my-bets" className="flex-grow overflow-auto">
+        <TabsContent value="my-bets" className="flex-grow overflow-auto w-full">
           <div className="px-4 py-2 border-b border-zinc-800">
             <h2 className="text-lg font-semibold">MY BETS</h2>
             <p className="text-sm text-zinc-400">351</p>
@@ -480,10 +491,64 @@ export default function Sidebar() {
         </TabsContent>
 
         {/* Top Bets  */}
-        <TabsContent value="top" className="flex-grow overflow-auto">
-          <div className="px-4 py-2 border-b border-zinc-800">
-            <h2 className="text-lg font-semibold">TOP BETS</h2>
-            <p className="text-sm text-zinc-400">Top bets details</p>
+        <TabsContent
+          value="top"
+          className="flex-grow overflow-auto p-0 hide-scrollbar w-full"
+        >
+          <div className=" p-0">
+            <Tabs
+              value={categoryTab}
+              onValueChange={setCategoryTab}
+              className="w-full p-0"
+            >
+              <TabsList className="bg-[#1b1c1d] p-0 rounded-lg flex items-center justify-center gap-1 h-auto">
+                <TabsTrigger
+                  value="huge-wins"
+                  className="text-white data-[state=active]:bg-transparent data-[state=active]:text-white rounded-2xl text-xs data-[state=active]:border data-[state=active]:border-[#e11d48] py-1 px-0 hover:text-[#e11d48]"
+                >
+                  HUGE WINS
+                </TabsTrigger>
+                <TabsTrigger
+                  value="biggest-wins"
+                  className="text-white data-[state=active]:bg-transparent data-[state=active]:text-white rounded-2xl text-xs data-[state=active]:border data-[state=active]:border-[#e11d48] py-1 px-0 hover:text-[#e11d48]"
+                >
+                  BIGGEST WINS
+                </TabsTrigger>
+                <TabsTrigger
+                  value="multipliers"
+                  className="text-white data-[state=active]:bg-transparent data-[state=active]:text-white rounded-2xl text-xs data-[state=active]:border data-[state=active]:border-[#e11d48] py-1 px-0 hover:text-[#e11d48]"
+                >
+                  MULTIPLIERS
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+
+            <Tabs
+              value={timeTab}
+              onValueChange={setTimeTab}
+              className="w-full m-2 flex items-center justify-center"
+            >
+              <TabsList className="grid w-3/4 grid-cols-3 bg-[#141516] rounded-3xl p-0 h-auto">
+                <TabsTrigger
+                  value="day"
+                  className="bg-[#141516] text-white  focus:bg-[#2c2d30] data-[state=active]:bg-[#2c2d30] data-[state=active]:text-white rounded-3xl data-[state=inactive]:hover:text-red-600"
+                >
+                  Day
+                </TabsTrigger>
+                <TabsTrigger
+                  value="month"
+                  className="bg-[#141516] text-white  focus:bg-[#2c2d30] data-[state=active]:bg-[#2c2d30] data-[state=active]:text-white rounded-3xl data-[state=inactive]:hover:text-red-600"
+                >
+                  Month
+                </TabsTrigger>
+                <TabsTrigger
+                  value="year"
+                  className="bg-[#141516] text-white  focus:bg-[#2c2d30] data-[state=active]:bg-[#2c2d30] data-[state=active]:text-white rounded-3xl data-[state=inactive]:hover:text-red-600"
+                >
+                  Year
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
           </div>
           <ScrollArea className="flex-1">
             <div className="py-2 min-h-full">
@@ -491,7 +556,7 @@ export default function Sidebar() {
                 bets.map((bet) => (
                   <div
                     key={bet.id}
-                    className="mb-4 bg-[#1b1c1d] rounded-lg shadow-lg"
+                    className="mb-4 bg-[#101112] rounded-lg shadow-lg"
                   >
                     <div className="flex items-center justify-between p-4 relative">
                       <div className=" flex flex-col items-center">
@@ -507,29 +572,29 @@ export default function Sidebar() {
                       </div>
                       <div className="grid grid-cols-3 gap-4">
                         <div className="col-span-2">
-                          <p className="text-xs text-gray-300">
+                          <p className="text-xs text-[#9ea0a3]">
                             Bet USD:{" "}
-                            <span className="font-semibold">
+                            <span className="font-semibold text-white">
                               {bet.amount.toFixed(2)}
                             </span>
                           </p>
-                          <p className="text-xs text-gray-300">
+                          <p className="text-xs text-[#9ea0a3]">
                             Cashed Out:{" "}
-                            <span className="font-semibold text-violet-900">
+                            <span className=" font-bold text-[#C017B4] bg-[#00000080] py-1 px-2 rounded-2xl">
                               {bet.cashedOut.toFixed(2)}x
                             </span>
                           </p>
-                          <p className="text-xs text-gray-300">
+                          <p className="text-xs text-[#9ea0a3]">
                             Win USD: <span className="font-semibold">Yes</span>
                           </p>
                         </div>
                       </div>
-                      <div className="text-green-500 absolute top-2 right-2">
+                      <div className="text-green-500 ">
                         <ShieldCheck className="h-4 w-4" />
                       </div>
                     </div>
 
-                    <div className="flex justify-between items-center bg-[#111111] px-4 py-1">
+                    <div className="flex justify-between items-center bg-[#000000] px-1 py-1">
                       <div className="text-xs text-gray-400 flex gap-4">
                         <p>
                           {bet.date
@@ -541,8 +606,9 @@ export default function Sidebar() {
                           <span className="text-white">{bet.round}</span>
                         </p>
                       </div>
-                      <button className="text-xs text-blue-500 hover:text-blue-700">
-                        <Forward className="h-4 w-4" />
+                      <button className="text-xs border border-[#414148] bg-[#252528] rounded-3xl flex items-center justify-center px-1 gap-1">
+                        <Forward size={16} stroke="#9ea0a3" />{" "}
+                        <MessageCircle size={14} stroke="#9ea0a3" />
                       </button>
                     </div>
                   </div>
