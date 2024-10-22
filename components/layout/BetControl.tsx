@@ -3,13 +3,11 @@
 import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Minus, Plus, X } from "lucide-react";
-import { Switch } from "../ui/switch";
-import { Input } from "../ui/input";
+import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
 
-export default function BetControl() {
+const BetSection = () => {
   const [betAmount, setBetAmount] = useState<number>(1.0);
-  const [autoCashOut, setAutoCashOut] = useState<boolean>(false);
-  const [autoCashOutAmount, setAutoCashOutAmount] = useState<number>(2.0);
 
   const handleIncrement = () => setBetAmount((prev) => prev + 1);
   const handleDecrement = () =>
@@ -19,11 +17,7 @@ export default function BetControl() {
     alert(`Bet placed: ${betAmount.toFixed(2)} USD`);
   };
 
-  const handleClearAutoCashOut = () => {
-    setAutoCashOutAmount(0);
-  };
-
-  const BetSection = () => (
+  return (
     <div className="flex flex-col gap-2 w-full">
       <div className="flex gap-2">
         <div className="flex-1 rounded-md p-1">
@@ -48,7 +42,7 @@ export default function BetControl() {
             {[1, 2, 5, 10].map((amount) => (
               <button
                 key={amount}
-                className="bg-[#141516;] text-sm focus:outline-none text-[#ffffff80] rounded-3xl"
+                className="bg-[#141516] text-sm focus:outline-none text-[#ffffff80] rounded-3xl"
                 onClick={() => setBetAmount(amount)}
               >
                 {amount.toFixed(2)}
@@ -57,7 +51,7 @@ export default function BetControl() {
           </div>
         </div>
         <button
-          className="flex-1 flex flex-col items-center justify-center text-white py-2 px-4 bg-[#28a909] hover:bg-[#36cb12] rounded-md"
+          className="flex-1 flex flex-col items-center justify-center text-white py-2 px-4 bg-[#28a909] hover:bg-[#36cb12] rounded-2xl"
           onClick={handleBet}
         >
           <span className="text-lg font-bold uppercase">Bet</span>
@@ -66,15 +60,26 @@ export default function BetControl() {
       </div>
     </div>
   );
+};
 
-  const AutoSection = () => (
+const AutoSection = () => {
+  const [autoCashOut, setAutoCashOut] = useState<boolean>(false);
+  const [autoCashOutAmount, setAutoCashOutAmount] = useState<number>(2.0);
+
+  const handleClearAutoCashOut = () => {
+    setAutoCashOutAmount(0);
+  };
+
+  return (
     <div className="flex flex-col gap-2 w-full">
       <BetSection />
       <div className="flex items-center gap-2">
-        <button className="flex-1 text-sm bg-[#1d7aca] border border-[#46c0f2] rounded-md text-white uppercase py-2">
-          Auto Play
-        </button>
-        <div className="flex-1 flex items-center justify-center  rounded-3xl px-3 py-2 gap-2">
+        <div className=" flex-1 flex items-center justify-center">
+          <button className="w-4/5 text-sm bg-[#1d7aca] border border-[#46c0f2] rounded-3xl text-white uppercase py-1 px-4">
+            Auto Play
+          </button>
+        </div>
+        <div className="flex-1 flex items-center justify-center rounded-3xl px-3 py-2 gap-2">
           <div className="flex items-center gap-2">
             <span className="text-[#9ea0a3] text-sm">Auto Cash Out</span>
             <Switch
@@ -96,7 +101,7 @@ export default function BetControl() {
               <button
                 onClick={handleClearAutoCashOut}
                 className="absolute right-2 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-200"
-                >
+              >
                 <X size={16} />
               </button>
             )}
@@ -105,7 +110,9 @@ export default function BetControl() {
       </div>
     </div>
   );
+};
 
+export default function BetControl() {
   return (
     <div className="flex flex-col lg:flex-row justify-between gap-4 pt-2 pb-2 lg:pb-0">
       <div className="flex-1 p-4 rounded-md bg-[#222222]">
