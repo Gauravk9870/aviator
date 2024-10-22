@@ -69,7 +69,7 @@ export default function BetControl() {
   );
 
   return (
-    <div className="flex flex-col lg:flex-row justify-between gap-4 p-2 lg:p-4">
+    <div className="flex flex-col lg:flex-row justify-between gap-4 pt-2">
       <div className="flex-1 p-4 rounded-md bg-[#222222]">
         <Tabs
           defaultValue="bet"
