@@ -9,7 +9,7 @@ export default function Avitor() {
   };
 
   return (
-    <div className="p-4 h-full w-full relative">
+    <div className="h-full w-full relative">
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-[#0e0e0e] text-white">
           <p>Loading...</p>
