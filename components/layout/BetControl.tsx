@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Minus, Plus } from "lucide-react";
-
 export default function BetControl() {
   const [betAmount, setBetAmount] = useState<number>(1.0);
 
@@ -19,6 +18,7 @@ export default function BetControl() {
     <div className="flex flex-col gap-2 w-full">
       <div className="flex gap-2">
         <div className="flex-1 rounded-md p-1">
+    
           <div className="flex items-center justify-between bg-[#000000b3] rounded-3xl px-1">
             <button
               className="w-4 h-4 flex items-center justify-center text-white border border-[#ffffff80] rounded-full focus:outline-none"
