@@ -17,6 +17,18 @@ body {
   scrollbar-width: none;  /* Firefox */
 }
 
+/* Hide increment and decrement buttons for Chrome, Safari, Edge, and Opera */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Hide increment and decrement buttons for Firefox */
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;

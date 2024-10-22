@@ -2,9 +2,14 @@
 
 import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Minus, Plus } from "lucide-react";
+import { Minus, Plus, X } from "lucide-react";
+import { Switch } from "../ui/switch";
+import { Input } from "../ui/input";
+
 export default function BetControl() {
   const [betAmount, setBetAmount] = useState<number>(1.0);
+  const [autoCashOut, setAutoCashOut] = useState<boolean>(false);
+  const [autoCashOutAmount, setAutoCashOutAmount] = useState<number>(2.0);
 
   const handleIncrement = () => setBetAmount((prev) => prev + 1);
   const handleDecrement = () =>
@@ -14,17 +19,20 @@ export default function BetControl() {
     alert(`Bet placed: ${betAmount.toFixed(2)} USD`);
   };
 
+  const handleClearAutoCashOut = () => {
+    setAutoCashOutAmount(0);
+  };
+
   const BetSection = () => (
     <div className="flex flex-col gap-2 w-full">
       <div className="flex gap-2">
         <div className="flex-1 rounded-md p-1">
-    
           <div className="flex items-center justify-between bg-[#000000b3] rounded-3xl px-1">
             <button
               className="w-4 h-4 flex items-center justify-center text-white border border-[#ffffff80] rounded-full focus:outline-none"
               onClick={handleDecrement}
             >
-              <Minus size={16} stroke="#ffffff80"/>
+              <Minus size={16} stroke="#ffffff80" />
             </button>
             <span className="text-lg text-white font-bold">
               {betAmount.toFixed(2)}
@@ -33,7 +41,7 @@ export default function BetControl() {
               className="w-4 h-4 flex items-center justify-center text-white border border-[#ffffff80] rounded-full focus:outline-none"
               onClick={handleIncrement}
             >
-              <Plus size={16} stroke="#ffffff80"/>
+              <Plus size={16} stroke="#ffffff80" />
             </button>
           </div>
           <div className="grid grid-cols-2 gap-1 mt-1">
@@ -62,9 +70,39 @@ export default function BetControl() {
   const AutoSection = () => (
     <div className="flex flex-col gap-2 w-full">
       <BetSection />
-      <button className="w-full text-sm bg-[#1d7aca] border border-[#46c0f2] rounded-md text-white uppercase py-2">
-        Auto Play
-      </button>
+      <div className="flex items-center gap-2">
+        <button className="flex-1 text-sm bg-[#1d7aca] border border-[#46c0f2] rounded-md text-white uppercase py-2">
+          Auto Play
+        </button>
+        <div className="flex-1 flex items-center justify-center  rounded-3xl px-3 py-2 gap-2">
+          <div className="flex items-center gap-2">
+            <span className="text-[#9ea0a3] text-sm">Auto Cash Out</span>
+            <Switch
+              checked={autoCashOut}
+              onCheckedChange={setAutoCashOut}
+              className="border-2 border-gray-600 bg-transparent data-[state=checked]:border-[#60ae05] data-[state=checked]:bg-[#229607] data-[state=unchecked]:bg-transparent"
+            />
+          </div>
+
+          <div className="relative">
+            <Input
+              type="number"
+              value={autoCashOutAmount}
+              onChange={(e) => setAutoCashOutAmount(Number(e.target.value))}
+              className="w-16 text-white border-none text-right h-auto bg-[#000000b3] outline-none rounded-3xl hide-spin-buttons pr-8 py-1"
+              disabled={!autoCashOut}
+            />
+            {autoCashOut && (
+              <button
+                onClick={handleClearAutoCashOut}
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-200"
+                >
+                <X size={16} />
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 
