@@ -29,12 +29,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#111111] lg:h-screen flex flex-col`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#111111] lg:h-screen flex flex-col hide-scrollbar`}
       >
         <Navbar />
-        <div className="flex flex-1 overflow-hidden p-1 flex-col-reverse lg:flex-row">
+        <div className="flex flex-1 overflow-hidden p-1 flex-col-reverse lg:flex-row hide-scrollbar">
           <Sidebar />
-          <main className="flex-1 overflow-auto relative lg:h-[calc(100vh-56px)]">
+          <main className="flex-1 overflow-auto relative lg:h-[calc(100vh-56px)] hide-scrollbar">
             <Multipliers />
             {children}
           </main>

@@ -3,7 +3,7 @@ import BetControl from "@/components/layout/BetControl";
 
 export default function Home() {
   return (
-    <main className=" h-full overflow-scroll flex flex-col justify-between bg-[#0e0e0e]">
+    <main className=" h-full overflow-scroll flex flex-col justify-between bg-[#0e0e0e] hide-scrollbar">
       {/* <Avitor /> */}
       <BetControl/>
     </main>
