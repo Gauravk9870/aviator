@@ -21,7 +21,7 @@ export default function Avitor() {
         onLoad={handleLoad}
         style={{
           display: isLoading ? "none" : "block",
-          borderRadius: "15px", 
+          borderRadius: "20px", 
           overflow: "hidden"
         }}
       ></iframe>
