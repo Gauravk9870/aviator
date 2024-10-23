@@ -19,7 +19,11 @@ export default function Avitor() {
         src="https://elaborate-monstera-c8852a.netlify.app"
         className="w-full h-full"
         onLoad={handleLoad}
-        style={{ display: isLoading ? "none" : "block" }}
+        style={{
+          display: isLoading ? "none" : "block",
+          borderRadius: "15px", 
+          overflow: "hidden"
+        }}
       ></iframe>
     </div>
   );
