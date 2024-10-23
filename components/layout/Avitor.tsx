@@ -9,7 +9,7 @@ export default function Avitor() {
   };
 
   return (
-    <div className="h-full w-full relative">
+    <div className="h-full w-full relative border border-[#6666664b] rounded-2xl">
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-[#0e0e0e] text-white">
           <p>Loading...</p>
@@ -17,11 +17,10 @@ export default function Avitor() {
       )}
       <iframe
         src="https://elaborate-monstera-c8852a.netlify.app"
-        className="w-full h-full"
+        className="w-full h-full rounded-2xl"
         onLoad={handleLoad}
         style={{
           display: isLoading ? "none" : "block",
-          borderRadius: "20px", 
           overflow: "hidden"
         }}
       ></iframe>

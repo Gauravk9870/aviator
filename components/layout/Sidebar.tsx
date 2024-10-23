@@ -391,11 +391,6 @@ export default function Sidebar() {
                     {bets.map((bet) => (
                       <tr
                         key={bet.id}
-                        className={
-                          bet.cashedOut > 0
-                            ? "bg-[#123405] border-2 border-[#427f00]"
-                            : ""
-                        }
                       >
                         <td className="whitespace-nowrap rounded-tl-xl rounded-bl-xl ">
                           <div className="flex items-center">
