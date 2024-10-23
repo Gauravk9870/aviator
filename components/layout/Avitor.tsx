@@ -9,7 +9,7 @@ export default function Avitor() {
   };
 
   return (
-    <div className=" h-[250px] w-full relative border border-[#6666664b] rounded-2xl lg:h-full">
+    <div className=" h-[200px] w-full relative border border-[#6666664b] rounded-2xl lg:h-full">
       {isLoading && (
         <div className="h-full absolute inset-0 flex items-center justify-center bg-[#0e0e0e] text-white">
           <p>Loading...</p>
