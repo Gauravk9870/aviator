@@ -19,7 +19,7 @@ const BetSection = () => {
 
   return (
     <div className="flex flex-col gap-2 w-full mt-2">
-      <div className="flex gap-2">
+      <div className="flex gap-1">
         <div className="flex-1 rounded-md p-1">
           <div className="flex items-center justify-between bg-[#000000b3] rounded-3xl px-1">
             <button
@@ -117,21 +117,21 @@ const AutoSection = () => {
 export default function BetControl() {
   return (
     <div className="flex flex-col lg:flex-row justify-between gap-2 pt-2 pb-2 lg:pb-0">
-      <div className="flex-1 p-4 rounded-md bg-[#222222]">
+      <div className="flex-1 px-4 lg:px-10 py-4 rounded-md bg-[#222222] ">
         <Tabs
           defaultValue="bet"
           className="flex flex-col items-center justify-center gap-2"
         >
-          <TabsList className="bg-[#141516] w-full sm:w-1/3 min-w-40 rounded-3xl h-auto p-0">
-            <TabsTrigger
+          <TabsList className="bg-[#141516] w-full max-w-[200px] rounded-3xl h-auto p-0">
+          <TabsTrigger
               value="bet"
-              className=" w-24 rounded-3xl data-[state=active]:bg-[#2c2d30] text-white data-[state=active]:text-white p-0"
+              className="w-1/2 rounded-3xl data-[state=active]:bg-[#2c2d30] text-white data-[state=active]:text-white py-0.5 px-4 flex-1"
             >
               Bet
             </TabsTrigger>
             <TabsTrigger
               value="auto"
-              className=" w-24 rounded-3xl data-[state=active]:bg-[#2c2d30] text-white data-[state=active]:text-white p-0"
+              className="w-1/2 rounded-3xl data-[state=active]:bg-[#2c2d30] text-white data-[state=active]:text-white py-0.5 px-4 flex-1"
             >
               Auto
             </TabsTrigger>
@@ -144,21 +144,21 @@ export default function BetControl() {
           </TabsContent>
         </Tabs>
       </div>
-      <div className="flex-1 p-4 rounded-md bg-[#222222]">
+      <div className="flex-1 px-4 lg:px-10 py-4 rounded-md bg-[#222222] ">
         <Tabs
           defaultValue="bet"
           className="flex flex-col items-center justify-center gap-2"
         >
-          <TabsList className="bg-[#141516] w-full sm:w-1/3 min-w-40 rounded-3xl h-auto p-0">
+          <TabsList className="bg-[#141516] w-full max-w-[200px] rounded-3xl h-auto p-0">
             <TabsTrigger
               value="bet"
-              className=" w-24 rounded-3xl data-[state=active]:bg-[#2c2d30] text-white data-[state=active]:text-white p-0"
+              className="w-1/2 rounded-3xl data-[state=active]:bg-[#2c2d30] text-white data-[state=active]:text-white py-0.5 px-4 flex-1 h-auto"
             >
               Bet
             </TabsTrigger>
             <TabsTrigger
               value="auto"
-              className=" w-24 rounded-3xl data-[state=active]:bg-[#2c2d30] text-white data-[state=active]:text-white p-0"
+              className="w-1/2 rounded-3xl data-[state=active]:bg-[#2c2d30] text-white data-[state=active]:text-white py-0.5 px-4 flex-1"
             >
               Auto
             </TabsTrigger>
