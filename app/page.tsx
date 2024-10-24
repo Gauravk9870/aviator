@@ -4,10 +4,8 @@ import Avitor from "@/components/layout/Avitor";
 
 export default function Home() {
   return (
-    <main className=" h-full overflow-scroll flex flex-col justify-between bg-[#0e0e0e] hide-scrollbar">
-      <div className="flex-1">
-        <Avitor />
-      </div>{" "}
+    <main className=" lg:h-[calc(100vh-119.5px)] flex flex-col bg-[#0e0e0e] justify-between lg:p-2">
+      <Avitor />
       <BetControl />
     </main>
   );
