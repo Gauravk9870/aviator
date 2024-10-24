@@ -72,7 +72,7 @@ const Navbar = () => {
   return (
     <div className="flex justify-between bg-[#1b1c1d] p-2 text-white">
       <div className="flex items-center gap-4">
-        <span className="text-2xl font-black text-red-600">Avitor</span>
+        <span className="text-2xl font-black text-red-600 font-style: italic">Aviator</span>
 
         <button
           onClick={toggleHowToPlay}
