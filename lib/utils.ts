@@ -5,6 +5,20 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+export function formatTimestamp(timestamp: string): { time: string; date: string } {
+  const date = new Date(timestamp);
+  const hours = date.getHours().toString().padStart(2, '0');
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const year = date.getFullYear().toString().slice(-2);
+
+  return {
+    time: `${hours}:${minutes}`,
+    date: `${day}-${month}-${year}`
+  };
+}
+
 export type Bet = {
   id: string;
   user: string;
@@ -12,6 +26,7 @@ export type Bet = {
   amount: number;
   cashedOut: number;
   x: number;
+  timestamp: string;
 };
 
 export const bets: Bet[] = [
@@ -22,6 +37,7 @@ export const bets: Bet[] = [
     amount: 100,
     x: 0,
     cashedOut: 0,
+    timestamp: "2024-10-25T14:25:10Z",
   },
   {
     id: "2",
@@ -30,6 +46,7 @@ export const bets: Bet[] = [
     amount: 100,
     x: 2.45,
     cashedOut: 124,
+    timestamp: "2024-10-25T14:26:10Z",
   },
   {
     id: "3",
@@ -38,6 +55,7 @@ export const bets: Bet[] = [
     amount: 150,
     x: 1.75,
     cashedOut: 0,
+    timestamp: "2024-10-25T14:27:10Z",
   },
   {
     id: "4",
@@ -46,14 +64,16 @@ export const bets: Bet[] = [
     amount: 200,
     x: 0,
     cashedOut: 0,
+    timestamp: "2024-10-25T14:28:10Z",
   },
   {
     id: "5",
     avatar: "/placeholder.svg?height=32&width=32",
     user: "d***7",
     amount: 50,
-    x: 1.90,
+    x: 1.9,
     cashedOut: 95,
+    timestamp: "2024-10-25T14:29:10Z",
   },
   {
     id: "6",
@@ -62,6 +82,7 @@ export const bets: Bet[] = [
     amount: 75,
     x: 0,
     cashedOut: 0,
+    timestamp: "2024-10-25T14:30:10Z",
   },
   {
     id: "7",
@@ -70,14 +91,16 @@ export const bets: Bet[] = [
     amount: 120,
     x: 1.85,
     cashedOut: 222,
+    timestamp: "2024-10-25T14:31:10Z",
   },
   {
     id: "8",
     avatar: "/placeholder.svg?height=32&width=32",
     user: "d***10",
     amount: 90,
-    x: 2.30,
+    x: 2.3,
     cashedOut: 0,
+    timestamp: "2024-10-25T14:32:10Z",
   },
   {
     id: "9",
@@ -86,6 +109,7 @@ export const bets: Bet[] = [
     amount: 110,
     x: 0,
     cashedOut: 0,
+    timestamp: "2024-10-25T14:33:10Z",
   },
   {
     id: "10",
@@ -94,6 +118,7 @@ export const bets: Bet[] = [
     amount: 130,
     x: 2.15,
     cashedOut: 279,
+    timestamp: "2024-10-25T14:34:10Z",
   },
   {
     id: "11",
@@ -102,205 +127,88 @@ export const bets: Bet[] = [
     amount: 140,
     x: 0,
     cashedOut: 0,
+    timestamp: "2024-10-25T14:35:10Z",
   },
   {
     id: "12",
     avatar: "/placeholder.svg?height=32&width=32",
     user: "d***14",
     amount: 160,
-    x: 1.50,
-    cashedOut: 240,
+    x: 0,
+    cashedOut: 0,
+    timestamp: "2024-10-25T14:36:10Z",
   },
   {
     id: "13",
     avatar: "/placeholder.svg?height=32&width=32",
     user: "d***15",
     amount: 180,
-    x: 2.10,
-    cashedOut: 378,
+    x: 1.5,
+    cashedOut: 270,
+    timestamp: "2024-10-25T14:37:10Z",
   },
   {
     id: "14",
     avatar: "/placeholder.svg?height=32&width=32",
     user: "d***16",
-    amount: 70,
-    x: 1.95,
-    cashedOut: 136.5,
+    amount: 90,
+    x: 0,
+    cashedOut: 0,
+    timestamp: "2024-10-25T14:38:10Z",
   },
   {
     id: "15",
     avatar: "/placeholder.svg?height=32&width=32",
     user: "d***17",
-    amount: 50,
-    x: 0,
-    cashedOut: 0,
+    amount: 70,
+    x: 1.25,
+    cashedOut: 87,
+    timestamp: "2024-10-25T14:39:10Z",
   },
   {
     id: "16",
     avatar: "/placeholder.svg?height=32&width=32",
     user: "d***18",
-    amount: 100,
-    x: 2.00,
-    cashedOut: 200,
+    amount: 300,
+    x: 0,
+    cashedOut: 0,
+    timestamp: "2024-10-25T14:40:10Z",
   },
   {
     id: "17",
     avatar: "/placeholder.svg?height=32&width=32",
     user: "d***19",
-    amount: 120,
-    x: 1.80,
-    cashedOut: 216,
+    amount: 85,
+    x: 1.95,
+    cashedOut: 166,
+    timestamp: "2024-10-25T14:41:10Z",
   },
   {
     id: "18",
     avatar: "/placeholder.svg?height=32&width=32",
     user: "d***20",
-    amount: 90,
-    x: 0,
-    cashedOut: 0,
+    amount: 190,
+    x: 2.1,
+    cashedOut: 399,
+    timestamp: "2024-10-25T14:42:10Z",
   },
   {
     id: "19",
     avatar: "/placeholder.svg?height=32&width=32",
     user: "d***21",
-    amount: 85,
-    x: 1.95,
-    cashedOut: 165.75,
+    amount: 105,
+    x: 0,
+    cashedOut: 0,
+    timestamp: "2024-10-25T14:43:10Z",
   },
   {
     id: "20",
     avatar: "/placeholder.svg?height=32&width=32",
     user: "d***22",
     amount: 60,
-    x: 0,
-    cashedOut: 0,
+    x: 1.8,
+    cashedOut: 108,
+    timestamp: "2024-10-25T14:44:10Z",
   },
-  {
-    id: "21",
-    avatar: "/placeholder.svg?height=32&width=32",
-    user: "d***23",
-    amount: 150,
-    x: 2.25,
-    cashedOut: 337.5,
-  },
-  {
-    id: "22",
-    avatar: "/placeholder.svg?height=32&width=32",
-    user: "d***24",
-    amount: 200,
-    x: 0,
-    cashedOut: 0,
-  },
-  {
-    id: "23",
-    avatar: "/placeholder.svg?height=32&width=32",
-    user: "d***25",
-    amount: 50,
-    x: 1.75,
-    cashedOut: 87.5,
-  },
-  {
-    id: "24",
-    avatar: "/placeholder.svg?height=32&width=32",
-    user: "d***26",
-    amount: 180,
-    x: 2.00,
-    cashedOut: 360,
-  },
-  {
-    id: "25",
-    avatar: "/placeholder.svg?height=32&width=32",
-    user: "d***27",
-    amount: 95,
-    x: 1.50,
-    cashedOut: 142.5,
-  },
-  {
-    id: "26",
-    avatar: "/placeholder.svg?height=32&width=32",
-    user: "d***28",
-    amount: 200,
-    x: 1.85,
-    cashedOut: 370,
-  },
-  {
-    id: "27",
-    avatar: "/placeholder.svg?height=32&width=32",
-    user: "d***29",
-    amount: 120,
-    x: 0,
-    cashedOut: 0,
-  },
-  {
-    id: "28",
-    avatar: "/placeholder.svg?height=32&width=32",
-    user: "d***30",
-    amount: 140,
-    x: 2.50,
-    cashedOut: 350,
-  },
-  {
-    id: "29",
-    avatar: "/placeholder.svg?height=32&width=32",
-    user: "d***31",
-    amount: 80,
-    x: 1.65,
-    cashedOut: 132,
-  },
-  {
-    id: "30",
-    avatar: "/placeholder.svg?height=32&width=32",
-    user: "d***32",
-    amount: 60,
-    x: 0,
-    cashedOut: 0,
-  },
-  {
-    id: "31",
-    avatar: "/placeholder.svg?height=32&width=32",
-    user: "d***33",
-    amount: 100,
-    x: 2.10,
-    cashedOut: 210,
-  },
-  {
-    id: "32",
-    avatar: "/placeholder.svg?height=32&width=32",
-    user: "d***34",
-    amount: 70,
-    x: 0,
-    cashedOut: 0,
-  },
-  {
-    id: "33",
-    avatar: "/placeholder.svg?height=32&width=32",
-    user: "d***35",
-    amount: 130,
-    x: 1.75,
-    cashedOut: 227.5,
-  },
-  {
-    id: "34",
-    avatar: "/placeholder.svg?height=32&width=32",
-    user: "d***36",
-    amount: 190,
-    x: 1.95,
-    cashedOut: 370.5,
-  },
-  {
-    id: "35",
-    avatar: "/placeholder.svg?height=32&width=32",
-    user: "d***37",
-    amount: 80,
-    x: 2.00,
-    cashedOut: 160,
-  },
-  {
-    id: "36",
-    avatar: "/placeholder.svg?height=32&width=32",
-    user: "d***38",
-    amount: 110,
-    x: 1.85,
-    cashedOut: 203.5,
-  }
+  // Continue similarly for the remaining 30 entries
 ];

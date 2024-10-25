@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format } from "date-fns";
 import { Forward, ShieldCheck, History, MessageCircle } from "lucide-react";
 import { getTextColorClass } from "../ui/MulticolorText";
-import { bets } from "@/lib/utils";
+import { bets, formatTimestamp } from "@/lib/utils";
 
 const topBets = [
   {
@@ -130,12 +130,12 @@ export default function Component() {
                               {bet.user.charAt(0).toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
-                          <p className="ml-2 text-[#9ea0a3] font-[13px]">
+                          <p className="ml-2 text-[#9ea0a3] text-[13px]">
                             {bet.user}
                           </p>
                         </div>
                         <div className="px-4 py-1 whitespace-nowrap text-left  flex-1 ">
-                          <span className="text-sm text-[#bbbfc5] font-normal">
+                          <span className="text-base text-[#ffffff] font-normal">
                             {bet.amount.toFixed(2)}
                           </span>
 
@@ -150,7 +150,7 @@ export default function Component() {
                           )}
                         </div>
                         <div className="px-4 py-1 whitespace-nowrap text-right text-xs text-gray-300 flex-1 ">
-                          <span className="text-sm text-[#bbbfc5] font-normal">
+                          <span className="text-base text-[#ffffff] font-normal">
                             {bet.cashedOut.toFixed(2)}
                           </span>
                         </div>
@@ -164,51 +164,81 @@ export default function Component() {
             </div>
           </ScrollArea>
         </TabsContent>
-        <TabsContent value="my-bets" className="flex-grow overflow-auto w-full">
-          <div className="px-4 py-2 border-b border-zinc-800">
-            <h2 className="text-lg font-semibold">MY BETS</h2>
-            <p className="text-sm text-zinc-400">351</p>
-          </div>
-          <ScrollArea className="flex-1">
-            <div className="py-2 min-h-full">
-              {myBets.length > 0 ? (
-                <div className="divide-y divide-gray-700">
-                  <div className="flex justify-between px-2 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    <span>Bet X</span>
-                    <span>Cash out</span>
-                    <span>Placed At</span>
-                    <span>Status</span>
-                    <span>Won</span>
+        <TabsContent
+          value="my-bets"
+          className="flex-grow overflow-auto p-0 hide-scrollbar w-full"
+        >
+          <ScrollArea className="flex-1 hide-scrollbar">
+            <div className="min-h-full">
+              {bets.length > 0 ? (
+                <div className="">
+                  <div className="flex justify-between  text-[11px] font-medium text-gray-500  tracking-wider">
+                    <div className="  px-4 py-2 flex-1">
+                      <span>Date</span>
+                    </div>
+                    <div className="  px-4 py-2 flex-1 text-left">
+                      <span className="">Bet USD X</span>
+                    </div>
+                    <div className="  px-4 py-2 flex-1 text-right">
+                      <span>Cash out USD</span>
+                    </div>
+                    <div className="  px-4 py-2  text-right"></div>
                   </div>
-                  <div className="bg-[#1b1c1d] divide-y divide-gray-700">
-                    {myBets.map((bet) => (
-                      <div
-                        key={bet.id}
-                        className={`flex justify-between px-2 py-1 ${
-                          bet.status === "Won" ? "bg-[#1e3a1e]" : "bg-[#1b1c1d]"
-                        }`}
-                      >
-                        <span className="whitespace-nowrap text-center text-xs text-gray-300">
-                          {bet.amount.toFixed(2)}
-                        </span>
-                        <span className="whitespace-nowrap text-center text-xs text-gray-300">
-                          {bet?.cashedOut.toFixed(2)}
-                        </span>
-                        <span className="whitespace-nowrap text-center text-xs text-gray-300">
-                          {bet.placedAt}
-                        </span>
-                        <span className="whitespace-nowrap text-center text-xs text-gray-300">
-                          {bet.status}
-                        </span>
-                        <span className="whitespace-nowrap text-center text-xs text-gray-300">
-                          {bet.status}
-                        </span>
-                      </div>
-                    ))}
+
+                  <div className="bg-[#1b1c1d]">
+                    {bets.map((bet) => {
+                      const { time, date } = formatTimestamp(bet.timestamp);
+                      return (
+                        <div
+                          key={bet.id}
+                          className={`flex justify-between rounded-lg ${
+                            bet.x > 0
+                              ? "border border-[#427f00] bg-[#123405]"
+                              : "bg-[#141516]"
+                          } mb-0.5`}
+                        >
+                          <div
+                            className="flex items-left justify-center flex-col gap-0 px-0.5 flex-1 ml-2 text-[#bbbfc5] text-[12px]"
+                            style={{ lineHeight: "1" }}
+                          >
+                            <span>{time}</span>
+                            <span>{date}</span>
+                          </div>
+                          <div className="px-4 py-1 whitespace-nowrap text-left flex-1">
+                            <span className="text-base text-[#ffffff] font-normal">
+                              {bet.amount.toFixed(2)}
+                            </span>
+
+                            {bet.x > 0 && (
+                              <span
+                                className={`py-[2px] px-[6px] rounded-[11px] ${getTextColorClass(
+                                  Number(bet.x)
+                                )} bg-[#00000080] text-[12px] ml-2 font-bold`}
+                              >
+                                {bet.x}x
+                              </span>
+                            )}
+                          </div>
+                          <div className=" pl-4 pr-1 py-1 whitespace-nowrap text-right text-xs text-gray-300 flex-1">
+                            <span className="text-base text-[#ffffff] font-normal">
+                              {bet.cashedOut.toFixed(2)}
+                            </span>
+                          </div>
+
+                          <div className=" px-4 py-1 flex items-center justify-center gap-1">
+                            <ShieldCheck
+                              className=" text-green-500"
+                              size={16}
+                            />
+                            <MessageCircle size={16} stroke="#9ea0a3" />
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               ) : (
-                <p className="text-sm text-zinc-400">No bets available</p>
+                <p className="text-sm text-gray-400">No bets available</p>
               )}
             </div>
           </ScrollArea>
