@@ -15,39 +15,20 @@ const topBets = [
     user: "User1",
     amount: 300,
     cashedOut: 450,
-    date: "2023-10-05 10:00:00",
-    round: "Round 1",
+    timestamp: "2023-10-05 10:00:00",
+    x: 0,
     avatar: "avatar1.png",
   },
   {
     id: 2,
     user: "User2",
     amount: 500,
-    cashedOut: 0,
-    date: "2023-10-06 11:30:00",
-    round: "Round 2",
+    cashedOut: 232,
+    timestamp: "2023-10-06 11:30:00",
+    x: 1.34,
     avatar: "avatar2.png",
   },
   // ... (other top bet objects)
-];
-
-const myBets = [
-  {
-    id: "1",
-    amount: 150,
-    cashedOut: 225,
-    placedAt: "2023-10-03 16:45:00",
-    status: "Won",
-    wonAmount: 225,
-  },
-  {
-    id: "2",
-    amount: 250,
-    cashedOut: 22,
-    placedAt: "2023-10-04 18:20:00",
-    status: "Lost",
-    wonAmount: 0,
-  },
 ];
 
 export default function Component() {
@@ -347,12 +328,12 @@ export default function Component() {
                     <div className="flex justify-between items-center bg-[#000000] px-1 py-1">
                       <div className="text-xs text-gray-400 flex gap-4">
                         <p>
-                          {bet.date
-                            ? format(new Date(bet.date), "dd MMM, yy")
+                          {bet.timestamp
+                            ? format(new Date(bet.timestamp), "dd MMM, yy")
                             : "N/A"}
                         </p>
                         <p>
-                          Round: <span className="text-white">{bet.round}</span>
+                          Round: <span className="text-white">{bet.x}</span>
                         </p>
                       </div>
                       <button className="text-xs border border-[#414148] bg-[#252528] rounded-3xl flex items-center justify-center px-1 gap-1">
