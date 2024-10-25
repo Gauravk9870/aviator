@@ -12,6 +12,7 @@ import {
   CircleUser,
   Menu,
   Home,
+  Info,
 } from "lucide-react";
 import {
   Menubar,
@@ -22,10 +23,14 @@ import {
   MenubarSeparator,
 } from "@/components/ui/menubar";
 import { Switch } from "@/components/ui/switch";
+import HowToPlayPopup from "./HowToPlayPopup";
 
 export default function Navbar() {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [musicEnabled, setMusicEnabled] = useState(true);
+  const [showHowToPlay, setShowHowToPlay] = useState(false);
+
+  const toggleHowToPlay = () => setShowHowToPlay((prev) => !prev);
 
   const menuItems = [
     {
@@ -54,6 +59,20 @@ export default function Navbar() {
     <div className="flex justify-between bg-[#1b1c1d] p-2 text-white">
       <div className="flex items-center gap-4">
         <span className="text-2xl font-black text-red-600 italic">Aviator</span>
+        <button
+          onClick={toggleHowToPlay}
+          className="hidden items-center gap-1 rounded-3xl bg-[#e69308] px-2 py-1 text-sm text-[#5f3816] transition-opacity duration-300 sm:flex"
+        >
+          <Info size={16} stroke="#5f3816" />
+          <span>How to play?</span>
+        </button>
+
+        <button
+          onClick={toggleHowToPlay}
+          className="flex transition-opacity duration-300 sm:hidden"
+        >
+          <Info size={16} stroke="#fff" />
+        </button>
       </div>
       <div className="flex items-center">
         <div className="px-3">
@@ -121,6 +140,7 @@ export default function Navbar() {
           </Menubar>
         </div>
       </div>
+      {showHowToPlay && <HowToPlayPopup onClose={toggleHowToPlay} />}
     </div>
   );
 }
