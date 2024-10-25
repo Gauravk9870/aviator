@@ -1,6 +1,6 @@
 import React from "react";
 
-const getTextColorClass = (value: number) => {
+export const getTextColorClass = (value: number) => {
   if (value > 10) return "text-[#913EF8]";
   if (value > 2) return "text-[#34B4FF]";
   return "text-[#C017B4]";
