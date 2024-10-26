@@ -159,37 +159,50 @@ export default function Navbar() {
                     </button>
                   </div>
                   {menuItems.map((item, index) => (
-                    <React.Fragment key={index}>
-                      <MenubarItem
-                        className="flex items-center justify-between bg-[#1b1c1d] py-3 px-3 hover:bg-[#1b1c1d] focus:bg-[#1b1c1d] focus:text-white"
-                        onSelect={(event) => {
-                          if (item.toggle) {
-                            event.preventDefault();
-                          }
-                          if (item.label === "Game Limits") toggleGameLimits();
-                          if (item.label === "How To Play") toggleHowToPlay();
-                          if (item.label === "Game Rules") toggleGameRules();
-                          if (item.label === "Provably Fair Settings") toggleProvablyFairSettings();
-                        }}
-                      >
-                        <div className="flex items-center">
-                          <span className="mr-2 text-[#83878e]">{item.icon}</span>
-                          {item.label}
-                        </div>
-                        {item.toggle && (
-                          <Switch
-                            checked={item.state}
-                            onCheckedChange={(checked) => item.setState(checked)}
-                            className="ml-2 border-2 border-gray-600 bg-transparent data-[state=checked]:border-[#60ae05] data-[state=checked]:bg-[#229607] data-[state=unchecked]:bg-transparent"
-                          />
-                        )}
-                      </MenubarItem>
-                      {item.isLastToggle && <div className="h-4"></div>}
-                      {index < menuItems.length - 1 && (
-                        <MenubarSeparator className="m-0 h-[1px] bg-gray-700 p-0" />
-                      )}
-                    </React.Fragment>
-                  ))}
+  <React.Fragment key={index}>
+    <MenubarItem
+      className="flex items-center justify-between bg-[#1b1c1d] py-3 px-3 hover:bg-[#1b1c1d] focus:bg-[#1b1c1d] focus:text-white"
+      onSelect={(event) => {
+        if (item.toggle) {
+          event.preventDefault();
+        }
+        // Use a switch statement for better clarity
+        switch (item.label) {
+          case "Game Limits":
+            toggleGameLimits();
+            break;
+          case "How To Play":
+            toggleHowToPlay();
+            break;
+          case "Game Rules":
+            toggleGameRules();
+            break;
+          case "Provably Fair Settings":
+            toggleProvablyFairSettings();
+            break;
+          default:
+            break; // No action for other items
+        }
+      }}
+    >
+      <div className="flex items-center">
+        <span className="mr-2 text-[#83878e]">{item.icon}</span>
+        {item.label}
+      </div>
+      {item.toggle && (
+        <Switch
+          checked={item.state}
+          onCheckedChange={(checked) => item.setState(checked)}
+          className="ml-2 border-2 border-gray-600 bg-transparent data-[state=checked]:border-[#60ae05] data-[state=checked]:bg-[#229607] data-[state=unchecked]:bg-transparent"
+        />
+      )}
+    </MenubarItem>
+    {item.isLastToggle && <div className="h-4"></div>}
+    {index < menuItems.length - 1 && (
+      <MenubarSeparator className="m-0 h-[1px] bg-gray-700 p-0" />
+    )}
+  </React.Fragment>
+))}
                   <MenubarSeparator className="m-0 h-[1px] bg-gray-700 p-0" />
 
                   {/* Conditionally Render the "Home" Button */}
