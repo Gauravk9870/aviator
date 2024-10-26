@@ -42,6 +42,16 @@ const avatars = [
 "./logo.png",
 "./logo.png",
 "./logo.png",
+"./logo.png",
+"./logo.png",
+"./logo.png",
+"./logo.png",
+"./logo.png",
+"./logo.png",
+"./logo.png",
+"./logo.png",
+"./logo.png",
+"./logo.png",
 
   // Add more avatar URLs as needed
 ];
@@ -98,10 +108,6 @@ const ChangeAvatarPopup: React.FC<ChangeAvatarPopupProps> = ({ onClose, onAvatar
               key={index}
               onClick={() => handleAvatarClick(avatarUrl)} // This will close the dialog
               className={`flex justify-center transition-transform transform hover:scale-110 cursor-pointer`}
-              style={{
-                gridRow: Math.floor(index / 5) + 1, // Control the row position
-                gridColumn: (index % 5) + (Math.floor(index / 5) % 2) // Staggering columns for diagonal effect
-              }}
             >
               <img
                 src={avatarUrl}

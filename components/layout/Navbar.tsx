@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Volume2,
   Music,
@@ -27,7 +27,7 @@ import HowToPlayPopup from "./HowToPlayPopup";
 import GameRulesPopup from "./GameRulesPopup";
 import ProvablyFairSettingsPopup from "./ProvablyFairSettingsPopup";
 import GameLimitsPopup from "./GameLimitsPopup";
-import ChangeAvatarPopup from "./ChangeAvatarPopup";
+import ChangeAvatarPopup from "./ChangeAvatarPopup"; // Importing the ChangeAvatarPopup
 
 export default function Navbar() {
   const [soundEnabled, setSoundEnabled] = useState(true);
@@ -40,14 +40,38 @@ export default function Navbar() {
   const [showHomeButton, setShowHomeButton] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
+  useEffect(() => {
+    // Load avatar from localStorage when component mounts
+    const savedAvatar = localStorage.getItem("selectedAvatar");
+    if (savedAvatar) {
+      setAvatarUrl(savedAvatar);
+    }
+
+    // Check for 'return_url' in the URL
+    const params = new URLSearchParams(window.location.search);
+    const returnUrl = params.get("return_url");
+
+    if (returnUrl === "https://spribe.co/games") {
+      setShowHomeButton(true); // Show "Home" button only if URL matches
+    }
+  }, []);
+
   const toggleHowToPlay = () => setShowHowToPlay((prev) => !prev);
   const toggleGameRules = () => setShowGameRules((prev) => !prev);
   const toggleProvablyFairSettings = () => setShowProvablyFairSettings((prev) => !prev);
   const toggleGameLimits = () => setShowGameLimits((prev) => !prev);
   const toggleChangeAvatar = () => setShowChangeAvatar((prev) => !prev);
 
+  const sendMessageToIframe = (data: { type: string; enabled: boolean }) => {
+    const iframe = document.getElementById("iframeID") as HTMLIFrameElement;
+    if (iframe && iframe.contentWindow) {
+      iframe.contentWindow.postMessage(data, "*");
+    }
+  };
+
   const handleAvatarSelect = (url: string) => {
-    setAvatarUrl(url); // Update avatar in state only
+    setAvatarUrl(url); // Update avatar in state
+    localStorage.setItem("selectedAvatar", url); // Save avatar in localStorage
     setShowChangeAvatar(false); // Close the avatar popup
   };
 
@@ -57,14 +81,20 @@ export default function Navbar() {
       label: "Sound",
       toggle: true,
       state: soundEnabled,
-      setState: (checked: boolean) => setSoundEnabled(checked),
+      setState: (checked: boolean) => {
+        setSoundEnabled(checked);
+        sendMessageToIframe({ type: "sound-toggle", enabled: checked });
+      },
     },
     {
       icon: <Music size={18} />,
       label: "Music",
       toggle: true,
       state: musicEnabled,
-      setState: (checked: boolean) => setMusicEnabled(checked),
+      setState: (checked: boolean) => {
+        setMusicEnabled(checked);
+        sendMessageToIframe({ type: "bgMusic-toggle", enabled: checked });
+      },
       isLastToggle: true,
     },
     { icon: <History size={18} />, label: "My Bet History" },
@@ -183,7 +213,13 @@ export default function Navbar() {
       {showHowToPlay && <HowToPlayPopup onClose={toggleHowToPlay} />}
       {showGameRules && <GameRulesPopup onClose={toggleGameRules} />}
       {showProvablyFairSettings && <ProvablyFairSettingsPopup onClose={toggleProvablyFairSettings} />}
-      {showChangeAvatar && <ChangeAvatarPopup onClose={toggleChangeAvatar} onAvatarSelect={handleAvatarSelect} />}
+      {showChangeAvatar && (
+        <ChangeAvatarPopup
+          onClose={toggleChangeAvatar}
+          onAvatarSelect={handleAvatarSelect} // Pass the avatar select handler
+          selectedAvatarUrl={avatarUrl} // Pass the current avatar URL here
+        />
+      )}
     </div>
   );
 }
