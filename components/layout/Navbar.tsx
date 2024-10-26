@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Volume2,
   Music,
@@ -34,33 +34,21 @@ export default function Navbar() {
   const [musicEnabled, setMusicEnabled] = useState(true);
   const [showHowToPlay, setShowHowToPlay] = useState(false);
   const [showGameRules, setShowGameRules] = useState(false);
-  const [showProvablyFairSettings, setShowProvablyFairSettings] =
-    useState(false);
+  const [showProvablyFairSettings, setShowProvablyFairSettings] = useState(false);
   const [showGameLimits, setShowGameLimits] = useState(false);
   const [showChangeAvatar, setShowChangeAvatar] = useState(false);
-  const [showHomeButton, setShowHomeButton] = useState(false); // New state to control "Home" button visibility
-
-  useEffect(() => {
-    // Check for 'return_url' in the URL
-    const params = new URLSearchParams(window.location.search);
-    const returnUrl = params.get("return_url");
-
-    if (returnUrl === "https://spribe.co/games") {
-      setShowHomeButton(true); // Show "Home" button only if URL matches
-    }
-  }, []);
+  const [showHomeButton, setShowHomeButton] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
   const toggleHowToPlay = () => setShowHowToPlay((prev) => !prev);
   const toggleGameRules = () => setShowGameRules((prev) => !prev);
-  const toggleProvablyFairSettings = () =>
-    setShowProvablyFairSettings((prev) => !prev);
+  const toggleProvablyFairSettings = () => setShowProvablyFairSettings((prev) => !prev);
   const toggleGameLimits = () => setShowGameLimits((prev) => !prev);
   const toggleChangeAvatar = () => setShowChangeAvatar((prev) => !prev);
-  const sendMessageToIframe = (data: { type: string; enabled: boolean }) => {
-    const iframe = document.getElementById("iframeID") as HTMLIFrameElement;
-    if (iframe && iframe.contentWindow) {
-      iframe.contentWindow.postMessage(data, "*");
-    }
+
+  const handleAvatarSelect = (url: string) => {
+    setAvatarUrl(url); // Update avatar in state only
+    setShowChangeAvatar(false); // Close the avatar popup
   };
 
   const menuItems = [
@@ -69,20 +57,14 @@ export default function Navbar() {
       label: "Sound",
       toggle: true,
       state: soundEnabled,
-      setState: (checked: boolean) => {
-        setSoundEnabled(checked);
-        sendMessageToIframe({ type: "sound-toggle", enabled: checked });
-      },
+      setState: (checked: boolean) => setSoundEnabled(checked),
     },
     {
       icon: <Music size={18} />,
       label: "Music",
       toggle: true,
       state: musicEnabled,
-      setState: (checked: boolean) => {
-        setMusicEnabled(checked);
-        sendMessageToIframe({ type: "bgMusic-toggle", enabled: checked });
-      },
+      setState: (checked: boolean) => setMusicEnabled(checked),
       isLastToggle: true,
     },
     { icon: <History size={18} />, label: "My Bet History" },
@@ -94,7 +76,6 @@ export default function Navbar() {
 
   return (
     <div className="flex flex-col bg-[#1b1c1d] p-1 text-white">
-      {/* Main Navbar Content */}
       <div className="flex justify-between">
         <div className="flex items-center gap-4">
           <span className="text-2xl font-black text-red-600 italic">Aviator</span>
@@ -124,10 +105,17 @@ export default function Navbar() {
                   <Menu size={20} className="text-[#999999]" />
                 </MenubarTrigger>
                 <MenubarContent className="min-w-[320px] border-none bg-[#2c2d30] p-0 text-white">
-                  {/* Menubar content */}
                   <div className="flex items-center justify-between p-2">
                     <div className="flex items-center p-1">
-                      <div className="mr-2 h-8 w-8 rounded-full bg-gray-700"></div>
+                      {avatarUrl ? (
+                        <img
+                          src={avatarUrl}
+                          alt="User Avatar"
+                          className="h-8 w-8 rounded-full"
+                        />
+                      ) : (
+                        <div className="mr-2 h-8 w-8 rounded-full bg-gray-700"></div>
+                      )}
                       <div className="text-sm font-semibold">d***8</div>
                     </div>
                     <button
@@ -151,8 +139,7 @@ export default function Navbar() {
                           if (item.label === "Game Limits") toggleGameLimits();
                           if (item.label === "How To Play") toggleHowToPlay();
                           if (item.label === "Game Rules") toggleGameRules();
-                          if (item.label === "Provably Fair Settings")
-                            toggleProvablyFairSettings();
+                          if (item.label === "Provably Fair Settings") toggleProvablyFairSettings();
                         }}
                       >
                         <div className="flex items-center">
@@ -162,9 +149,7 @@ export default function Navbar() {
                         {item.toggle && (
                           <Switch
                             checked={item.state}
-                            onCheckedChange={(checked) => {
-                              item.setState(checked);
-                            }}
+                            onCheckedChange={(checked) => item.setState(checked)}
                             className="ml-2 border-2 border-gray-600 bg-transparent data-[state=checked]:border-[#60ae05] data-[state=checked]:bg-[#229607] data-[state=unchecked]:bg-transparent"
                           />
                         )}
@@ -192,16 +177,13 @@ export default function Navbar() {
           </div>
         </div>
       </div>
-      
+
       {/* Popups */}
       {showGameLimits && <GameLimitsPopup onClose={toggleGameLimits} />}
       {showHowToPlay && <HowToPlayPopup onClose={toggleHowToPlay} />}
       {showGameRules && <GameRulesPopup onClose={toggleGameRules} />}
-      {showProvablyFairSettings && (
-        <ProvablyFairSettingsPopup onClose={toggleProvablyFairSettings} />
-      )}
-      {showChangeAvatar && <ChangeAvatarPopup onClose={toggleChangeAvatar} />}
+      {showProvablyFairSettings && <ProvablyFairSettingsPopup onClose={toggleProvablyFairSettings} />}
+      {showChangeAvatar && <ChangeAvatarPopup onClose={toggleChangeAvatar} onAvatarSelect={handleAvatarSelect} />}
     </div>
   );
 }
-// http://localhost:3000/?return_url=https://spribe.co/games to check
