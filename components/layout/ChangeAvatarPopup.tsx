@@ -56,17 +56,18 @@ const avatars = [
 ];
 
 const ChangeAvatarPopup: React.FC<ChangeAvatarPopupProps> = ({ onClose, onAvatarSelect, selectedAvatarUrl }) => {
-  // Function to handle avatar selection
   const handleAvatarClick = (avatarUrl: string) => {
-    onAvatarSelect(avatarUrl); // Pass selected avatar back to parent component
-    onClose; // Close the popup after selection
+    onAvatarSelect(avatarUrl);
+    onClose();
   };
 
   return (
-    <Dialog open={true} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <DialogContent className="sm:max-w-[700px] bg-[#2c2d30] border-gray-700 rounded-lg p-0"> {/* No padding */}
-        
-        {/* Header with title and close button */}
+    <Dialog open={true} onOpenChange={(isOpen) => {
+      if (!isOpen) {
+        onClose();
+      }
+    }}>
+      <DialogContent className="sm:max-w-[700px] bg-[#2c2d30] border-gray-700 rounded-lg p-0">
         <div className="bg-[#0f0f11] border-b border-gray-700 flex justify-between items-center p-4"> 
           <DialogTitle className="text-2xl font-bold text-white">
             Choose Game Avatar
@@ -88,8 +89,7 @@ const ChangeAvatarPopup: React.FC<ChangeAvatarPopupProps> = ({ onClose, onAvatar
             </svg>
           </DialogClose>
         </div>
-        
-        {/* Display the selected avatar at the top */}
+
         {selectedAvatarUrl && (
           <div className="flex justify-center my-4">
             <img
@@ -99,13 +99,12 @@ const ChangeAvatarPopup: React.FC<ChangeAvatarPopupProps> = ({ onClose, onAvatar
             />
           </div>
         )}
-        
-        {/* Avatar selection grid with a darker background */}
-        <div className="grid grid-cols-5 gap-4 p-4 bg-[#1b1c1d]"> {/* Darker background */}
+
+        <div className="grid grid-cols-5 gap-4 p-4 bg-[#1b1c1d]">
           {avatars.map((avatarUrl, index) => (
             <div
               key={index}
-              onClick={() => handleAvatarClick(avatarUrl)} // This will close the dialog
+              onClick={() => handleAvatarClick(avatarUrl)}
               className={`flex justify-center transition-transform transform hover:scale-110 cursor-pointer`}
             >
               <img
@@ -117,7 +116,6 @@ const ChangeAvatarPopup: React.FC<ChangeAvatarPopupProps> = ({ onClose, onAvatar
           ))}
         </div>
 
-        {/* Close button at the bottom */}
         <div className="flex justify-center mt-4">
           <button
             onClick={onClose}
