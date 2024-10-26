@@ -8,10 +8,10 @@ const multipliers = [
   2.48, 3.72, 1.57, 6.02, 83.16, 2.75, 1.41, 2.19, 1.7, 1.0, 1.89, 4.14, 1.39,
   10.6, 2.85, 2.42, 7.25, 1.48, 1.64, 1.21, 1.0, 1.33, 2.22, 15.64, 1.37, 1.2,
   1.71, 1.59, 2.31, 2.15, 50.73, 1.31, 1.34, 2.36, 1.0, 2.75, 1.1, 1.64, 1.86,
-  1.79, 2.48, 3.72, 1.57, 6.02, 83.16, 2.75, 1.41, 2.19, 1.7, 1.0, 1.89, 4.14, 1.39,
-  10.6, 2.85, 2.42, 7.25, 1.48, 1.64, 1.21, 1.0, 1.33, 2.22, 15.64, 1.37, 1.2,
-  1.71, 1.59, 2.31, 2.15, 50.73, 1.31, 1.34, 2.36, 1.0, 2.75, 1.1, 1.64, 1.86,
-  1.79,
+  1.79, 2.48, 3.72, 1.57, 6.02, 83.16, 2.75, 1.41, 2.19, 1.7, 1.0, 1.89, 4.14,
+  1.39, 10.6, 2.85, 2.42, 7.25, 1.48, 1.64, 1.21, 1.0, 1.33, 2.22, 15.64, 1.37,
+  1.2, 1.71, 1.59, 2.31, 2.15, 50.73, 1.31, 1.34, 2.36, 1.0, 2.75, 1.1, 1.64,
+  1.86, 1.79,
 ];
 
 export default function Component() {
@@ -25,7 +25,7 @@ export default function Component() {
       <div
         ref={containerRef}
         className={`
-          w-full p-4
+          w-full p-2
           transition-all duration-500 ease-in-out
           ${expanded ? "h-16 overflow-hidden" : " h-auto"}
         `}
@@ -57,7 +57,9 @@ export default function Component() {
         `}
       >
         <div className="">
-          <div className="h-8 px-[10px] flex items-center text-white text-sm font-bold mb-2 bg-[#1f2128]">ROUND HISTORY</div>
+          <div className="h-8 px-[10px] flex items-center text-white text-sm font-bold mb-2 bg-[#1f2128]">
+            ROUND HISTORY
+          </div>
           <div className="flex flex-wrap px-2 py-1">
             {multipliers.map((multiplier, index) => (
               <div
@@ -70,13 +72,13 @@ export default function Component() {
           </div>
         </div>
       </div>
-      <div className="absolute top-3 right-4 z-[30] border border-[#414148] bg-[#252528] rounded-3xl">
+      <div className="absolute top-2 right-4 z-[30] border border-[#414148] bg-[#252528] rounded-3xl">
         <button
           onClick={toggleExpanded}
           className="flex items-center justify-center px-2 py-0.5 gap-1"
         >
-          <History 
-            size={16} 
+          <History
+            size={16}
             className={`transition-colors duration-300 ${
               expanded ? "stroke-red-500" : "stroke-[#ffffff80]"
             }`}
@@ -84,7 +86,9 @@ export default function Component() {
           <Triangle
             size={12}
             className={`transition-all duration-300 ${
-              expanded ? "stroke-red-500 fill-red-500 rotate-0" : "stroke-[#ffffff80] fill-[#ffffff80] rotate-180"
+              expanded
+                ? "stroke-red-500 fill-red-500 rotate-0"
+                : "stroke-[#ffffff80] fill-[#ffffff80] rotate-180"
             }`}
           />
         </button>

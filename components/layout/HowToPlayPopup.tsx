@@ -14,7 +14,7 @@ interface HowToPlayPopupProps {
 const HowToPlayPopup: React.FC<HowToPlayPopupProps> = ({ onClose }) => {
   return (
     <Dialog open={true} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <DialogContent className="sm:max-w-[700px] bg-[#1b1c1d] border-gray-700">
+      <DialogContent className="sm:max-w-[700px] bg-[#27a409] border-gray-700">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-white">
             HOW TO PLAY?

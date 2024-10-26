@@ -47,103 +47,97 @@ export default function Component() {
         <TabsList className="grid w-3/4 grid-cols-3 bg-[#141516] rounded-3xl p-0 h-auto mt-0.2">
           <TabsTrigger
             value="all-bets"
-            className="bg-[#141516] text-white focus:bg-[#2c2d30] data-[state=active]:bg-[#2c2d30] data-[state=active]:text-white rounded-3xl data-[state=inactive]:hover:text-red-600 py-0.5 px-4"
+            className="bg-[#141516] text-white text-xs focus:bg-[#2c2d30] data-[state=active]:bg-[#2c2d30] data-[state=active]:text-white rounded-3xl data-[state=inactive]:hover:text-red-600 py-0.5 px-4"
           >
             All Bets
           </TabsTrigger>
           <TabsTrigger
             value="my-bets"
-            className="bg-[#141516] text-white focus:bg-[#2c2d30] data-[state=active]:bg-[#2c2d30] data-[state=active]:text-white rounded-3xl data-[state=inactive]:hover:text-red-600 py-0.5 px-4"
+            className="bg-[#141516] text-white text-xs focus:bg-[#2c2d30] data-[state=active]:bg-[#2c2d30] data-[state=active]:text-white rounded-3xl data-[state=inactive]:hover:text-red-600 py-0.5 px-4"
           >
             My Bets
           </TabsTrigger>
           <TabsTrigger
             value="top"
-            className="bg-[#141516] text-white focus:bg-[#2c2d30] data-[state=active]:bg-[#2c2d30] data-[state=active]:text-white rounded-3xl data-[state=inactive]:hover:text-red-600 py-0.5 px-4"
+            className="bg-[#141516] text-white text-xs focus:bg-[#2c2d30] data-[state=active]:bg-[#2c2d30] data-[state=active]:text-white rounded-3xl data-[state=inactive]:hover:text-red-600 py-0.5 px-4"
           >
             Top
           </TabsTrigger>
         </TabsList>
         <TabsContent
           value="all-bets"
-          className="flex-grow overflow-auto p-0 hide-scrollbar w-full"
+          className="flex-grow overflow-auto p-0 m-0 hide-scrollbar w-full"
         >
           <div className="flex items-center justify-between border-b-2 border-[#141516]">
             <div className="px-2 py-1 border-b border-zinc-800">
               <h2 className="text-sm font-medium">ALL BETS</h2>
               <p className="text-sm text-zinc-400">351</p>
             </div>
-            <button className="bg-[#252528] flex items-center justify-center gap-1 pl-1 pr-2 rounded-3xl border border-[#414148] mr-2">
-              <History size={14} stroke="#9ea0a3" />
-              <span className="text-sm text-[#9ea0a3]">Previous hand</span>
-            </button>
           </div>
-          <ScrollArea className="flex-1 hide-scrollbar">
-            <div className="min-h-full">
-              {bets.length > 0 ? (
-                <div className="">
-                  <div className="flex justify-between  text-[11px] font-medium text-gray-500  tracking-wider">
-                    <div className="  px-4 py-2 flex-1">
-                      <span>User</span>
-                    </div>
-                    <div className="  px-4 py-2 flex-1 text-left">
-                      <span className="">Bet USD X</span>
-                    </div>
-                    <div className="  px-4 py-2 flex-1 text-right">
-                      <span>Cash out USD</span>
-                    </div>
+          <div>
+            {bets.length > 0 ? (
+              <div>
+                <div className="flex justify-between  text-[11px] font-medium text-gray-500  tracking-wider">
+                  <div className="  px-4 py-1 flex-1">
+                    <span>User</span>
                   </div>
-
-                  <div className="bg-[#1b1c1d]  ">
-                    {bets.map((bet) => (
-                      <div
-                        key={bet.id}
-                        className={`flex justify-between rounded-lg  ${
-                          bet.x > 0
-                            ? "border border-[#427f00] bg-[#123405]"
-                            : "bg-[#141516]"
-                        }  mb-0.5 `}
-                      >
-                        <div className="flex items-center px-0.5 flex-1">
-                          <Avatar className="w-[30px] h-[30px]">
-                            <AvatarImage src={bet.avatar} alt={bet.user} />
-                            <AvatarFallback>
-                              {bet.user.charAt(0).toUpperCase()}
-                            </AvatarFallback>
-                          </Avatar>
-                          <p className="ml-2 text-[#9ea0a3] text-[13px]">
-                            {bet.user}
-                          </p>
-                        </div>
-                        <div className="px-4 py-1 whitespace-nowrap text-left  flex-1 ">
-                          <span className="text-base text-[#ffffff] font-normal">
-                            {bet.amount.toFixed(2)}
-                          </span>
-
-                          {bet.x > 0 && (
-                            <span
-                              className={` py-[2px] px-[6px] rounded-[11px] ${getTextColorClass(
-                                Number(bet.x)
-                              )} bg-[#00000080] text-[12px] ml-2 font-bold`}
-                            >
-                              {bet.x}x
-                            </span>
-                          )}
-                        </div>
-                        <div className="px-4 py-1 whitespace-nowrap text-right text-xs text-gray-300 flex-1 ">
-                          <span className="text-base text-[#ffffff] font-normal">
-                            {bet.cashedOut.toFixed(2)}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
+                  <div className="  px-4 py-1 flex-1 text-left">
+                    <span className="">Bet USD X</span>
+                  </div>
+                  <div className="  px-4 py-1 flex-1 text-right">
+                    <span>Cash out USD</span>
                   </div>
                 </div>
-              ) : (
-                <p className="text-sm text-gray-400">No bets available</p>
-              )}
-            </div>
-          </ScrollArea>
+
+                <div className="bg-[#1b1c1d]  ">
+                  {bets.map((bet) => (
+                    <div
+                      key={bet.id}
+                      className={`flex justify-between rounded-lg  ${
+                        bet.x > 0
+                          ? "border border-[#427f00] bg-[#123405]"
+                          : "bg-[#141516]"
+                      }  mb-0.5 `}
+                    >
+                      <div className="flex items-center px-0.5 flex-1">
+                        <Avatar className="w-[30px] h-[30px]">
+                          <AvatarImage src={bet.avatar} alt={bet.user} />
+                          <AvatarFallback>
+                            {bet.user.charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <p className="ml-2 text-[#9ea0a3] text-[13px]">
+                          {bet.user}
+                        </p>
+                      </div>
+                      <div className="px-4 py-1 whitespace-nowrap text-left  flex-1 ">
+                        <span className="text-base text-[#ffffff] font-normal">
+                          {bet.amount.toFixed(2)}
+                        </span>
+
+                        {bet.x > 0 && (
+                          <span
+                            className={` py-[2px] px-[6px] rounded-[11px] ${getTextColorClass(
+                              Number(bet.x)
+                            )} bg-[#00000080] text-[12px] ml-2 font-bold`}
+                          >
+                            {bet.x}x
+                          </span>
+                        )}
+                      </div>
+                      <div className="px-4 py-1 whitespace-nowrap text-right text-xs text-gray-300 flex-1 ">
+                        <span className="text-base text-[#ffffff] font-normal">
+                          {bet.cashedOut.toFixed(2)}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm text-gray-400">No bets available</p>
+            )}
+          </div>
         </TabsContent>
         <TabsContent
           value="my-bets"
@@ -185,7 +179,7 @@ export default function Component() {
                             <span>{time}</span>
                             <span>{date}</span>
                           </div>
-                          <div className="px-4 py-1 whitespace-nowrap text-left flex-1">
+                          <div className="px-4 py-1 whitespace-nowrap flex flex-row justify-center">
                             <span className="text-base text-[#ffffff] font-normal">
                               {bet.amount.toFixed(2)}
                             </span>
@@ -234,16 +228,16 @@ export default function Component() {
               onValueChange={setCategoryTab}
               className="w-full p-0"
             >
-              <TabsList className="bg-[#1b1c1d] p-0 rounded-lg flex items-center justify-center gap-1 h-auto">
+              <TabsList className="bg-[#1b1c1d] p-1 rounded-lg flex items-center justify-center gap-1 h-auto">
                 <TabsTrigger
                   value="huge-wins"
-                  className="text-white data-[state=active]:bg-transparent data-[state=active]:text-white rounded-2xl text-xs data-[state=active]:border data-[state=active]:border-[#e11d48] py-1 px-0 hover:text-[#e11d48]"
+                  className="text-white mx-1 data-[state=active]:bg-transparent data-[state=active]:text-white rounded-2xl text-xs data-[state=active]:border data-[state=active]:border-[#e11d48] py-1 px-0 hover:text-[#e11d48]"
                 >
                   HUGE WINS
                 </TabsTrigger>
                 <TabsTrigger
                   value="biggest-wins"
-                  className="text-white data-[state=active]:bg-transparent data-[state=active]:text-white rounded-2xl text-xs data-[state=active]:border data-[state=active]:border-[#e11d48] py-1 px-0 hover:text-[#e11d48]"
+                  className="text-white mx-1 data-[state=active]:bg-transparent data-[state=active]:text-white rounded-2xl text-xs data-[state=active]:border data-[state=active]:border-[#e11d48] py-1 px-0 hover:text-[#e11d48]"
                 >
                   BIGGEST WINS
                 </TabsTrigger>
@@ -263,19 +257,19 @@ export default function Component() {
               <TabsList className="grid w-3/4 grid-cols-3 bg-[#141516] rounded-3xl p-0 h-auto">
                 <TabsTrigger
                   value="day"
-                  className="bg-[#141516] text-white focus:bg-[#2c2d30] data-[state=active]:bg-[#2c2d30] data-[state=active]:text-white rounded-3xl data-[state=inactive]:hover:text-red-600"
+                  className="bg-[#141516] text-white p-0 focus:bg-[#2c2d30] data-[state=active]:bg-[#2c2d30] data-[state=active]:text-white rounded-3xl data-[state=inactive]:hover:text-red-600"
                 >
                   Day
                 </TabsTrigger>
                 <TabsTrigger
                   value="month"
-                  className="bg-[#141516] text-white focus:bg-[#2c2d30] data-[state=active]:bg-[#2c2d30] data-[state=active]:text-white rounded-3xl data-[state=inactive]:hover:text-red-600"
+                  className="bg-[#141516] text-white p-0 focus:bg-[#2c2d30] data-[state=active]:bg-[#2c2d30] data-[state=active]:text-white rounded-3xl data-[state=inactive]:hover:text-red-600"
                 >
                   Month
                 </TabsTrigger>
                 <TabsTrigger
                   value="year"
-                  className="bg-[#141516] text-white focus:bg-[#2c2d30] data-[state=active]:bg-[#2c2d30] data-[state=active]:text-white rounded-3xl data-[state=inactive]:hover:text-red-600"
+                  className="bg-[#141516] text-white p-0 focus:bg-[#2c2d30] data-[state=active]:bg-[#2c2d30] data-[state=active]:text-white rounded-3xl data-[state=inactive]:hover:text-red-600"
                 >
                   Year
                 </TabsTrigger>

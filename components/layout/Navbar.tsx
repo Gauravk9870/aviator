@@ -24,13 +24,27 @@ import {
 } from "@/components/ui/menubar";
 import { Switch } from "@/components/ui/switch";
 import HowToPlayPopup from "./HowToPlayPopup";
+import GameRulesPopup from "./GameRulesPopup";
+import ProvablyFairSettingsPopup from "./ProvablyFairSettingsPopup";
+import GameLimitsPopup from "./GameLimitsPopup";
+import ChangeAvatarPopup from "./ChangeAvatarPopup";
 
 export default function Navbar() {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [musicEnabled, setMusicEnabled] = useState(true);
   const [showHowToPlay, setShowHowToPlay] = useState(false);
+  const [showGameRules, setShowGameRules] = useState(false);
+  const [showProvablyFairSettings, setShowProvablyFairSettings] =
+    useState(false);
+  const [showGameLimits, setShowGameLimits] = useState(false);
+  const [showChangeAvatar, setShowChangeAvatar] = useState(false);
 
   const toggleHowToPlay = () => setShowHowToPlay((prev) => !prev);
+  const toggleGameRules = () => setShowGameRules((prev) => !prev);
+  const toggleProvablyFairSettings = () =>
+    setShowProvablyFairSettings((prev) => !prev);
+  const toggleGameLimits = () => setShowGameLimits((prev) => !prev);
+  const toggleChangeAvatar = () => setShowChangeAvatar((prev) => !prev);
 
   const menuItems = [
     {
@@ -56,7 +70,7 @@ export default function Navbar() {
   ];
 
   return (
-    <div className="flex justify-between bg-[#1b1c1d] p-2 text-white">
+    <div className="flex justify-between bg-[#1b1c1d] p-1 text-white">
       <div className="flex items-center gap-4">
         <span className="text-2xl font-black text-red-600 italic">Aviator</span>
         <button
@@ -91,7 +105,7 @@ export default function Navbar() {
                     <div className="mr-2 h-8 w-8 rounded-full bg-gray-700"></div>
                     <div className="text-sm font-semibold">d***8</div>
                   </div>
-                  <button className="flex cursor-pointer items-center justify-center gap-1 rounded-full border border-[#414148] bg-[#252528] px-4 py-1.5 text-xs text-[#83878e]">
+                  <button className="flex cursor-pointer items-center justify-center gap-1 rounded-full border border-[#414148] bg-[#252528] px-4 py-1.5 text-xs text-[#83878e]" onClick={toggleChangeAvatar}>
                     <CircleUser size={22} strokeWidth={1} />
                     <span className="leading-tight">
                       Change <br /> Avatar
@@ -106,6 +120,11 @@ export default function Navbar() {
                         if (item.toggle) {
                           event.preventDefault();
                         }
+                        if (item.label == "Game Limits") toggleGameLimits();
+                        if (item.label == "How To Play") toggleHowToPlay();
+                        if (item.label == "Game Rules") toggleGameRules();
+                        if (item.label == "Provably Fair Settings")
+                          toggleProvablyFairSettings();
                       }}
                     >
                       <div className="flex items-center">
@@ -140,7 +159,14 @@ export default function Navbar() {
           </Menubar>
         </div>
       </div>
+      {showGameLimits && <GameLimitsPopup onClose={toggleGameLimits} />}
       {showHowToPlay && <HowToPlayPopup onClose={toggleHowToPlay} />}
+      {showGameRules && <GameRulesPopup onClose={toggleGameRules} />}
+      {showProvablyFairSettings && (
+        <ProvablyFairSettingsPopup onClose={toggleProvablyFairSettings} />
+      )}
+      {showGameLimits && <GameLimitsPopup onClose={toggleGameLimits} />}
+      {showChangeAvatar && <ChangeAvatarPopup onClose={toggleChangeAvatar} />}
     </div>
   );
 }
