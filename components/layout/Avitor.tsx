@@ -16,6 +16,7 @@ export default function Avitor() {
         </div>
       )}
       <iframe
+        id ="iframeID"
         src="https://elaborate-monstera-c8852a.netlify.app"
         className="h-full w-full rounded-2xl"
         onLoad={handleLoad}

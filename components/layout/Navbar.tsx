@@ -45,21 +45,32 @@ export default function Navbar() {
     setShowProvablyFairSettings((prev) => !prev);
   const toggleGameLimits = () => setShowGameLimits((prev) => !prev);
   const toggleChangeAvatar = () => setShowChangeAvatar((prev) => !prev);
-
+  const sendMessageToIframe = (data: { type: string; enabled: boolean }) => {
+    const iframe = document.getElementById("iframeID") as HTMLIFrameElement;
+    if (iframe && iframe.contentWindow) {
+      iframe.contentWindow.postMessage(data, "*");
+    }
+  };
   const menuItems = [
     {
       icon: <Volume2 size={18} />,
       label: "Sound",
       toggle: true,
       state: soundEnabled,
-      setState: setSoundEnabled,
+      setState: (checked: boolean) => {
+        setSoundEnabled(checked); // Update state
+        sendMessageToIframe({ type: "sound-toggle", enabled: checked }); // Send message to iframe
+      },
     },
     {
       icon: <Music size={18} />,
       label: "Music",
       toggle: true,
       state: musicEnabled,
-      setState: setMusicEnabled,
+      setState: (checked: boolean) => {
+        setMusicEnabled(checked); // Update state
+        sendMessageToIframe({ type: "bgMusic-toggle", enabled: checked }); // Send message to iframe
+      },
       isLastToggle: true,
     },
     { icon: <History size={18} />, label: "My Bet History" },
