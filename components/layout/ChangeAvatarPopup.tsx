@@ -54,7 +54,6 @@ const avatars = [
 
   // Add more avatar URLs as needed
 ];
-
 const ChangeAvatarPopup: React.FC<ChangeAvatarPopupProps> = ({ onClose, onAvatarSelect, selectedAvatarUrl }) => {
   const handleAvatarClick = (avatarUrl: string) => {
     onAvatarSelect(avatarUrl);
