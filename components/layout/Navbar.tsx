@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Volume2,
   Music,
@@ -38,6 +38,17 @@ export default function Navbar() {
     useState(false);
   const [showGameLimits, setShowGameLimits] = useState(false);
   const [showChangeAvatar, setShowChangeAvatar] = useState(false);
+  const [showHomeButton, setShowHomeButton] = useState(false); // New state to control "Home" button visibility
+
+  useEffect(() => {
+    // Check for 'return_url' in the URL
+    const params = new URLSearchParams(window.location.search);
+    const returnUrl = params.get("return_url");
+
+    if (returnUrl === "https://spribe.co/games") {
+      setShowHomeButton(true); // Show "Home" button only if URL matches
+    }
+  }, []);
 
   const toggleHowToPlay = () => setShowHowToPlay((prev) => !prev);
   const toggleGameRules = () => setShowGameRules((prev) => !prev);
@@ -51,6 +62,7 @@ export default function Navbar() {
       iframe.contentWindow.postMessage(data, "*");
     }
   };
+
   const menuItems = [
     {
       icon: <Volume2 size={18} />,
@@ -58,8 +70,8 @@ export default function Navbar() {
       toggle: true,
       state: soundEnabled,
       setState: (checked: boolean) => {
-        setSoundEnabled(checked); // Update state
-        sendMessageToIframe({ type: "sound-toggle", enabled: checked }); // Send message to iframe
+        setSoundEnabled(checked);
+        sendMessageToIframe({ type: "sound-toggle", enabled: checked });
       },
     },
     {
@@ -68,8 +80,8 @@ export default function Navbar() {
       toggle: true,
       state: musicEnabled,
       setState: (checked: boolean) => {
-        setMusicEnabled(checked); // Update state
-        sendMessageToIframe({ type: "bgMusic-toggle", enabled: checked }); // Send message to iframe
+        setMusicEnabled(checked);
+        sendMessageToIframe({ type: "bgMusic-toggle", enabled: checked });
       },
       isLastToggle: true,
     },
@@ -81,103 +93,115 @@ export default function Navbar() {
   ];
 
   return (
-    <div className="flex justify-between bg-[#1b1c1d] p-1 text-white">
-      <div className="flex items-center gap-4">
-        <span className="text-2xl font-black text-red-600 italic">Aviator</span>
-        <button
-          onClick={toggleHowToPlay}
-          className="hidden items-center gap-1 rounded-3xl bg-[#e69308] px-2 py-1 text-sm text-[#5f3816] transition-opacity duration-300 sm:flex"
-        >
-          <Info size={16} stroke="#5f3816" />
-          <span>How to play?</span>
-        </button>
-
-        <button
-          onClick={toggleHowToPlay}
-          className="flex transition-opacity duration-300 sm:hidden"
-        >
-          <Info size={16} stroke="#fff" />
-        </button>
-      </div>
-      <div className="flex items-center">
-        <div className="px-3">
-          <span className="text-base font-bold text-[#28a909]">3,000.00</span>
-          <span className="text-xs text-[#9b9c9e]">USD</span>
+    <div className="flex flex-col bg-[#1b1c1d] p-1 text-white">
+      {/* Main Navbar Content */}
+      <div className="flex justify-between">
+        <div className="flex items-center gap-4">
+          <span className="text-2xl font-black text-red-600 italic">Aviator</span>
+          <button
+            onClick={toggleHowToPlay}
+            className="hidden items-center gap-1 rounded-3xl bg-[#e69308] px-2 py-1 text-sm text-[#5f3816] transition-opacity duration-300 sm:flex"
+          >
+            <Info size={16} stroke="#5f3816" />
+            <span>How to play?</span>
+          </button>
+          <button
+            onClick={toggleHowToPlay}
+            className="flex transition-opacity duration-300 sm:hidden"
+          >
+            <Info size={16} stroke="#fff" />
+          </button>
         </div>
-        <div className="flex items-center justify-center border-l-2 border-[#464648]">
-          <Menubar className="h-auto w-auto cursor-pointer border-none bg-transparent p-0 data-[state=open]:bg-transparent">
-            <MenubarMenu>
-              <MenubarTrigger className="bg-transparent hover:bg-transparent focus:bg-transparent data-[state=open]:bg-transparent">
-                <Menu size={20} className="text-[#999999]" />
-              </MenubarTrigger>
-              <MenubarContent className="min-w-[320px] border-none bg-[#2c2d30] p-0 text-white">
-                <div className="flex items-center justify-between p-2">
-                  <div className="flex items-center p-1">
-                    <div className="mr-2 h-8 w-8 rounded-full bg-gray-700"></div>
-                    <div className="text-sm font-semibold">d***8</div>
-                  </div>
-                  <button className="flex cursor-pointer items-center justify-center gap-1 rounded-full border border-[#414148] bg-[#252528] px-4 py-1.5 text-xs text-[#83878e]" onClick={toggleChangeAvatar}>
-                    <CircleUser size={22} strokeWidth={1} />
-                    <span className="leading-tight">
-                      Change <br /> Avatar
-                    </span>
-                  </button>
-                </div>
-                {menuItems.map((item, index) => (
-                  <React.Fragment key={index}>
-                    <MenubarItem
-                      className="flex items-center justify-between bg-[#1b1c1d] py-3 px-3 hover:bg-[#1b1c1d] focus:bg-[#1b1c1d] focus:text-white"
-                      onSelect={(event) => {
-                        if (item.toggle) {
-                          event.preventDefault();
-                        }
-                        if (item.label == "Game Limits") toggleGameLimits();
-                        if (item.label == "How To Play") toggleHowToPlay();
-                        if (item.label == "Game Rules") toggleGameRules();
-                        if (item.label == "Provably Fair Settings")
-                          toggleProvablyFairSettings();
-                      }}
+        <div className="flex items-center">
+          <div className="px-3">
+            <span className="text-base font-bold text-[#28a909]">3,000.00</span>
+            <span className="text-xs text-[#9b9c9e]">USD</span>
+          </div>
+          <div className="flex items-center justify-center border-l-2 border-[#464648]">
+            <Menubar className="h-auto w-auto cursor-pointer border-none bg-transparent p-0 data-[state=open]:bg-transparent">
+              <MenubarMenu>
+                <MenubarTrigger className="bg-transparent hover:bg-transparent focus:bg-transparent data-[state=open]:bg-transparent">
+                  <Menu size={20} className="text-[#999999]" />
+                </MenubarTrigger>
+                <MenubarContent className="min-w-[320px] border-none bg-[#2c2d30] p-0 text-white">
+                  {/* Menubar content */}
+                  <div className="flex items-center justify-between p-2">
+                    <div className="flex items-center p-1">
+                      <div className="mr-2 h-8 w-8 rounded-full bg-gray-700"></div>
+                      <div className="text-sm font-semibold">d***8</div>
+                    </div>
+                    <button
+                      className="flex cursor-pointer items-center justify-center gap-1 rounded-full border border-[#414148] bg-[#252528] px-4 py-1.5 text-xs text-[#83878e]"
+                      onClick={toggleChangeAvatar}
                     >
-                      <div className="flex items-center">
-                        <span className="mr-2 text-[#83878e]">{item.icon}</span>
-                        {item.label}
-                      </div>
-                      {item.toggle && (
-                        <Switch
-                          checked={item.state}
-                          onCheckedChange={(checked) => {
-                            item.setState(checked);
-                          }}
-                          className="ml-2 border-2 border-gray-600 bg-transparent data-[state=checked]:border-[#60ae05] data-[state=checked]:bg-[#229607] data-[state=unchecked]:bg-transparent"
-                        />
-                      )}
-                    </MenubarItem>
-                    {item.isLastToggle && <div className="h-4"></div>}
-                    {index < menuItems.length - 1 && (
-                      <MenubarSeparator className="m-0 h-[1px] bg-gray-700 p-0" />
-                    )}
-                  </React.Fragment>
-                ))}
-                <MenubarSeparator className="m-0 h-[1px] bg-gray-700 p-0" />
-                <MenubarItem className="flex items-center justify-center bg-[#2c2d30] py-3 px-3 hover:bg-[#2c2d30] focus:bg-[#2c2d30] focus:text-white cursor-pointer">
-                  <div className="flex items-center gap-1">
-                    <Home size={16} className="text-[#83878e]" />
-                    <span className="text-xs text-[#9ea0a3] ">Home</span>
+                      <CircleUser size={22} strokeWidth={1} />
+                      <span className="leading-tight">
+                        Change <br /> Avatar
+                      </span>
+                    </button>
                   </div>
-                </MenubarItem>
-              </MenubarContent>
-            </MenubarMenu>
-          </Menubar>
+                  {menuItems.map((item, index) => (
+                    <React.Fragment key={index}>
+                      <MenubarItem
+                        className="flex items-center justify-between bg-[#1b1c1d] py-3 px-3 hover:bg-[#1b1c1d] focus:bg-[#1b1c1d] focus:text-white"
+                        onSelect={(event) => {
+                          if (item.toggle) {
+                            event.preventDefault();
+                          }
+                          if (item.label === "Game Limits") toggleGameLimits();
+                          if (item.label === "How To Play") toggleHowToPlay();
+                          if (item.label === "Game Rules") toggleGameRules();
+                          if (item.label === "Provably Fair Settings")
+                            toggleProvablyFairSettings();
+                        }}
+                      >
+                        <div className="flex items-center">
+                          <span className="mr-2 text-[#83878e]">{item.icon}</span>
+                          {item.label}
+                        </div>
+                        {item.toggle && (
+                          <Switch
+                            checked={item.state}
+                            onCheckedChange={(checked) => {
+                              item.setState(checked);
+                            }}
+                            className="ml-2 border-2 border-gray-600 bg-transparent data-[state=checked]:border-[#60ae05] data-[state=checked]:bg-[#229607] data-[state=unchecked]:bg-transparent"
+                          />
+                        )}
+                      </MenubarItem>
+                      {item.isLastToggle && <div className="h-4"></div>}
+                      {index < menuItems.length - 1 && (
+                        <MenubarSeparator className="m-0 h-[1px] bg-gray-700 p-0" />
+                      )}
+                    </React.Fragment>
+                  ))}
+                  <MenubarSeparator className="m-0 h-[1px] bg-gray-700 p-0" />
+
+                  {/* Conditionally Render the "Home" Button */}
+                  {showHomeButton && (
+                    <MenubarItem className="flex items-center justify-center bg-[#2c2d30] py-3 px-3 hover:bg-[#2c2d30] focus:bg-[#2c2d30] focus:text-white cursor-pointer">
+                      <div className="flex items-center gap-1">
+                        <Home size={16} className="text-[#83878e]" />
+                        <span className="text-xs text-[#9ea0a3]">Home</span>
+                      </div>
+                    </MenubarItem>
+                  )}
+                </MenubarContent>
+              </MenubarMenu>
+            </Menubar>
+          </div>
         </div>
       </div>
+      
+      {/* Popups */}
       {showGameLimits && <GameLimitsPopup onClose={toggleGameLimits} />}
       {showHowToPlay && <HowToPlayPopup onClose={toggleHowToPlay} />}
       {showGameRules && <GameRulesPopup onClose={toggleGameRules} />}
       {showProvablyFairSettings && (
         <ProvablyFairSettingsPopup onClose={toggleProvablyFairSettings} />
       )}
-      {showGameLimits && <GameLimitsPopup onClose={toggleGameLimits} />}
       {showChangeAvatar && <ChangeAvatarPopup onClose={toggleChangeAvatar} />}
     </div>
   );
 }
+// http://localhost:3000/?return_url=https://spribe.co/games to check
