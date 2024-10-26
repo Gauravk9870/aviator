@@ -38,6 +38,7 @@ export default function Component() {
 
   return (
     <div className="lg:w-96 text-white flex flex-col bg-[#1b1c1d] rounded-xl p-1 lg:m-0">
+        
       <Tabs
         defaultValue="all-bets"
         value={mainTab}
@@ -341,9 +342,37 @@ export default function Component() {
                 <p className="text-sm text-gray-400">No top bets available</p>
               )}
             </div>
+            
           </ScrollArea>
         </TabsContent>
+        <div className="flex justify-between items-center text-gray-300 text-xs mt-2 p-2 border-t border-gray-700 bg-black w-full">
+  <span className="flex items-center gap-1">
+    This game is
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="text-green-500 mx-1"
+    >
+      <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path>
+      <path d="m9 12 2 2 4-4"></path>
+    </svg>
+    <span style={{ color: "#afb2be", marginRight: "8px" }}>Provably Fair</span>
+  </span>
+  <span className="flex items-center gap-1">
+    Powered by   
+      <img src="./logo.png" alt="Logo" className="w-5 h-5" />
+  </span>
+</div>
+
       </Tabs>
+  
     </div>
   );
 }
