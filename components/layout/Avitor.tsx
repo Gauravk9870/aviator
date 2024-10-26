@@ -1,6 +1,5 @@
 // Avitor.tsx
 "use client";
-import { useEffect } from "react";
 
 // Define the prop types for Avitor
 interface AvitorProps {
