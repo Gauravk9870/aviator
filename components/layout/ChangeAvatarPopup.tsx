@@ -15,7 +15,101 @@ interface ChangeAvatarPopupProps {
 }
 
 // Sample avatar URLs (replace with actual paths to your avatar images)
-const avatars = new Array(72).fill("./logo.png"); // Sample placeholder avatars
+const avatars = [
+  './tile000.png',
+  './tile001.png',
+  './tile002.png',
+  './tile003.png',
+  './tile004.png',
+  './tile005.png',
+  './tile000.png',
+  './tile001.png',
+  './tile002.png',
+  './tile003.png',
+  './tile004.png',
+  './tile005.png',
+
+  './tile000.png',
+  './tile001.png',
+  './tile002.png',
+  './tile003.png',
+  './tile004.png',
+  './tile005.png',
+
+  './tile000.png',
+  './tile001.png',
+  './tile002.png',
+  './tile003.png',
+  './tile004.png',
+  './tile005.png',
+
+  './tile000.png',
+  './tile001.png',
+  './tile002.png',
+  './tile003.png',
+  './tile004.png',
+  './tile005.png',
+
+  './tile000.png',
+  './tile001.png',
+  './tile002.png',
+  './tile003.png',
+  './tile004.png',
+  './tile005.png',
+
+  './tile000.png',
+  './tile001.png',
+  './tile002.png',
+  './tile003.png',
+  './tile004.png',
+  './tile005.png',
+
+  './tile000.png',
+  './tile001.png',
+  './tile002.png',
+  './tile003.png',
+  './tile004.png',
+  './tile005.png',
+
+  './tile000.png',
+  './tile001.png',
+  './tile002.png',
+  './tile003.png',
+  './tile004.png',
+  './tile005.png',
+ './tile000.png',
+'./tile001.png',
+'./tile002.png',
+'./tile003.png',
+'./tile004.png',
+'./tile005.png',
+'./tile000.png',
+'./tile001.png',
+'./tile002.png',
+'./tile003.png',
+'./tile004.png',
+'./tile005.png',
+'./tile000.png',
+'./tile001.png',
+'./tile002.png',
+'./tile003.png',
+'./tile004.png',
+'./tile005.png',
+
+'./tile000.png',
+'./tile001.png',
+'./tile002.png',
+'./tile003.png',
+'./tile004.png',
+'./tile005.png',
+
+'./tile000.png',
+'./tile001.png',
+'./tile002.png',
+
+
+
+] // Sample placeholder avatars
 
 const ChangeAvatarPopup: React.FC<ChangeAvatarPopupProps> = ({
   onClose,
