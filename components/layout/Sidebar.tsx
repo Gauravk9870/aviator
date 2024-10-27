@@ -152,11 +152,7 @@ export default function Sidebar() {
           value="my-bets"
           className="flex-grow overflow-auto p-0 hide-scrollbar w-full"
         >
-          <ScrollArea className="flex-1 hide-scrollbar">
-            <div className="min-h-full">
-              {bets.length > 0 ? (
-                <div className="">
-                  <div className="flex justify-between  text-[11px] font-medium text-gray-500  tracking-wider">
+            <div className="flex justify-between  text-[11px] font-medium text-gray-500  tracking-wider">
                     <div className="  px-4 py-2 flex-1">
                       <span>Date</span>
                     </div>
@@ -168,6 +164,11 @@ export default function Sidebar() {
                     </div>
                     <div className="  px-4 py-2  text-right"></div>
                   </div>
+          <ScrollArea className="flex-1 hide-scrollbar">
+            <div className="min-h-full">
+              {bets.length > 0 ? (
+                <div className="">
+                
 
                   <div className="bg-[#1b1c1d]">
                     {bets.map((bet) => {

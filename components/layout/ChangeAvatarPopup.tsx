@@ -10,7 +10,7 @@ import {
 
 interface ChangeAvatarPopupProps {
   onClose: () => void;
-  onAvatarSelect: (avatarUrl: string) => void;
+  onAvatarSelect: (avatarUrl: string,close : () => void) => void;
   selectedAvatarUrl: string | null;
 }
 
@@ -23,14 +23,14 @@ const ChangeAvatarPopup: React.FC<ChangeAvatarPopupProps> = ({
   selectedAvatarUrl,
 }) => {
   const handleAvatarClick = (avatarUrl: string) => {
-    onAvatarSelect(avatarUrl);
-    (() => onClose())();
+    onAvatarSelect(avatarUrl,onClose);
   };
 
   return (
     <Dialog
       open={true}
       onOpenChange={(isOpen) => {
+
         if (!isOpen) {
           onClose();
         }
