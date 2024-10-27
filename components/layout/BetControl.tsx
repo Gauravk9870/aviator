@@ -12,16 +12,19 @@ const BetSection: FC<{
   const handleIncrement = () => setBetAmount((prev) => prev + 1);
   const handleDecrement = () => setBetAmount((prev) => (prev > 1 ? prev - 1 : 1));
 
+  const buttonClass = isBetting 
+    ? "bg-[#141516] text-[#ffffff80] cursor-not-allowed opacity-50" 
+    : "bg-[#141516] text-white";
+
   return (
-    <div
-      className={`flex flex-col gap-2 w-full mt-2 p-2 rounded-md`} // Apply red border only to this container when `isBetting` is true
-    >
+    <div className={`flex flex-col gap-2 w-full mt-2 p-2 rounded-md`}>
       <div className="flex gap-1 items-center relative">
         <div className="flex-1 rounded-md p-1">
           <div className="flex items-center justify-between bg-[#000000b3] rounded-3xl px-1">
             <button
-              className="w-4 h-4 flex items-center justify-center text-white border border-[#ffffff80] rounded-full focus:outline-none"
+              className={`w-4 h-4 flex items-center justify-center border border-[#ffffff80] rounded-full focus:outline-none ${buttonClass}`}
               onClick={handleDecrement}
+              disabled={isBetting} // Disable when betting
             >
               <Minus size={16} stroke="#ffffff80" />
             </button>
@@ -29,8 +32,9 @@ const BetSection: FC<{
               {betAmount.toFixed(2)}
             </span>
             <button
-              className="w-4 h-4 flex items-center justify-center text-white border border-[#ffffff80] rounded-full focus:outline-none"
+              className={`w-4 h-4 flex items-center justify-center border border-[#ffffff80] rounded-full focus:outline-none ${buttonClass}`}
               onClick={handleIncrement}
+              disabled={isBetting} // Disable when betting
             >
               <Plus size={16} stroke="#ffffff80" />
             </button>
@@ -39,8 +43,9 @@ const BetSection: FC<{
             {[1, 2, 5, 10].map((amount) => (
               <button
                 key={amount}
-                className="bg-[#141516] text-sm focus:outline-none text-[#ffffff80] rounded-3xl"
+                className={`text-sm focus:outline-none rounded-3xl ${buttonClass}`}
                 onClick={() => setBetAmount(amount)}
+                disabled={isBetting} // Disable when betting
               >
                 {amount.toFixed(2)}
               </button>
@@ -55,14 +60,10 @@ const BetSection: FC<{
             </span>
           )}
           <button
-            className={`w-[160px] flex items-center justify-center text-white rounded-2xl border shadow-inner ${
-              isBetting
-                ? "bg-red-600 h-12"
-                : "bg-[#28a909] h-20"
-            }`}
+            className={`w-[160px] flex items-center justify-center rounded-2xl border shadow-inner ${isBetting ? 'bg-red-600' : 'bg-[#28a909]'} h-20`}
             onClick={handleBet}
           >
-            <span className="text-lg font-normal uppercase text-shadow">
+            <span className="text-lg font-normal uppercase text-shadow text-white">
               {isBetting ? "Cancel" : "Bet"}
             </span>
           </button>
