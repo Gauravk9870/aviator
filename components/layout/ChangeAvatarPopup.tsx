@@ -10,65 +10,70 @@ import {
 
 interface ChangeAvatarPopupProps {
   onClose: () => void;
-  onAvatarSelect: (avatarUrl: string) => void; // Prop to handle avatar selection
-  selectedAvatarUrl: string | null; // Prop to display the currently selected avatar
+  onAvatarSelect: (avatarUrl: string) => void;
+  selectedAvatarUrl: string | null;
 }
 
-// Sample avatar URLs (replace with actual paths to your avatar images)
 const avatars = [
-"./logo.png",
-"./logo.png",
-"./logo.png",
-"./logo.png",
-"./logo.png",
-"./logo.png",
-"./logo.png",
-"./logo.png",
-"./logo.png",
-"./logo.png",
-"./logo.png",
-"./logo.png",
-"./logo.png",
-"./logo.png",
-"./logo.png",
-"./logo.png",
-"./logo.png",
-"./logo.png",
-"./logo.png",
-"./logo.png",
-"./logo.png",
-"./logo.png",
-"./logo.png",
-"./logo.png",
-"./logo.png",
-"./logo.png",
-"./logo.png",
-"./logo.png",
-"./logo.png",
-"./logo.png",
-"./logo.png",
-"./logo.png",
-"./logo.png",
-"./logo.png",
-"./logo.png",
-
-  // Add more avatar URLs as needed
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
 ];
-const ChangeAvatarPopup: React.FC<ChangeAvatarPopupProps> = ({ onClose, onAvatarSelect, selectedAvatarUrl }) => {
+
+const ChangeAvatarPopup: React.FC<ChangeAvatarPopupProps> = ({
+  onClose,
+  onAvatarSelect,
+  selectedAvatarUrl,
+}) => {
   const handleAvatarClick = (avatarUrl: string) => {
     onAvatarSelect(avatarUrl);
     onClose();
   };
 
   return (
-    <Dialog open={true} onOpenChange={(isOpen) => {
-      if (!isOpen) {
-        onClose();
-      }
-    }}>
-      <DialogContent className="sm:max-w-[700px] bg-[#2c2d30] border-gray-700 rounded-lg p-0">
-        <div className="bg-[#0f0f11] border-b border-gray-700 flex justify-between items-center p-4"> 
-          <DialogTitle className="text-2xl font-bold text-white">
+    <Dialog
+      open={true}
+      onOpenChange={(isOpen) => {
+        if (!isOpen) {
+          onClose();
+        }
+      }}
+    >
+      <DialogContent className="sm:max-w-[90vw] md:max-w-[700px] w-full bg-[#2c2d30] border-gray-700 rounded-lg p-0">
+        <div className="bg-[#0f0f11] border-b border-gray-700 flex justify-between items-center p-4">
+          <DialogTitle className="text-xl sm:text-2xl font-bold text-white">
             Choose Game Avatar
           </DialogTitle>
           <DialogClose className="text-white hover:text-gray-400 transition">
@@ -94,31 +99,31 @@ const ChangeAvatarPopup: React.FC<ChangeAvatarPopupProps> = ({ onClose, onAvatar
             <img
               src={selectedAvatarUrl}
               alt="Selected Avatar"
-              className="w-32 h-32 rounded-full border border-gray-600"
+              className="w-24 h-24 sm:w-32 sm:h-32 rounded-full border border-gray-600"
             />
           </div>
         )}
 
-        <div className="grid grid-cols-5 gap-4 p-4 bg-[#1b1c1d]">
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2 sm:gap-4 p-2 sm:p-4 bg-[#1b1c1d] overflow-y-auto max-h-[50vh] ">
           {avatars.map((avatarUrl, index) => (
             <div
               key={index}
               onClick={() => handleAvatarClick(avatarUrl)}
-              className={`flex justify-center transition-transform transform hover:scale-110 cursor-pointer`}
+              className="flex justify-center transition-transform transform hover:scale-110 cursor-pointer"
             >
               <img
                 src={avatarUrl}
                 alt={`Avatar ${index + 1}`}
-                className="w-20 h-20 rounded-full border-2 border-gray-600 hover:border-blue-500" 
+                className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 border-gray-600 hover:border-blue-500"
               />
             </div>
           ))}
         </div>
 
-        <div className="flex justify-center mt-4">
+        <div className="flex justify-center mt-4 pb-4">
           <button
             onClick={onClose}
-            className="px-6 py-2 text-white bg-red-600 rounded hover:bg-red-500 transition"
+            className="px-4 sm:px-6 py-2 text-sm sm:text-base text-white bg-red-600 rounded hover:bg-red-500 transition"
           >
             Close
           </button>
