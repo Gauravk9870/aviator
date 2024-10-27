@@ -107,3 +107,11 @@ input[type="number"] {
 
 
 
+/* Hides scrollbar on mobile while keeping scroll functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none; /* for Internet Explorer, Edge */
+  scrollbar-width: none; /* for Firefox */
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* for Chrome, Safari, and Opera */
+}
