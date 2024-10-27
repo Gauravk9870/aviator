@@ -72,8 +72,8 @@ const BetSection: FC<BetSectionProps> = ({
           )}
           <button
             className={`w-[160px] flex items-center justify-center rounded-2xl border shadow-inner ${
-              isBetting ? "bg-red-600" : "bg-[#28a909]"
-            } h-20`}
+              isBetting ? "bg-red-600 h-14" : "bg-[#28a909] h-20"
+            } `}
             onClick={handleBet}
           >
             <span className="text-lg font-normal uppercase text-shadow text-white">
@@ -173,7 +173,7 @@ const BetControlSection: FC<BetControlSectionProps> = ({
   return (
     <div
       className={`flex-1 px-4 lg:px-10 py-4 rounded-md bg-[#222222] ${
-        isBetting ? "border-2 border-red-500" : "border border-transparent"
+        isBetting ? "border-2 border-red-500" : "border-2 border-transparent"
       }`}
     >
       <Tabs
