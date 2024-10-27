@@ -45,30 +45,24 @@ export default function Navbar() {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    // Load avatar from localStorage when component mounts
     const savedAvatar = localStorage.getItem("selectedAvatar");
     if (savedAvatar) {
       setAvatarUrl(savedAvatar);
     }
 
-    // Check for 'return_url' in the URL
     const params = new URLSearchParams(window.location.search);
     const returnUrl = params.get("return_url");
 
     if (returnUrl === "https://spribe.co/games") {
-      setShowHomeButton(true); // Show "Home" button only if URL matches
+      setShowHomeButton(true);
     }
   }, []);
 
   const toggleHowToPlay = () => setShowHowToPlay((prev) => !prev);
-
   const toggleGameRules = () => setShowGameRules((prev) => !prev);
-
   const toggleProvablyFairSettings = () =>
     setShowProvablyFairSettings((prev) => !prev);
-
   const toggleGameLimits = () => setShowGameLimits((prev) => !prev);
-
   const toggleChangeAvatar = () => setShowChangeAvatar((prev) => !prev);
 
   const sendMessageToIframe = (data: { type: string; enabled: boolean }) => {
@@ -79,9 +73,9 @@ export default function Navbar() {
   };
 
   const handleAvatarSelect = (url: string) => {
-    setAvatarUrl(url); // Update avatar in state
-    localStorage.setItem("selectedAvatar", url); // Save avatar in localStorage
-    setShowChangeAvatar(false); // Close the avatar popup
+    setAvatarUrl(url);
+    localStorage.setItem("selectedAvatar", url);
+    setShowChangeAvatar(false);
   };
 
   const handleMyBetHistory = () => {
@@ -198,7 +192,7 @@ export default function Navbar() {
                     <React.Fragment key={index}>
                       <MenubarItem
                         className="flex items-center justify-between bg-[#1b1c1d] py-3 px-3 hover:bg-[#1b1c1d] focus:bg-[#1b1c1d] focus:text-white"
-                        onSelect={item.onSelect}
+                        onSelect={item.toggle ? undefined : item.onSelect}
                       >
                         <div className="flex items-center">
                           <span className="mr-2 text-[#83878e]">
@@ -207,13 +201,15 @@ export default function Navbar() {
                           {item.label}
                         </div>
                         {item.toggle && (
-                          <Switch
-                            checked={item.state}
-                            onCheckedChange={(checked) =>
-                              item.setState(checked)
-                            }
-                            className="ml-2 border-2 border-gray-600 bg-transparent data-[state=checked]:border-[#60ae05] data-[state=checked]:bg-[#229607] data-[state=unchecked]:bg-transparent"
-                          />
+                          <div onClick={(e) => e.stopPropagation()}>
+                            <Switch
+                              checked={item.state}
+                              onCheckedChange={(checked) =>
+                                item.setState(checked)
+                              }
+                              className="ml-2 border-2 border-gray-600 bg-transparent data-[state=checked]:border-[#60ae05] data-[state=checked]:bg-[#229607] data-[state=unchecked]:bg-transparent"
+                            />
+                          </div>
                         )}
                       </MenubarItem>
                       {item.isLastToggle && <div className="h-4"></div>}
@@ -224,7 +220,6 @@ export default function Navbar() {
                   ))}
                   <MenubarSeparator className="m-0 h-[1px] bg-gray-700 p-0" />
 
-                  {/* Conditionally Render the "Home" Button */}
                   {showHomeButton && (
                     <MenubarItem className="flex items-center justify-center bg-[#2c2d30] py-3 px-3 hover:bg-[#2c2d30] focus:bg-[#2c2d30] focus:text-white cursor-pointer">
                       <div className="flex items-center gap-1">
@@ -240,7 +235,6 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Popups */}
       {showGameLimits && <GameLimitsPopup onClose={toggleGameLimits} />}
       {showHowToPlay && <HowToPlayPopup onClose={toggleHowToPlay} />}
       {showGameRules && <GameRulesPopup onClose={toggleGameRules} />}
@@ -250,8 +244,8 @@ export default function Navbar() {
       {showChangeAvatar && (
         <ChangeAvatarPopup
           onClose={toggleChangeAvatar}
-          onAvatarSelect={handleAvatarSelect} // Pass the avatar select handler
-          selectedAvatarUrl={avatarUrl} // Pass the current avatar URL here
+          onAvatarSelect={handleAvatarSelect}
+          selectedAvatarUrl={avatarUrl}
         />
       )}
     </div>
