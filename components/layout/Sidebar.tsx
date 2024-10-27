@@ -74,80 +74,78 @@ export default function Sidebar() {
           </TabsTrigger>
         </TabsList>
         <TabsContent
-          value="all-bets"
-          className="flex-grow overflow-auto p-0 m-0 hide-scrollbar w-full"
-        >
-          <div className="flex items-center justify-between border-b-2 border-[#141516]">
-            <div className="px-2 py-1 border-b border-zinc-800">
-              <h2 className="text-sm font-medium">ALL BETS</h2>
-              <p className="text-sm text-zinc-400">351</p>
-            </div>
+  value="all-bets"
+  className="flex flex-col h-auto overflow-hidden p-0 m-0 hide-scrollbar w-full"
+>
+  <div className="flex items-center justify-between border-b-2 border-[#141516] bg-[#1b1c1d] z-10">
+    <div className="px-2 py-1">
+      <h2 className="text-sm font-medium">ALL BETS</h2>
+      <p className="text-sm text-zinc-400">351</p>
+    </div>
+  </div>
+
+  <div className="flex-grow overflow-auto hide-scrollbar">
+    {bets.length > 0 ? (
+      <div>
+        <div className="flex justify-between text-[11px] font-medium text-gray-500 tracking-wider">
+          <div className="px-4 py-1 flex-1">
+            <span>User</span>
           </div>
-          <div>
-            {bets.length > 0 ? (
-              <div>
-                <div className="flex justify-between  text-[11px] font-medium text-gray-500  tracking-wider">
-                  <div className="  px-4 py-1 flex-1">
-                    <span>User</span>
-                  </div>
-                  <div className="  px-4 py-1 flex-1 text-left">
-                    <span className="">Bet USD X</span>
-                  </div>
-                  <div className="  px-4 py-1 flex-1 text-right">
-                    <span>Cash out USD</span>
-                  </div>
-                </div>
-
-                <div className="bg-[#1b1c1d]  ">
-                  {bets.map((bet) => (
-                    <div
-                      key={bet.id}
-                      className={`flex justify-between rounded-lg  ${
-                        bet.x > 0
-                          ? "border border-[#427f00] bg-[#123405]"
-                          : "bg-[#141516]"
-                      }  mb-0.5 `}
-                    >
-                      <div className="flex items-center px-0.5 flex-1">
-                        <Avatar className="w-[30px] h-[30px]">
-                          <AvatarImage src={bet.avatar} alt={bet.user} />
-                          <AvatarFallback>
-                            {bet.user.charAt(0).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <p className="ml-2 text-[#9ea0a3] text-[13px]">
-                          {bet.user}
-                        </p>
-                      </div>
-                      <div className="px-4 py-1 whitespace-nowrap text-left  flex-1 ">
-                        <span className="text-base text-[#ffffff] font-normal">
-                          {bet.amount.toFixed(2)}
-                        </span>
-
-                        {bet.x > 0 && (
-                          <span
-                            className={` py-[2px] px-[6px] rounded-[11px] ${getTextColorClass(
-                              Number(bet.x)
-                            )} bg-[#00000080] text-[12px] ml-2 font-bold`}
-                          >
-                            {bet.x}x
-                          </span>
-                        )}
-                      </div>
-                      <div className="px-4 py-1 whitespace-nowrap text-right text-xs text-gray-300 flex-1 ">
-                        <span className="text-base text-[#ffffff] font-normal">
-                          {bet.cashedOut.toFixed(2)}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+          <div className="px-4 py-1 flex-1 text-left">
+            <span>Bet USD X</span>
+          </div>
+          <div className="px-4 py-1 flex-1 text-right">
+            <span>Cash out USD</span>
+          </div>
+        </div>
+        <div className="bg-[#1b1c1d]">
+          {bets.map((bet) => (
+            <div
+              key={bet.id}
+              className={`flex justify-between rounded-lg ${
+                bet.x > 0 ? "border border-[#427f00] bg-[#123405]" : "bg-[#141516]"
+              } mb-0.5`}
+            >
+              <div className="flex items-center px-0.5 flex-1">
+                <Avatar className="w-[30px] h-[30px]">
+                  <AvatarImage src={bet.avatar} alt={bet.user} />
+                  <AvatarFallback>
+                    {bet.user.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <p className="ml-2 text-[#9ea0a3] text-[13px]">
+                  {bet.user}
+                </p>
               </div>
-            ) : (
-              <p className="text-sm text-gray-400">No bets available</p>
-            )}
-          </div>
-        </TabsContent>
+              <div className="px-4 py-1 whitespace-nowrap text-left flex-1">
+                <span className="text-base text-[#ffffff] font-normal">
+                  {bet.amount.toFixed(2)}
+                </span>
+                {bet.x > 0 && (
+                  <span
+                    className={`py-[2px] px-[6px] rounded-[11px] ${getTextColorClass(
+                      Number(bet.x)
+                    )} bg-[#00000080] text-[12px] ml-2 font-bold`}
+                  >
+                    {bet.x}x
+                  </span>
+                )}
+              </div>
+              <div className="px-4 py-1 whitespace-nowrap text-right text-xs text-gray-300 flex-1">
+                <span className="text-base text-[#ffffff] font-normal">
+                  {bet.cashedOut.toFixed(2)}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    ) : (
+      <p className="text-sm text-gray-400">No bets available</p>
+    )}
+  </div>
+</TabsContent>
+
         <TabsContent
           value="my-bets"
           className="flex-grow overflow-auto p-0 hide-scrollbar w-full"
@@ -229,130 +227,129 @@ export default function Sidebar() {
           </ScrollArea>
         </TabsContent>
         <TabsContent
-          value="top"
-          className="flex-grow overflow-y-scroll p-0 hide-scrollbar w-full"
+  value="top"
+  className="flex flex-col h-auto overflow-hidden p-0 hide-scrollbar w-full"
+>
+  <div className="p-0">
+    <Tabs
+      value={categoryTab}
+      onValueChange={setCategoryTab}
+      className="w-full p-0"
+    >
+      <TabsList className="bg-[#1b1c1d] p-1 rounded-lg flex items-center justify-center gap-1 h-auto">
+        <TabsTrigger
+          value="huge-wins"
+          className="text-white mx-1 data-[state=active]:bg-transparent data-[state=active]:text-white rounded-2xl text-xs data-[state=active]:border data-[state=active]:border-[#e11d48] py-1 px-1 hover:text-[#e11d48]"
         >
-          <div className="p-0">
-            <Tabs
-              value={categoryTab}
-              onValueChange={setCategoryTab}
-              className="w-full p-0"
-            >
-              <TabsList className="bg-[#1b1c1d] p-1 rounded-lg flex items-center justify-center gap-1 h-auto">
-                <TabsTrigger
-                  value="huge-wins"
-                  className="text-white mx-1 data-[state=active]:bg-transparent data-[state=active]:text-white rounded-2xl text-xs data-[state=active]:border data-[state=active]:border-[#e11d48] py-1 px-0 hover:text-[#e11d48]"
-                >
-                  HUGE WINS
-                </TabsTrigger>
-                <TabsTrigger
-                  value="biggest-wins"
-                  className="text-white mx-1 data-[state=active]:bg-transparent data-[state=active]:text-white rounded-2xl text-xs data-[state=active]:border data-[state=active]:border-[#e11d48] py-1 px-0 hover:text-[#e11d48]"
-                >
-                  BIGGEST WINS
-                </TabsTrigger>
-                <TabsTrigger
-                  value="multipliers"
-                  className="text-white data-[state=active]:bg-transparent data-[state=active]:text-white rounded-2xl text-xs data-[state=active]:border data-[state=active]:border-[#e11d48] py-1 px-0 hover:text-[#e11d48]"
-                >
-                  MULTIPLIERS
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-            <Tabs
-              value={timeTab}
-              onValueChange={setTimeTab}
-              className="w-full flex items-center justify-center"
-            >
-              <TabsList className="grid w-3/4 grid-cols-3 bg-[#141516] rounded-3xl p-0 h-auto">
-                <TabsTrigger
-                  value="day"
-                  className="bg-[#141516] text-white p-0 focus:bg-[#2c2d30] data-[state=active]:bg-[#2c2d30] data-[state=active]:text-white rounded-3xl data-[state=inactive]:hover:text-red-600"
-                >
-                  Day
-                </TabsTrigger>
-                <TabsTrigger
-                  value="month"
-                  className="bg-[#141516] text-white p-0 focus:bg-[#2c2d30] data-[state=active]:bg-[#2c2d30] data-[state=active]:text-white rounded-3xl data-[state=inactive]:hover:text-red-600"
-                >
-                  Month
-                </TabsTrigger>
-                <TabsTrigger
-                  value="year"
-                  className="bg-[#141516] text-white p-0 focus:bg-[#2c2d30] data-[state=active]:bg-[#2c2d30] data-[state=active]:text-white rounded-3xl data-[state=inactive]:hover:text-red-600"
-                >
-                  Year
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </div>
-          <ScrollArea className="flex-1">
-            <div className="py-2 min-h-full">
-              {topBets.length > 0 ? (
-                bets.map((bet) => (
-                  <div
-                    key={bet.id}
-                    className="mb-4 bg-[#101112] rounded-lg shadow-lg"
-                  >
-                    <div className="flex items-center justify-between p-4 relative">
-                      <div className="flex flex-col items-center">
-                        <Avatar className="w-8 h-8">
-                          <AvatarImage src={bet.avatar} alt={bet.user} />
-                          <AvatarFallback>
-                            {bet.user.charAt(0).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <h3 className="text-sm font-bold text-white">
-                          {bet.user}
-                        </h3>
-                      </div>
-                      <div className="grid grid-cols-3 gap-4">
-                        <div className="col-span-2">
-                          <p className="text-xs text-[#9ea0a3] text-center mb-1">
-                            Bet USD:{" "}
-                            <span className="font-semibold text-white">
-                              {bet.amount.toFixed(2)}
-                            </span>
-                          </p>
-                          <p className="text-xs text-[#9ea0a3] text-center mb-1">
-                            Cashed Out:{" "}
-                            <span className="font-bold text-[#C017B4] bg-[#00000080] py-1 px-2 rounded-2xl">
-                              {bet.cashedOut.toFixed(2)}x
-                            </span>
-                          </p>
-                          <p className="text-xs text-[#9ea0a3] text-center">
-                            Win USD: <span className="font-semibold">Yes</span>
-                          </p>
-                        </div>
-                      </div>
-                      <div className="text-green-500">
-                        <ShieldCheck className="h-4 w-4" />
-                      </div>
-                    </div>
-                    <div className="flex justify-between items-center bg-[#000000] px-1 py-1">
-                      <div className="text-xs text-gray-400 flex gap-4">
-                        <p>
-                          {bet.timestamp
-                            ? format(new Date(bet.timestamp), "dd MMM, yy")
-                            : "N/A"}
-                        </p>
-                        <p>
-                          Round: <span className="text-white">{bet.x}</span>
-                        </p>
-                      </div>
-                      <button className="text-xs border border-[#414148] bg-[#252528] rounded-3xl flex items-center justify-center px-1 gap-1">
-                        <Forward size={16} stroke="#9ea0a3" />{" "}
-                        <MessageCircle size={14} stroke="#9ea0a3" />
-                      </button>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className="text-sm text-gray-400">No top bets available</p>
-              )}
+          HUGE WINS
+        </TabsTrigger>
+        <TabsTrigger
+          value="biggest-wins"
+          className="text-white mx-1 data-[state=active]:bg-transparent data-[state=active]:text-white rounded-2xl text-xs data-[state=active]:border data-[state=active]:border-[#e11d48] py-1 px-1 hover:text-[#e11d48]"
+        >
+          BIGGEST WINS
+        </TabsTrigger>
+        <TabsTrigger
+          value="multipliers"
+          className="text-white data-[state=active]:bg-transparent data-[state=active]:text-white rounded-2xl text-xs data-[state=active]:border data-[state=active]:border-[#e11d48] py-1 px-1 hover:text-[#e11d48]"
+        >
+          MULTIPLIERS
+        </TabsTrigger>
+      </TabsList>
+    </Tabs>
+    <Tabs
+      value={timeTab}
+      onValueChange={setTimeTab}
+      className="w-full flex items-center justify-center mb-2"
+    >
+      <TabsList className="grid w-3/4 grid-cols-3 bg-[#141516] rounded-3xl p-0 h-auto">
+        <TabsTrigger
+          value="day"
+          className="bg-[#141516] text-white p-0 focus:bg-[#2c2d30] data-[state=active]:bg-[#2c2d30] data-[state=active]:text-white rounded-3xl data-[state=inactive]:hover:text-red-600"
+        >
+          Day
+        </TabsTrigger>
+        <TabsTrigger
+          value="month"
+          className="bg-[#141516] text-white p-0 focus:bg-[#2c2d30] data-[state=active]:bg-[#2c2d30] data-[state=active]:text-white rounded-3xl data-[state=inactive]:hover:text-red-600"
+        >
+          Month
+        </TabsTrigger>
+        <TabsTrigger
+          value="year"
+          className="bg-[#141516] text-white p-0 focus:bg-[#2c2d30] data-[state=active]:bg-[#2c2d30] data-[state=active]:text-white rounded-3xl data-[state=inactive]:hover:text-red-600"
+        >
+          Year
+        </TabsTrigger>
+      </TabsList>
+    </Tabs>
+  </div>
+  <div className="flex-grow overflow-y-auto hide-scrollbar">
+    <div className="py-2 min-h-full">
+      {topBets.length > 0 ? (
+        bets.map((bet) => (
+          <div
+            key={bet.id}
+            className="mb-4 bg-[#101112] rounded-lg shadow-lg"
+          >
+            <div className="flex items-center justify-between p-4 relative">
+              <div className="flex flex-col items-center">
+                <Avatar className="w-8 h-8">
+                  <AvatarImage src={bet.avatar} alt={bet.user} />
+                  <AvatarFallback>
+                    {bet.user.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <h3 className="text-sm font-bold text-white">{bet.user}</h3>
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="col-span-2">
+                  <p className="text-xs text-[#9ea0a3] text-center mb-1">
+                    Bet USD:{" "}
+                    <span className="font-semibold text-white">
+                      {bet.amount.toFixed(2)}
+                    </span>
+                  </p>
+                  <p className="text-xs text-[#9ea0a3] text-center mb-1">
+                    Cashed Out:{" "}
+                    <span className="font-bold text-[#C017B4] bg-[#00000080] py-1 px-2 rounded-2xl">
+                      {bet.cashedOut.toFixed(2)}x
+                    </span>
+                  </p>
+                  <p className="text-xs text-[#9ea0a3] text-center">
+                    Win USD: <span className="font-semibold">Yes</span>
+                  </p>
+                </div>
+              </div>
+              <div className="text-green-500">
+                <ShieldCheck className="h-4 w-4" />
+              </div>
             </div>
-          </ScrollArea>
-        </TabsContent>
+            <div className="flex justify-between items-center bg-[#000000] px-1 py-1">
+              <div className="text-xs text-gray-400 flex gap-4">
+                <p>
+                  {bet.timestamp
+                    ? format(new Date(bet.timestamp), "dd MMM, yy")
+                    : "N/A"}
+                </p>
+                <p>
+                  Round: <span className="text-white">{bet.x}</span>
+                </p>
+              </div>
+              <button className="text-xs border border-[#414148] bg-[#252528] rounded-3xl flex items-center justify-center px-1 gap-1">
+                <Forward size={16} stroke="#9ea0a3" />{" "}
+                <MessageCircle size={14} stroke="#9ea0a3" />
+              </button>
+            </div>
+          </div>
+        ))
+      ) : (
+        <p className="text-sm text-gray-400">No top bets available</p>
+      )}
+    </div>
+  </div>
+</TabsContent>
+
         <div className="flex justify-between items-center text-gray-300 text-xs mt-2 p-2 border-t border-gray-700 bg-black w-full">
           <span className="flex items-center gap-1">
             This game is
