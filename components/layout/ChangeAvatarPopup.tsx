@@ -22,9 +22,10 @@ const ChangeAvatarPopup: React.FC<ChangeAvatarPopupProps> = ({
   onAvatarSelect,
   selectedAvatarUrl,
 }) => {
+
   const handleAvatarClick = (avatarUrl: string) => {
     onAvatarSelect(avatarUrl);
-    () => onClose();
+    (() => onClose())();
   };
 
   return (
