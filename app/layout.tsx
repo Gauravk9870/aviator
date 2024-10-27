@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "../components/layout/Navbar";
 import Sidebar from "@/components/layout/Sidebar";
 import Multipliers from "@/components/layout/Multipliers";
+import StoreProvider from "./StoreProvider";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -31,14 +32,16 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#111111] lg:h-screen flex flex-col hide-scrollbar`}
       >
-        <Navbar />
-        <div className="flex flex-1 overflow-hidden p-1 flex-col-reverse lg:flex-row hide-scrollbar">
-          <Sidebar />
-          <main className="flex-1 overflow-hidden relative lg:h-[calc(100vh-56px)]">
-            <Multipliers />
-            {children}
-          </main>
-        </div>
+        <StoreProvider>
+          <Navbar />
+          <div className="flex flex-1 overflow-hidden p-1 flex-col-reverse lg:flex-row hide-scrollbar">
+            <Sidebar />
+            <main className="flex-1 overflow-hidden relative lg:h-[calc(100vh-56px)]">
+              <Multipliers />
+              {children}
+            </main>
+          </div>
+        </StoreProvider>
       </body>
     </html>
   );

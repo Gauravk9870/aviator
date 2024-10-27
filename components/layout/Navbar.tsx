@@ -28,17 +28,21 @@ import GameRulesPopup from "./GameRulesPopup";
 import ProvablyFairSettingsPopup from "./ProvablyFairSettingsPopup";
 import GameLimitsPopup from "./GameLimitsPopup";
 import ChangeAvatarPopup from "./ChangeAvatarPopup"; // Importing the ChangeAvatarPopup
+import { setActiveTab } from "@/lib/features/tabsSlice";
+import { useDispatch } from "react-redux";
 
 export default function Navbar() {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [musicEnabled, setMusicEnabled] = useState(true);
   const [showHowToPlay, setShowHowToPlay] = useState(false);
   const [showGameRules, setShowGameRules] = useState(false);
-  const [showProvablyFairSettings, setShowProvablyFairSettings] = useState(false);
+  const [showProvablyFairSettings, setShowProvablyFairSettings] =
+    useState(false);
   const [showGameLimits, setShowGameLimits] = useState(false);
   const [showChangeAvatar, setShowChangeAvatar] = useState(false);
   const [showHomeButton, setShowHomeButton] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     // Load avatar from localStorage when component mounts
@@ -57,9 +61,14 @@ export default function Navbar() {
   }, []);
 
   const toggleHowToPlay = () => setShowHowToPlay((prev) => !prev);
+
   const toggleGameRules = () => setShowGameRules((prev) => !prev);
-  const toggleProvablyFairSettings = () => setShowProvablyFairSettings((prev) => !prev);
+
+  const toggleProvablyFairSettings = () =>
+    setShowProvablyFairSettings((prev) => !prev);
+
   const toggleGameLimits = () => setShowGameLimits((prev) => !prev);
+
   const toggleChangeAvatar = () => setShowChangeAvatar((prev) => !prev);
 
   const sendMessageToIframe = (data: { type: string; enabled: boolean }) => {
@@ -73,6 +82,11 @@ export default function Navbar() {
     setAvatarUrl(url); // Update avatar in state
     localStorage.setItem("selectedAvatar", url); // Save avatar in localStorage
     setShowChangeAvatar(false); // Close the avatar popup
+  };
+
+  const handleMyBetHistory = () => {
+    dispatch(setActiveTab("my-bets"));
+    console.log("Active tab set to 'my-bets'");
   };
 
   const menuItems = [
@@ -97,18 +111,40 @@ export default function Navbar() {
       },
       isLastToggle: true,
     },
-    { icon: <History size={18} />, label: "My Bet History" },
-    { icon: <Lock size={18} />, label: "Game Limits" },
-    { icon: <HelpCircle size={18} />, label: "How To Play" },
-    { icon: <FileText size={18} />, label: "Game Rules" },
-    { icon: <Shield size={18} />, label: "Provably Fair Settings" },
+    {
+      icon: <History size={18} />,
+      label: "My Bet History",
+      onSelect: handleMyBetHistory,
+    },
+    {
+      icon: <Lock size={18} />,
+      label: "Game Limits",
+      onSelect: toggleGameLimits,
+    },
+    {
+      icon: <HelpCircle size={18} />,
+      label: "How To Play",
+      onSelect: toggleHowToPlay,
+    },
+    {
+      icon: <FileText size={18} />,
+      label: "Game Rules",
+      onSelect: toggleGameRules,
+    },
+    {
+      icon: <Shield size={18} />,
+      label: "Provably Fair Settings",
+      onSelect: toggleProvablyFairSettings,
+    },
   ];
 
   return (
     <div className="flex flex-col bg-[#1b1c1d] p-1 text-white">
       <div className="flex justify-between">
         <div className="flex items-center gap-4">
-          <span className="text-2xl font-black text-red-600 italic">Aviator</span>
+          <span className="text-2xl font-black text-red-600 italic">
+            Aviator
+          </span>
           <button
             onClick={toggleHowToPlay}
             className="hidden items-center gap-1 rounded-3xl bg-[#e69308] px-2 py-1 text-sm text-[#5f3816] transition-opacity duration-300 sm:flex"
@@ -162,24 +198,20 @@ export default function Navbar() {
                     <React.Fragment key={index}>
                       <MenubarItem
                         className="flex items-center justify-between bg-[#1b1c1d] py-3 px-3 hover:bg-[#1b1c1d] focus:bg-[#1b1c1d] focus:text-white"
-                        onSelect={(event) => {
-                          if (item.toggle) {
-                            event.preventDefault();
-                          }
-                          if (item.label === "Game Limits") toggleGameLimits();
-                          if (item.label === "How To Play") toggleHowToPlay();
-                          if (item.label === "Game Rules") toggleGameRules();
-                          if (item.label === "Provably Fair Settings") toggleProvablyFairSettings();
-                        }}
+                        onSelect={item.onSelect}
                       >
                         <div className="flex items-center">
-                          <span className="mr-2 text-[#83878e]">{item.icon}</span>
+                          <span className="mr-2 text-[#83878e]">
+                            {item.icon}
+                          </span>
                           {item.label}
                         </div>
                         {item.toggle && (
                           <Switch
                             checked={item.state}
-                            onCheckedChange={(checked) => item.setState(checked)}
+                            onCheckedChange={(checked) =>
+                              item.setState(checked)
+                            }
                             className="ml-2 border-2 border-gray-600 bg-transparent data-[state=checked]:border-[#60ae05] data-[state=checked]:bg-[#229607] data-[state=unchecked]:bg-transparent"
                           />
                         )}
@@ -212,7 +244,9 @@ export default function Navbar() {
       {showGameLimits && <GameLimitsPopup onClose={toggleGameLimits} />}
       {showHowToPlay && <HowToPlayPopup onClose={toggleHowToPlay} />}
       {showGameRules && <GameRulesPopup onClose={toggleGameRules} />}
-      {showProvablyFairSettings && <ProvablyFairSettingsPopup onClose={toggleProvablyFairSettings} />}
+      {showProvablyFairSettings && (
+        <ProvablyFairSettingsPopup onClose={toggleProvablyFairSettings} />
+      )}
       {showChangeAvatar && (
         <ChangeAvatarPopup
           onClose={toggleChangeAvatar}
