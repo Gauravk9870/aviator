@@ -14,18 +14,52 @@ interface ChangeAvatarPopupProps {
   selectedAvatarUrl: string | null;
 }
 
-// Sample avatar URLs (replace with actual paths to your avatar images)
-const avatars = new Array(72).fill("./logo.png"); // Sample placeholder avatars
+const avatars = [
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+  "./logo.png",
+];
 
 const ChangeAvatarPopup: React.FC<ChangeAvatarPopupProps> = ({
   onClose,
   onAvatarSelect,
   selectedAvatarUrl,
 }) => {
-
   const handleAvatarClick = (avatarUrl: string) => {
     onAvatarSelect(avatarUrl);
-    (() => onClose())();
+    onClose();
   };
 
   return (
@@ -37,16 +71,15 @@ const ChangeAvatarPopup: React.FC<ChangeAvatarPopupProps> = ({
         }
       }}
     >
-      <DialogContent className="w-full max-w-[90%] md:max-w-[700px] lg:max-w-[900px] h-[90vh] max-h-[760px] bg-[#2c2d30] border-gray-700 rounded-lg p-0 flex flex-col">
-        {/* Header with fixed height */}
-        <div className="bg-[#2c2d30] flex items-center justify-between px-4 h-10">
-          <DialogTitle className="text-lg font-bold text-white">
+      <DialogContent className="sm:max-w-[90vw] md:max-w-[700px] w-full bg-[#2c2d30] border-gray-700 rounded-lg p-0">
+        <div className="bg-[#0f0f11] border-b border-gray-700 flex justify-between items-center p-4">
+          <DialogTitle className="text-xl sm:text-2xl font-bold text-white">
             Choose Game Avatar
           </DialogTitle>
           <DialogClose className="text-white hover:text-gray-400 transition">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
+              className="h-6 w-6"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -61,34 +94,36 @@ const ChangeAvatarPopup: React.FC<ChangeAvatarPopupProps> = ({
           </DialogClose>
         </div>
 
-        {/* Responsive avatar grid with hidden scrollbar on mobile */}
-        <div className="flex-grow grid grid-cols-5 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-9 gap-1 px-2 sm:px-10 py-4 bg-[#1b1c1d] overflow-y-auto justify-center scrollbar-hide">
+        {selectedAvatarUrl && (
+          <div className="flex justify-center my-4">
+            <img
+              src={selectedAvatarUrl}
+              alt="Selected Avatar"
+              className="w-24 h-24 sm:w-32 sm:h-32 rounded-full border border-gray-600"
+            />
+          </div>
+        )}
+
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2 sm:gap-4 p-2 sm:p-4 bg-[#1b1c1d] overflow-y-auto max-h-[50vh] ">
           {avatars.map((avatarUrl, index) => (
             <div
               key={index}
               onClick={() => handleAvatarClick(avatarUrl)}
-              className={`flex justify-center items-center 
-                          w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 lg:w-18 lg:h-18 
-                          rounded-full transition-transform transform hover:scale-110 cursor-pointer ${
-                            selectedAvatarUrl === avatarUrl
-                              ? " border-4 border-gray-600"
-                              : "border-4 border-gray-600"
-                          }`}
+              className="flex justify-center transition-transform transform hover:scale-110 cursor-pointer"
             >
               <img
                 src={avatarUrl}
                 alt={`Avatar ${index + 1}`}
-                className="w-full h-full object-cover rounded-full"
+                className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 border-gray-600 hover:border-blue-500"
               />
             </div>
           ))}
         </div>
 
-        {/* Footer with minimal height and centered button */}
-        <div className="flex justify-center items-center bg-[#2c2d30] h-10">
+        <div className="flex justify-center mt-4 pb-4">
           <button
             onClick={onClose}
-            className="px-4 py-1 text-sm text-white border border-[#6d747d] rounded-md hover:bg-[#6d747d] transition"
+            className="px-4 sm:px-6 py-2 text-sm sm:text-base text-white bg-red-600 rounded hover:bg-red-500 transition"
           >
             Close
           </button>
