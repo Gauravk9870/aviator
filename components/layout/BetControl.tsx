@@ -6,12 +6,19 @@ import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-const BetSection: FC<{
+interface BetSectionProps {
   isBetting: boolean;
   handleBet: () => void;
   betAmount: number;
   setBetAmount: React.Dispatch<React.SetStateAction<number>>;
-}> = ({ isBetting, handleBet, betAmount, setBetAmount }) => {
+}
+
+const BetSection: FC<BetSectionProps> = ({
+  isBetting,
+  handleBet,
+  betAmount,
+  setBetAmount,
+}) => {
   const handleIncrement = () => setBetAmount((prev) => prev + 1);
   const handleDecrement = () =>
     setBetAmount((prev) => (prev > 1 ? prev - 1 : 1));
@@ -79,15 +86,23 @@ const BetSection: FC<{
   );
 };
 
-const AutoSection: FC<{
-  isBetting: boolean;
-  handleBet: () => void;
-  betAmount: number;
-  setBetAmount: React.Dispatch<React.SetStateAction<number>>;
-}> = ({ isBetting, handleBet, betAmount, setBetAmount }) => {
-  const [autoCashOut, setAutoCashOut] = useState<boolean>(false);
-  const [autoCashOutAmount, setAutoCashOutAmount] = useState<number>(2.0);
+interface AutoSectionProps extends BetSectionProps {
+  autoCashOut: boolean;
+  setAutoCashOut: React.Dispatch<React.SetStateAction<boolean>>;
+  autoCashOutAmount: number;
+  setAutoCashOutAmount: React.Dispatch<React.SetStateAction<number>>;
+}
 
+const AutoSection: FC<AutoSectionProps> = ({
+  isBetting,
+  handleBet,
+  betAmount,
+  setBetAmount,
+  autoCashOut,
+  setAutoCashOut,
+  autoCashOutAmount,
+  setAutoCashOutAmount,
+}) => {
   const handleClearAutoCashOut = () => {
     setAutoCashOutAmount(0);
   };
@@ -139,114 +154,77 @@ const AutoSection: FC<{
   );
 };
 
-const BetControl: FC = () => {
-  const [betAmount1, setBetAmount1] = useState<number>(1.0);
-  const [isBetting1, setIsBetting1] = useState<boolean>(false);
+interface BetControlSectionProps {
+  defaultTab?: string;
+}
 
-  const [betAmount2, setBetAmount2] = useState<number>(1.0);
-  const [isBetting2, setIsBetting2] = useState<boolean>(false);
+const BetControlSection: FC<BetControlSectionProps> = ({
+  defaultTab = "bet",
+}) => {
+  const [betAmount, setBetAmount] = useState<number>(1.0);
+  const [isBetting, setIsBetting] = useState<boolean>(false);
+  const [autoCashOut, setAutoCashOut] = useState<boolean>(false);
+  const [autoCashOutAmount, setAutoCashOutAmount] = useState<number>(2.0);
 
-  const handleBet1 = () => {
-    setIsBetting1((prev) => !prev); // Toggle the isBetting state for the first BetSection
-  };
-
-  const handleBet2 = () => {
-    setIsBetting2((prev) => !prev); // Toggle the isBetting state for the second BetSection
+  const handleBet = () => {
+    setIsBetting((prev) => !prev);
   };
 
   return (
+    <div
+      className={`flex-1 px-4 lg:px-10 py-4 rounded-md bg-[#222222] ${
+        isBetting ? "border-2 border-red-500" : "border border-transparent"
+      }`}
+    >
+      <Tabs
+        defaultValue={defaultTab}
+        className="flex flex-col items-center justify-center gap-2"
+      >
+        <TabsList className="bg-[#141516] w-full max-w-[200px] rounded-3xl h-auto p-0">
+          <TabsTrigger
+            value="bet"
+            className="w-1/2 rounded-3xl data-[state=active]:bg-[#2c2d30] text-white data-[state=active]:text-white py-0.5 px-4 flex-1"
+          >
+            Bet
+          </TabsTrigger>
+          <TabsTrigger
+            value="auto"
+            className="w-1/2 rounded-3xl data-[state=active]:bg-[#2c2d30] text-white data-[state=active]:text-white py-0.5 px-4 flex-1"
+          >
+            Auto
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="bet" className="w-full">
+          {/* <div className={`flex-1 px-4 lg:px-10 py-4 rounded-md bg-[#222222] `}> */}
+          <BetSection
+            isBetting={isBetting}
+            handleBet={handleBet}
+            betAmount={betAmount}
+            setBetAmount={setBetAmount}
+          />
+          {/* </div> */}
+        </TabsContent>
+        <TabsContent value="auto" className="w-full">
+          <AutoSection
+            isBetting={isBetting}
+            handleBet={handleBet}
+            betAmount={betAmount}
+            setBetAmount={setBetAmount}
+            autoCashOut={autoCashOut}
+            setAutoCashOut={setAutoCashOut}
+            autoCashOutAmount={autoCashOutAmount}
+            setAutoCashOutAmount={setAutoCashOutAmount}
+          />
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+};
+const BetControl: FC = () => {
+  return (
     <div className="flex flex-col lg:flex-row justify-end gap-2 pt-2 pb-2 lg:pb-0">
-      <div className="flex-1 px-4 lg:px-10 py-4 rounded-md bg-[#222222] ">
-        <Tabs
-          defaultValue="bet"
-          className="flex flex-col items-center justify-center gap-2"
-        >
-          <TabsList className="bg-[#141516] w-full max-w-[200px] rounded-3xl h-auto p-0">
-            <TabsTrigger
-              value="bet"
-              className="w-1/2 rounded-3xl data-[state=active]:bg-[#2c2d30] text-white data-[state=active]:text-white py-0.5 px-4 flex-1"
-            >
-              Bet
-            </TabsTrigger>
-            <TabsTrigger
-              value="auto"
-              className="w-1/2 rounded-3xl data-[state=active]:bg-[#2c2d30] text-white data-[state=active]:text-white py-0.5 px-4 flex-1"
-            >
-              Auto
-            </TabsTrigger>
-          </TabsList>
-          <TabsContent value="bet" className="w-full">
-            <div
-              className={`flex-1 px-4 lg:px-10 py-4 rounded-md bg-[#222222] ${
-                isBetting1
-                  ? "border-2 border-red-500"
-                  : "border border-transparent"
-              }`}
-            >
-              <BetSection
-                isBetting={isBetting1}
-                handleBet={handleBet1}
-                betAmount={betAmount1}
-                setBetAmount={setBetAmount1}
-              />
-            </div>
-          </TabsContent>
-          <TabsContent value="auto" className="w-full">
-            <AutoSection
-              isBetting={isBetting2}
-              handleBet={handleBet2}
-              betAmount={betAmount2}
-              setBetAmount={setBetAmount2}
-            />
-          </TabsContent>
-        </Tabs>
-      </div>
-
-      <div className="flex-1 px-4 lg:px-10 py-4 rounded-md bg-[#222222] ">
-        <Tabs
-          defaultValue="bet"
-          className="flex flex-col items-center justify-center gap-2"
-        >
-          <TabsList className="bg-[#141516] w-full max-w-[200px] rounded-3xl h-auto p-0">
-            <TabsTrigger
-              value="bet"
-              className="w-1/2 rounded-3xl data-[state=active]:bg-[#2c2d30] text-white data-[state=active]:text-white py-0.5 px-4 flex-1"
-            >
-              Bet
-            </TabsTrigger>
-            <TabsTrigger
-              value="auto"
-              className="w-1/2 rounded-3xl data-[state=active]:bg-[#2c2d30] text-white data-[state=active]:text-white py-0.5 px-4 flex-1"
-            >
-              Auto
-            </TabsTrigger>
-          </TabsList>
-          <TabsContent value="bet" className="w-full">
-            <div
-              className={`flex-1 px-4 lg:px-10 py-4 rounded-md bg-[#222222] ${
-                isBetting2
-                  ? "border-2 border-red-500"
-                  : "border border-transparent"
-              }`}
-            >
-              <BetSection
-                isBetting={isBetting2}
-                handleBet={handleBet2}
-                betAmount={betAmount2}
-                setBetAmount={setBetAmount2}
-              />
-            </div>
-          </TabsContent>
-          <TabsContent value="auto" className="w-full">
-            <AutoSection
-              isBetting={isBetting2}
-              handleBet={handleBet2}
-              betAmount={betAmount2}
-              setBetAmount={setBetAmount2}
-            />
-          </TabsContent>
-        </Tabs>
-      </div>
+      <BetControlSection defaultTab="bet" />
+      <BetControlSection defaultTab="bet" />
     </div>
   );
 };
