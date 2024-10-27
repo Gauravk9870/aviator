@@ -53,7 +53,7 @@ export default function Navbar() {
     const params = new URLSearchParams(window.location.search);
     const returnUrl = params.get("return_url");
 
-    if (returnUrl === "https://spribe.co/games") {
+    if (returnUrl) {
       setShowHomeButton(true);
     }
   }, []);
@@ -221,7 +221,12 @@ export default function Navbar() {
                   <MenubarSeparator className="m-0 h-[1px] bg-gray-700 p-0" />
 
                   {showHomeButton && (
-                    <MenubarItem className="flex items-center justify-center bg-[#2c2d30] py-3 px-3 hover:bg-[#2c2d30] focus:bg-[#2c2d30] focus:text-white cursor-pointer">
+                    <MenubarItem
+                      className="flex items-center justify-center bg-[#2c2d30] py-3 px-3 hover:bg-[#2c2d30] focus:bg-[#2c2d30] focus:text-white cursor-pointer"
+                      onClick={() =>
+                        (window.location.href = "https://spribe.co/games")
+                      }
+                    >
                       <div className="flex items-center gap-1">
                         <Home size={16} className="text-[#83878e]" />
                         <span className="text-xs text-[#9ea0a3]">Home</span>

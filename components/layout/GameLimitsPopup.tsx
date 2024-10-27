@@ -3,7 +3,6 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
-  DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 
@@ -14,15 +13,16 @@ interface GameLimitsPopupProps {
 const GameLimitsPopup: React.FC<GameLimitsPopupProps> = ({ onClose }) => {
   return (
     <Dialog open={true} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <DialogContent className="sm:max-w-[700px] bg-[#27a409] border-gray-700">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-white">
-            Game Limits
+      <DialogContent className="sm:max-w-[400px] rounded-lg shadow-lg overflow-hidden bg-[#1a1a1a] border border-gray-700 p-0 top-40 left-1/2 transform -translate-x1/2">
+        {/* Header at the top without padding */}
+        <div className="bg-[#333333] px-4 py-3 flex justify-between items-center border-b border-gray-700">
+          <DialogTitle className="text-sm font-semibold text-gray-300">
+            GAME LIMITS
           </DialogTitle>
-          <DialogClose className="absolute top-4 right-4 text-white hover:text-gray-400 transition">
+          <DialogClose className="text-gray-400 hover:text-gray-500 transition">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6"
+              className="h-5 w-5"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -35,14 +35,33 @@ const GameLimitsPopup: React.FC<GameLimitsPopupProps> = ({ onClose }) => {
               />
             </svg>
           </DialogClose>
-        </DialogHeader>
-        <table className="border black rounded-3xl">
-          <tr>
-            <td>Minimum bet USD: 0.10</td>
-          </tr>
-          <tr>Maximum be USD: 100.00</tr>
-          <tr>Maximum win for one bet USD: 10,000.00</tr>
-        </table>
+        </div>
+
+        {/* Main content without gap between rows */}
+        <div className="px-4 py-3 bg-[#1a1a1a]">
+          <div className="border border-gray-600 rounded">
+            {/* Single row without gap */}
+            <div className="flex justify-between items-center border-b border-gray-600 px-3 py-2 last:border-none">
+              <div className="text-gray-300 text-sm whitespace-nowrap">Minimum bet USD:</div>
+              <div className="text-white font-semibold border border-green-500 bg-[#004d00] px-4 py-1 rounded-full text-center text-sm">
+                0.10
+              </div>
+            </div>
+            {/* Additional rows without gap */}
+            <div className="flex justify-between items-center border-b border-gray-600 px-3 py-2 last:border-none">
+              <div className="text-gray-300 text-sm whitespace-nowrap">Maximum bet USD:</div>
+              <div className="text-white font-semibold border border-green-500 bg-[#004d00] px-4 py-1 rounded-full text-center text-sm">
+                100.00
+              </div>
+            </div>
+            <div className="flex justify-between items-center px-3 py-2">
+              <div className="text-gray-300 text-sm whitespace-nowrap">Maximum win for one bet USD:</div>
+              <div className="text-white font-semibold border border-green-500 bg-[#004d00] px-4 py-1 rounded-full text-center text-sm">
+                10,000.00
+              </div>
+            </div>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );
