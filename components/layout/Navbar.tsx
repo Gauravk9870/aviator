@@ -36,7 +36,6 @@ import {
   closeMenu,
 } from "@/lib/features/menuSlice";
 
-
 const useMenu = () => {
   const dispatch = useAppDispatch();
   const { isOpen, isTransitioning } = useAppSelector((state) => state.menu);
