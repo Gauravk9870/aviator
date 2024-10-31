@@ -1,14 +1,27 @@
 // Avitor.tsx
 "use client";
 
+import { closeMenu } from "@/lib/features/menuSlice";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+
 // Define the prop types for Avitor
 interface AvitorProps {
   setIsLoading: (isLoading: boolean) => void;
 }
 
 export default function Avitor({ setIsLoading }: AvitorProps) {
+  const dispatch = useAppDispatch();
+  const isMenuOpen = useAppSelector((state) => state.menu.isOpen);
+
   const handleLoad = () => {
     setIsLoading(false);
+  };
+
+  const handleClick = () => {
+    console.log("Clicked");
+    if (isMenuOpen) {
+      dispatch(closeMenu());
+    }
   };
 
   return (
@@ -22,6 +35,7 @@ export default function Avitor({ setIsLoading }: AvitorProps) {
           overflow: "hidden",
         }}
       ></iframe>
+      <div className="absolute inset-0 z-10" onClick={handleClick}></div>
     </div>
   );
 }
