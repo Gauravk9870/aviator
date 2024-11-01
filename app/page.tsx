@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import BetControl from "@/components/layout/BetControl";
 import Avitor from "@/components/layout/Avitor";
-import Socket from "@/components/layout/socket";
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -27,7 +26,7 @@ export default function Home() {
       )}
       <Avitor setIsLoading={setIsLoading} />
       <BetControl />
-      <Socket />
+      {/* <Socket /> */}
     </main>
   );
 }

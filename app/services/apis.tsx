@@ -21,7 +21,6 @@ export const verifyToken = async () => {
     throw new Error("An error occurred during token verification.");
   }
 };
-
 //PlaceBet
 export const placeBet = async (userId: string, amount: number) => {
   try {
@@ -44,9 +43,7 @@ export const placeBet = async (userId: string, amount: number) => {
     console.error("An error occurred while placing the bet.");
   }
 };
-
 //cashOut
-
 export const cashOut = async (userId: string, currentMultiplier: number) => {
   try {
     const res = await fetch(`${config.serverUrl}/api/aviator/cash-out`, {
@@ -83,18 +80,15 @@ export const getBetsByUser = async (userId: string) => {
         },
       }
     );
-
     const data = await res.json();
-
     if (data.status && data.data) {
       console.log("Bets fetched successfully:", data.data);
       return data.data;
-    } else if (!data.status && data.message === "No Bets Found.") {
-      console.log("No bets found for this user.");
+    } else if (!data.status && data.message === "No bets found") {
+      // console.log("No bets found for this user.");
       return [];
     } else {
       console.log("Error fetching bets:", data.message);
-      return null;
     }
   } catch (err) {
     console.error("Error fetching bets:", err);
@@ -127,9 +121,7 @@ export const getCrashPoints = async () => {
     throw new Error("An error occurred while fetching crash points.");
   }
 };
-
 //getAviatorSetting
-
 export const getAviatorSetting = async (settingName: string) => {
   try {
     const res = await fetch(
