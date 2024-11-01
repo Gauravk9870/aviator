@@ -11,6 +11,7 @@ import { bets, formatTimestamp } from "@/lib/utils";
 import { useDispatch, useSelector } from "react-redux";
 import { setActiveTab } from "@/lib/features/tabsSlice";
 import { RootState } from "@/lib/store";
+import Currency from "./Currency";
 
 const topBets = [
   {
@@ -92,10 +93,10 @@ export default function Sidebar() {
             <span>User</span>
           </div>
           <div className="px-4 py-1 flex-1 text-left">
-            <span>Bet USD X</span>
+            <span>Bet <Currency/> X</span>
           </div>
           <div className="px-4 py-1 flex-1 text-right">
-            <span>Cash out USD</span>
+            <span>Cash out <Currency/></span>
           </div>
         </div>
         <div className="bg-[#1b1c1d]">
@@ -155,10 +156,10 @@ export default function Sidebar() {
                       <span>Date</span>
                     </div>
                     <div className="  px-4 py-2 flex-1 text-left">
-                      <span className="">Bet USD X</span>
+                      <span className="">Bet <Currency/> X</span>
                     </div>
                     <div className="  px-4 py-2 flex-1 text-right">
-                      <span>Cash out USD</span>
+                      <span>Cash out <Currency/></span>
                     </div>
                     <div className="  px-4 py-2  text-right"></div>
                   </div>
@@ -305,7 +306,7 @@ export default function Sidebar() {
               <div className="grid grid-cols-3 gap-4">
                 <div className="col-span-2">
                   <p className="text-xs text-[#9ea0a3] text-center mb-1">
-                    Bet USD:{" "}
+                    Bet <Currency/>:{" "}
                     <span className="font-semibold text-white">
                       {bet.amount.toFixed(2)}
                     </span>
@@ -317,7 +318,7 @@ export default function Sidebar() {
                     </span>
                   </p>
                   <p className="text-xs text-[#9ea0a3] text-center">
-                    Win USD: <span className="font-semibold">Yes</span>
+                    Win <Currency/>: <span className="font-semibold">Yes</span>
                   </p>
                 </div>
               </div>

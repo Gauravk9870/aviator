@@ -5,6 +5,7 @@ import {
   DialogContent,
   DialogTitle,
 } from "@/components/ui/dialog";
+import Currency from "./Currency";
 
 interface BetHistoryDialogProps {
   onClose: () => void;
@@ -61,8 +62,8 @@ const BetHistoryDialog: React.FC<BetHistoryDialogProps> = ({ onClose }) => {
         <div className="bg-[#1a1a1a] p-4 text-gray-400">
           <div className="flex justify-between border-b border-gray-600 pb-2 mb-2 text-xs">
             <span>Date</span>
-            <span>Bet USD X</span>
-            <span>Cash out USD</span>
+            <span>Bet <Currency/> X</span>
+            <span>Cash out <Currency/></span>
           </div>
           <div className="text-center py-6">
             <button className="bg-gray-700 text-gray-400 py-2 px-6 rounded-md cursor-not-allowed opacity-50">
