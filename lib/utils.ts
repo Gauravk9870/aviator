@@ -19,6 +19,24 @@ export function formatTimestamp(timestamp: string): { time: string; date: string
   };
 }
 
+const exchangeRates: { [key: string]: number } = {
+  USD: 1,
+  EUR: 0.85,
+  GBP: 0.73,
+  JPY: 110.14
+}
+
+export function convertCurrency(amount: number, fromCurrency: string, toCurrency: string): number {
+  const fromRate = exchangeRates[fromCurrency]
+  const toRate = exchangeRates[toCurrency]
+
+  if (!fromRate || !toRate) {
+    throw new Error('Invalid currency')
+  }
+
+  return (amount / fromRate) * toRate
+}
+
 export type Bet = {
   id: string;
   user: string;

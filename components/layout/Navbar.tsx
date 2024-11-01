@@ -35,6 +35,7 @@ import {
   setTransitioning,
   closeMenu,
 } from "@/lib/features/menuSlice";
+import Currency from "./Currency";
 
 const useMenu = () => {
   const dispatch = useAppDispatch();
@@ -123,6 +124,7 @@ export default function Navbar() {
   const [showHomeButton, setShowHomeButton] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const dispatch = useAppDispatch();
+  const {balance} = useAppSelector((state) => state.currency);
 
   useEffect(() => {
     const savedAvatar = localStorage.getItem("selectedAvatar");
@@ -235,8 +237,8 @@ export default function Navbar() {
         </div>
         <div className="flex items-center">
           <div className="px-3">
-            <span className="text-base font-bold text-[#28a909]">3,000.00</span>
-            <span className="text-xs text-[#9b9c9e]">USD</span>
+            <span className="text-base font-bold text-[#28a909]">{balance}</span>
+            <Currency/>
           </div>
           <div className="flex items-center justify-center border-l-2 border-[#464648]">
             <Menubar className="h-auto w-auto cursor-pointer border-none bg-transparent p-0 data-[state=open]:bg-transparent">
