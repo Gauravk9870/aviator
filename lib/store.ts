@@ -1,11 +1,17 @@
-import { configureStore } from "@reduxjs/toolkit";
+import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import tabsReducer from "@/lib/features/tabsSlice";
+import menuReducer from "@/lib/features/menuSlice";
+import currencyReducer from "@/lib/features/currencySlice";
+
+const rootReducer = combineReducers({
+  tabs: tabsReducer,
+  menu: menuReducer,
+  currency : currencyReducer
+});
 
 export const makeStore = () => {
   return configureStore({
-    reducer: {
-      tabs: tabsReducer,
-    },
+    reducer: rootReducer,
   });
 };
 

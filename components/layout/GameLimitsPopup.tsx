@@ -5,6 +5,7 @@ import {
   DialogContent,
   DialogTitle,
 } from "@/components/ui/dialog";
+import Currency from "./Currency";
 
 interface GameLimitsPopupProps {
   onClose: () => void;
@@ -42,20 +43,20 @@ const GameLimitsPopup: React.FC<GameLimitsPopupProps> = ({ onClose }) => {
           <div className="border border-gray-600 rounded">
             {/* Single row without gap */}
             <div className="flex justify-between items-center border-b border-gray-600 px-3 py-2 last:border-none">
-              <div className="text-gray-300 text-sm whitespace-nowrap">Minimum bet USD:</div>
+              <div className="text-gray-300 text-sm whitespace-nowrap">Minimum bet <Currency/>:</div>
               <div className="text-white font-semibold border border-green-500 bg-[#004d00] px-4 py-1 rounded-full text-center text-sm">
                 0.10
               </div>
             </div>
             {/* Additional rows without gap */}
             <div className="flex justify-between items-center border-b border-gray-600 px-3 py-2 last:border-none">
-              <div className="text-gray-300 text-sm whitespace-nowrap">Maximum bet USD:</div>
+              <div className="text-gray-300 text-sm whitespace-nowrap">Maximum bet <Currency/>:</div>
               <div className="text-white font-semibold border border-green-500 bg-[#004d00] px-4 py-1 rounded-full text-center text-sm">
                 100.00
               </div>
             </div>
             <div className="flex justify-between items-center px-3 py-2">
-              <div className="text-gray-300 text-sm whitespace-nowrap">Maximum win for one bet USD:</div>
+              <div className="text-gray-300 text-sm whitespace-nowrap">Maximum win for one bet <Currency/>:</div>
               <div className="text-white font-semibold border border-green-500 bg-[#004d00] px-4 py-1 rounded-full text-center text-sm">
                 10,000.00
               </div>
