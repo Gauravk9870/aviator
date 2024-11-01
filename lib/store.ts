@@ -2,11 +2,13 @@ import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import tabsReducer from "@/lib/features/tabsSlice";
 import menuReducer from "@/lib/features/menuSlice";
 import currencyReducer from "@/lib/features/currencySlice";
+import aviatorReducer from "@/lib/features/aviatorSlice";
 
 const rootReducer = combineReducers({
   tabs: tabsReducer,
   menu: menuReducer,
-  currency : currencyReducer
+  currency: currencyReducer,
+  aviator: aviatorReducer,
 });
 
 export const makeStore = () => {

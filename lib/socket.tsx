@@ -2,6 +2,8 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { config } from "./config";
+import { useAppDispatch } from "./hooks";
+import { resetGame, setConnectionStatus, setCurrentMultiplier, setGameCrashed, setGameStarted, setSessionId } from "./features/aviatorSlice";
 
 interface SocketContextType {
     socket: WebSocket | null;
@@ -20,6 +22,7 @@ export const useSocket = (): SocketContextType => {
 export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     children,
 }) => {
+    const dispatch = useAppDispatch();
     const [socket, setSocket] = useState<WebSocket | null>(null);
 
     useEffect(() => {
@@ -27,25 +30,38 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
 
         ws.onopen = () => {
             console.log("Connected to Aviator WebSocket");
+            dispatch(setConnectionStatus(true));
         }
 
         ws.onmessage = (event) => {
             const data = JSON.parse(event.data);
-            console.log("Received message:", data);
+            console.log("Received message from Aviator WebSocket:", data);
 
-            if (data.message === "Welcome to Aviator!") {
-                console.log("Received welcome message");
-            } else if (data.multiplier === "SessionId") {
-                console.log("Session ID set to", data.sessionId);
-            } else if (data.multiplier === "Started") {
-                console.log("Session started");
-            } else if (data.multiplier === "Crashed") {
-                console.log("Session crashed at", data.finalMultiplier);
+            switch (true) {
+                case data.message === "Welcome to Aviator!":
+                    console.log(data.message);
+                    break;
+                case data.multiplier === "sessionId":
+                    dispatch(setSessionId(data.sessionId));
+                    dispatch(resetGame());
+                    break;
+                case data.multiplier === "Started":
+                    dispatch(setGameStarted());
+                    break;
+                case data.multiplier === "Crashed":
+                    dispatch(setGameCrashed(data.finalMultiplier));
+                    break;
+                case typeof data.multiplier === 'string' && !isNaN(parseFloat(data.multiplier)):
+                    dispatch(setCurrentMultiplier(data.multiplier));
+                    break;
+                default:
+                    console.log("Unhandled message type:", data);
             }
         };
 
         ws.onclose = () => {
             console.log("Disconnected from Aviator WebSocket");
+            dispatch(setConnectionStatus(false));
         };
 
         setSocket(ws)
@@ -53,7 +69,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         return () => {
             ws.close()
         }
-    }, []);
+    }, [dispatch]);
 
     return (
         <SocketContext.Provider value={{ socket }}>{children}</SocketContext.Provider>
