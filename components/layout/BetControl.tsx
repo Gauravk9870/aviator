@@ -5,6 +5,7 @@ import { Minus, Plus, X } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { placeBet } from "@/app/services/apis";
 
 interface BetSectionProps {
   isBetting: boolean;
@@ -35,7 +36,7 @@ const BetSection: FC<BetSectionProps> = ({
             <button
               className={`w-4 h-4 flex items-center justify-center border border-[#ffffff80] rounded-full focus:outline-none ${buttonClass}`}
               onClick={handleDecrement}
-              disabled={isBetting} // Disable when betting
+              disabled={isBetting}
             >
               <Minus size={16} stroke="#ffffff80" />
             </button>
@@ -45,7 +46,7 @@ const BetSection: FC<BetSectionProps> = ({
             <button
               className={`w-4 h-4 flex items-center justify-center border border-[#ffffff80] rounded-full focus:outline-none ${buttonClass}`}
               onClick={handleIncrement}
-              disabled={isBetting} // Disable when betting
+              disabled={isBetting}
             >
               <Plus size={16} stroke="#ffffff80" />
             </button>
@@ -56,7 +57,7 @@ const BetSection: FC<BetSectionProps> = ({
                 key={amount}
                 className={`text-sm focus:outline-none rounded-3xl ${buttonClass}`}
                 onClick={() => setBetAmount(amount)}
-                disabled={isBetting} // Disable when betting
+                disabled={isBetting}
               >
                 {amount.toFixed(2)}
               </button>
@@ -166,8 +167,19 @@ const BetControlSection: FC<BetControlSectionProps> = ({
   const [autoCashOut, setAutoCashOut] = useState<boolean>(false);
   const [autoCashOutAmount, setAutoCashOutAmount] = useState<number>(2.0);
 
-  const handleBet = () => {
+  const handleBet = async () => {
     setIsBetting((prev) => !prev);
+
+    if (!isBetting) {
+      try {
+        const userId = "11542";
+        await placeBet(userId, betAmount);
+      } catch (error) {
+        console.error("Failed to place bet:", error);
+      }
+
+    
+    }
   };
 
   return (
@@ -195,14 +207,12 @@ const BetControlSection: FC<BetControlSectionProps> = ({
           </TabsTrigger>
         </TabsList>
         <TabsContent value="bet" className="w-full">
-          {/* <div className={`flex-1 px-4 lg:px-10 py-4 rounded-md bg-[#222222] `}> */}
           <BetSection
             isBetting={isBetting}
             handleBet={handleBet}
             betAmount={betAmount}
             setBetAmount={setBetAmount}
           />
-          {/* </div> */}
         </TabsContent>
         <TabsContent value="auto" className="w-full">
           <AutoSection
