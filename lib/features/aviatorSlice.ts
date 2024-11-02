@@ -50,10 +50,15 @@ export const placeBet = createAsyncThunk(
     'aviator/placeBet',
     async ({ userId, amount }: { userId: string; amount: number }, { rejectWithValue }) => {
         try {
-            const response = await axios.post(`${config.server}/aviator/place-bet`, { userId, amount }, {
-                headers: { Authorization: `Bearer ${config.token}` }
+            const response = await axios.post('http://88.222.215.60/api/aviator/place-bet', { userId, amount }, {
+                headers: { Authorization: config.token }
             })
-            return response.data
+
+            if (response.data.status) {
+                return response.data.bet;
+            } else {
+                return rejectWithValue(response.data.error);
+            }
         } catch (error) {
             if (error instanceof AxiosError && error.response) {
                 return rejectWithValue(error.response.data)
@@ -63,14 +68,19 @@ export const placeBet = createAsyncThunk(
     }
 )
 
+
 export const cashOut = createAsyncThunk(
     'aviator/cashOut',
     async ({ userId, currentMultiplier }: { userId: string; currentMultiplier: number }, { rejectWithValue }) => {
         try {
-            const response = await axios.post(`${config.server}/aviator/cash-out`, { userId, currentMultiplier }, {
-                headers: { Authorization: `Bearer ${config.token}` }
+            const response = await axios.post('http://88.222.215.60/api/aviator/cash-out', { userId, currentMultiplier }, {
+                headers: { Authorization: config.token }
             })
-            return response.data
+            if (response.data.status) {
+                return response.data.payout;
+            } else {
+                return rejectWithValue(response.data.error);
+            }
         } catch (error) {
             if (error instanceof AxiosError && error.response) {
                 return rejectWithValue(error.response.data)
@@ -84,10 +94,14 @@ export const fetchUserBets = createAsyncThunk(
     'aviator/fetchUserBets',
     async (userId: string, { rejectWithValue }) => {
         try {
-            const response = await axios.get(`${config.server}/aviator/getBets/${userId}`, {
-                headers: { Authorization: `Bearer ${config.token}` }
+            const response = await axios.get(`http://88.222.215.60/api/aviator/getBets/${userId}`, {
+                headers: { Authorization: config.token }
             })
-            return response.data
+            if (response.data.status) {
+                return response.data.data;
+            } else {
+                return rejectWithValue(response.data.message);
+            }
         } catch (error) {
             if (error instanceof AxiosError && error.response) {
                 return rejectWithValue(error.response.data)
@@ -103,6 +117,9 @@ const aviatorSlice = createSlice({
     reducers: {
         setConnectionStatus: (state, action: PayloadAction<boolean>) => {
             state.isConnected = action.payload;
+        },
+        setBetPlaced: (state, action: PayloadAction<boolean>) => {
+            state.isBetting = action.payload;
         },
         setSessionId: (state, action: PayloadAction<string>) => {
             state.sessionId = action.payload;
@@ -120,12 +137,12 @@ const aviatorSlice = createSlice({
             state.gameStatus = 'crashed';
             state.finalMultiplier = action.payload;
             state.multiplierHistory.push(action.payload);
+            state.isBetting = false;
         },
         resetGame: (state) => {
             state.gameStatus = 'waiting';
             state.currentMultiplier = 1;
             state.finalMultiplier = null;
-            state.isBetting = false;
         },
         setBets: (state, action: PayloadAction<Bet[]>) => {
             state.bets = action.payload
@@ -145,10 +162,6 @@ const aviatorSlice = createSlice({
         setError: (state, action: PayloadAction<string | null>) => {
             state.error = action.payload
         },
-        cancelBet: (state, action: PayloadAction<string>) => {
-            state.isBetting = false
-            state.bets = state.bets.filter(bet => bet.userId !== action.payload)
-        },
     },
     extraReducers(builder) {
         builder
@@ -156,8 +169,7 @@ const aviatorSlice = createSlice({
                 state.error = null
             })
             .addCase(placeBet.fulfilled, (state, action) => {
-                state.isBetting = true
-                state.bets.push(action.payload.bet)
+                state.bets.push(action.payload)
                 state.error = null
             })
             .addCase(placeBet.rejected, (state, action) => {
@@ -168,15 +180,10 @@ const aviatorSlice = createSlice({
             })
             .addCase(cashOut.fulfilled, (state, action) => {
                 state.isBetting = false;
-                if (action.payload && action.payload.bet) {
-                    const betIndex = state.bets.findIndex(bet => bet.userId === action.payload.bet.userId);
-                    if (betIndex !== -1) {
-                        state.bets[betIndex].cashedOut = true;
-                        state.bets[betIndex].cashOutMultiplier = action.payload.bet.cashOutMultiplier;
-                    } else {
-                        // If the bet is not found, add it to the bets array
-                        state.bets.push(action.payload.bet);
-                    }
+                const betIndex = state.bets.findIndex(bet => bet.userId === action.meta.arg.userId);
+                if (betIndex !== -1) {
+                    state.bets[betIndex].cashedOut = true;
+                    state.bets[betIndex].cashOutMultiplier = action.meta.arg.currentMultiplier;
                 }
                 state.error = null;
             })
@@ -187,7 +194,7 @@ const aviatorSlice = createSlice({
                 state.error = null
             })
             .addCase(fetchUserBets.fulfilled, (state, action) => {
-                state.bets = action.payload.data
+                state.bets = action.payload
                 state.error = null
             })
             .addCase(fetchUserBets.rejected, (state, action) => {
@@ -209,7 +216,7 @@ export const {
     updateBet,
     setAutoCashOut,
     setError,
-    cancelBet,
+    setBetPlaced
 } = aviatorSlice.actions;
 
 export default aviatorSlice.reducer;

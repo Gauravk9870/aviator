@@ -3,10 +3,11 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { config } from "./config";
 import { useAppDispatch } from "./hooks";
-import { resetGame, setConnectionStatus, setCurrentMultiplier, setGameCrashed, setGameStarted, setSessionId, updateBet } from "./features/aviatorSlice";
+import { placeBet, resetGame, setConnectionStatus, setCurrentMultiplier, setGameCrashed, setGameStarted, setSessionId, updateBet } from "./features/aviatorSlice";
 
 interface SocketContextType {
     socket: WebSocket | null;
+    setPendingBet: React.Dispatch<React.SetStateAction<{ userId: string; amount: number } | null>>;
 }
 
 const SocketContext = createContext<SocketContextType | undefined>(undefined);
@@ -24,6 +25,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
     const dispatch = useAppDispatch();
     const [socket, setSocket] = useState<WebSocket | null>(null);
+    const [pendingBet, setPendingBet] = useState<{ userId: string, amount: number } | null>(null);
 
     useEffect(() => {
         const ws = new WebSocket(`${config.ws}`)
@@ -41,21 +43,35 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
                 case data.message === "Welcome to Aviator!":
                     console.log(data.message);
                     break;
+
+                case data.multiplier === "Started":
+                    console.log("Game started");
+                    dispatch(setGameStarted());
+                    if (pendingBet) {
+                        dispatch(placeBet(pendingBet))
+                        setPendingBet(null)
+                    }
+                    break;
+
                 case data.multiplier === "sessionId":
+                    console.log("Session ID:", data.sessionId);
                     dispatch(setSessionId(data.sessionId));
                     dispatch(resetGame());
+                    if (pendingBet) {
+                        dispatch(placeBet(pendingBet))
+                        setPendingBet(null)
+                    }
                     break;
-                case data.multiplier === "Started":
-                    dispatch(setGameStarted());
-                    break;
+
                 case data.multiplier === "Crashed":
                     dispatch(setGameCrashed(data.finalMultiplier));
                     break;
+
                 case typeof data.multiplier === 'string' && !isNaN(parseFloat(data.multiplier)):
                     dispatch(setCurrentMultiplier(data.multiplier));
                     break;
+
                 case data.type === "BETS":
-                    console.log("BETS", data.data);
                     dispatch(updateBet(data.data))
                     break
                 default:
@@ -73,9 +89,9 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         return () => {
             ws.close()
         }
-    }, [dispatch]);
+    }, [dispatch, pendingBet]);
 
     return (
-        <SocketContext.Provider value={{ socket }}>{children}</SocketContext.Provider>
+        <SocketContext.Provider value={{ socket, setPendingBet }}>{children}</SocketContext.Provider>
     );
 };

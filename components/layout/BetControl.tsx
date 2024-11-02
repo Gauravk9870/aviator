@@ -6,7 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { cancelBet, cashOut, placeBet, setAutoCashOut } from "@/lib/features/aviatorSlice";
+import { setAutoCashOut, placeBet, cashOut, setBetPlaced } from "@/lib/features/aviatorSlice"
 
 interface BetSectionProps {
   gameStatus: 'waiting' | 'started' | 'crashed';
@@ -38,40 +38,39 @@ const BetSection: FC<BetSectionProps> = ({
     : "bg-[#141516] text-white";
 
   const renderButton = () => {
-    if (isBetting) {
-      if (gameStatus === 'waiting') {
-        return (
-          <div className="flex flex-col items-center">
-            <span className="mb-1 text-sm" style={{ color: "#777c7e" }}>
-              Waiting for the next round
-            </span>
-            <button
-              className="w-[160px] flex items-center justify-center rounded-2xl border shadow-inner bg-gray-600 h-14"
-              onClick={handleCancel}
-            >
-              <span className="text-lg font-normal uppercase text-shadow text-white">
-                Cancel
-              </span>
-            </button>
-          </div>
-        )
-      } else if (gameStatus === 'started') {
-        return (
+    if (gameStatus === 'waiting' && isBetting) {
+      return (
+        <>
+          <span className="mb-1 text-sm text-[#777c7e]">
+            Waiting for the next round
+          </span>
           <button
             className="w-[160px] flex items-center justify-center rounded-2xl border shadow-inner bg-red-600 h-14"
-            onClick={handleCashOut}
+            onClick={handleCancel}
           >
             <span className="text-lg font-normal uppercase text-shadow text-white">
-              Cash Out ({typeof currentMultiplier === 'number' ? currentMultiplier.toFixed(2) : currentMultiplier}x)            </span>
+              Cancel
+            </span>
           </button>
-        )
-      }
+        </>
+      )
+    } else if (gameStatus === 'started' && isBetting) {
+      return (
+        <button
+          className="w-[160px] flex items-center justify-center rounded-2xl border border-[#ffbd71] shadow-inner bg-[#d07206] h-16 text-white text-center"
+          onClick={handleCashOut}
+        >
+          <span className="text-lg font-normal uppercase">
+            Cash Out <br /> {currentMultiplier}x
+          </span>
+        </button>
+      )
     } else {
       return (
         <button
-          className="w-[160px] flex items-center justify-center rounded-2xl border shadow-inner bg-[#28a909] h-20"
+          className={`w-[160px] flex items-center justify-center rounded-2xl border shadow-inner bg-[#28a909] h-20`}
           onClick={handleBet}
-          disabled={gameStatus === 'started'}
+
         >
           <span className="text-lg font-normal uppercase text-shadow text-white">
             Bet
@@ -80,6 +79,7 @@ const BetSection: FC<BetSectionProps> = ({
       )
     }
   }
+
 
   return (
     <div className={`flex flex-col gap-2 w-full mt-2 p-2 rounded-md`}>
@@ -220,20 +220,25 @@ const BetControlSection: FC<BetControlSectionProps> = ({
   defaultTab = "bet",
   userId,
 }) => {
-  const dispatch = useAppDispatch();
-  const { isBetting, currentMultiplier, autoCashOut, autoCashOutAmount, gameStatus } = useAppSelector((state) => state.aviator);
-  const [betAmount, setBetAmount] = useState<number>(1.0);
+  const dispatch = useAppDispatch()
+  const { isBetting, currentMultiplier, autoCashOut, autoCashOutAmount, gameStatus } = useAppSelector((state) => state.aviator)
+  const [betAmount, setBetAmount] = useState<number>(1.0)
   const [localAutoCashOut, setLocalAutoCashOut] = useState(autoCashOut)
   const [localAutoCashOutAmount, setLocalAutoCashOutAmount] = useState(autoCashOutAmount)
-
+  const [pendingBet, setPendingBet] = useState<number | null>(null)
 
 
   const handleBet = () => {
+    dispatch(setBetPlaced(true));
+
     if (gameStatus === 'waiting' && !isBetting) {
       dispatch(placeBet({ userId, amount: betAmount }))
-    }
-    console.log('bet : ', betAmount);
+      console.log('Bet Placed : ', betAmount, gameStatus, isBetting);
 
+    } else if (gameStatus === 'started') {
+      setPendingBet(betAmount);
+      console.log('Bet Pending : ', betAmount, gameStatus, isBetting);
+    }
   }
 
   const handleCashOut = () => {
@@ -243,10 +248,18 @@ const BetControlSection: FC<BetControlSectionProps> = ({
   }
 
   const handleCancel = () => {
-    if (gameStatus === 'waiting' && isBetting) {
-      dispatch(cancelBet(userId))
+    if (isBetting) {
+      setPendingBet(null);
+      dispatch(setBetPlaced(false))
     }
   }
+
+  useEffect(() => {
+    if (gameStatus === 'waiting' && pendingBet !== null) {
+      dispatch(placeBet({ userId, amount: pendingBet }))
+      setPendingBet(null)
+    }
+  }, [gameStatus, pendingBet, dispatch, userId])
 
   useEffect(() => {
     if (localAutoCashOut && isBetting && gameStatus === 'started' && currentMultiplier >= localAutoCashOutAmount) {
