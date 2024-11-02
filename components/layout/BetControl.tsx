@@ -72,9 +72,8 @@ const BetSection: FC<BetSectionProps> = ({
             </span>
           )}
           <button
-            className={`w-[160px] flex items-center justify-center rounded-2xl border shadow-inner ${
-              isBetting ? "bg-red-600 h-14" : "bg-[#28a909] h-20"
-            } `}
+            className={`w-[160px] flex items-center justify-center rounded-2xl border shadow-inner ${isBetting ? "bg-red-600 h-14" : "bg-[#28a909] h-20"
+              } `}
             onClick={handleBet}
           >
             <span className="text-lg font-normal uppercase text-shadow text-white">
@@ -104,9 +103,28 @@ const AutoSection: FC<AutoSectionProps> = ({
   autoCashOutAmount,
   setAutoCashOutAmount,
 }) => {
+  const [inputValue, setInputValue] = useState(autoCashOutAmount.toFixed(2))
+
   const handleClearAutoCashOut = () => {
-    setAutoCashOutAmount(0);
-  };
+    setAutoCashOutAmount(0)
+    setInputValue('0.00')
+  }
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value
+
+    // Remove leading zeros, but keep a single zero if it's the only input
+    value = value.replace(/^0+(?=\d)/, '')
+    if (value === '') value = '0'
+
+    setInputValue(value)
+
+    // Update autoCashOutAmount only if the input is a valid number
+    const numValue = parseFloat(value)
+    if (!isNaN(numValue)) {
+      setAutoCashOutAmount(numValue)
+    }
+  }
 
   return (
     <div className="flex flex-col gap-2 w-full">
@@ -117,11 +135,6 @@ const AutoSection: FC<AutoSectionProps> = ({
         setBetAmount={setBetAmount}
       />
       <div className="flex items-center gap-2">
-        <div className=" flex-1 flex items-center justify-center">
-          <button className="w-4/5 text-sm bg-[#1d7aca] border border-[#46c0f2] rounded-3xl text-white uppercase py-1 px-4">
-            Auto Play
-          </button>
-        </div>
         <div className="flex-1 flex items-center justify-center rounded-3xl px-3 py-2 gap-2">
           <div className="flex items-center gap-2">
             <span className="text-[#9ea0a3] text-sm">Auto Cash Out</span>
@@ -134,11 +147,11 @@ const AutoSection: FC<AutoSectionProps> = ({
 
           <div className="relative">
             <Input
-              type="number"
-              value={autoCashOutAmount}
-              onChange={(e) => setAutoCashOutAmount(Number(e.target.value))}
-              className="w-16 text-white border-none text-right h-auto bg-[#000000b3] outline-none rounded-3xl hide-spin-buttons pr-8 py-1"
-              disabled={!autoCashOut}
+              type="text"
+              value={inputValue}
+              onChange={handleInputChange}
+              className="w-[5.7rem] text-white border-none text-right h-auto bg-[#000000b3] outline-none rounded-3xl pr-8 py-1 font-bold focus:border-none focus:outline-none" disabled={!autoCashOut}
+              aria-label="Auto Cash Out Amount"
             />
             {autoCashOut && (
               <button
@@ -181,9 +194,8 @@ const BetControlSection: FC<BetControlSectionProps> = ({
 
   return (
     <div
-      className={`flex-1 px-4 lg:px-10 py-4 rounded-md bg-[#222222] ${
-        isBetting ? "border-2 border-red-500" : "border-2 border-transparent"
-      }`}
+      className={`flex-1 px-4 lg:px-10 py-4 rounded-md bg-[#222222] ${isBetting ? "border-2 border-red-500" : "border-2 border-transparent"
+        }`}
     >
       <Tabs
         defaultValue={defaultTab}
