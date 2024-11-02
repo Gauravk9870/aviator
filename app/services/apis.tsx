@@ -22,7 +22,12 @@ export const verifyToken = async () => {
   }
 };
 //PlaceBet
-export const placeBet = async (userId: string, amount: number) => {
+
+export const placeBet = async (
+  userId: string,
+  amount: number,
+  socket: WebSocket | null
+) => {
   try {
     const res = await fetch(`${config.serverUrl}/api/aviator/place-bet`, {
       method: "POST",
@@ -32,17 +37,39 @@ export const placeBet = async (userId: string, amount: number) => {
       },
       body: JSON.stringify({ userId, amount }),
     });
+
     const data = await res.json();
+
     if (data.error) {
       console.log(data.error);
     } else if (data.status && data.bet) {
-      console.log(data.bet);
+      console.log("Bet placed successfully:", data.bet);
+
+      // Emit WebSocket message for "BETS" event
+      if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.send(
+          JSON.stringify({
+            type: "BETS",
+            data: {
+              userId,
+              amount,
+              sessionId: data.bet.sessionId,
+              cashedOut: false,
+              cashOutMultiplier: 1,
+              ...data.bet,
+            },
+          })
+        );
+      }
+
+    
     }
   } catch (err) {
     console.error("Error placing bet:", err);
     console.error("An error occurred while placing the bet.");
   }
 };
+
 //cashOut
 export const cashOut = async (userId: string, currentMultiplier: number) => {
   try {

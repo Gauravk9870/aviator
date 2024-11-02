@@ -6,7 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { placeBet } from "@/app/services/apis";
-
+import { useSocket } from "@/lib/socket";
 interface BetSectionProps {
   isBetting: boolean;
   handleBet: () => void;
@@ -72,8 +72,9 @@ const BetSection: FC<BetSectionProps> = ({
             </span>
           )}
           <button
-            className={`w-[160px] flex items-center justify-center rounded-2xl border shadow-inner ${isBetting ? "bg-red-600 h-14" : "bg-[#28a909] h-20"
-              } `}
+            className={`w-[160px] flex items-center justify-center rounded-2xl border shadow-inner ${
+              isBetting ? "bg-red-600 h-14" : "bg-[#28a909] h-20"
+            } `}
             onClick={handleBet}
           >
             <span className="text-lg font-normal uppercase text-shadow text-white">
@@ -103,28 +104,28 @@ const AutoSection: FC<AutoSectionProps> = ({
   autoCashOutAmount,
   setAutoCashOutAmount,
 }) => {
-  const [inputValue, setInputValue] = useState(autoCashOutAmount.toFixed(2))
+  const [inputValue, setInputValue] = useState(autoCashOutAmount.toFixed(2));
 
   const handleClearAutoCashOut = () => {
-    setAutoCashOutAmount(0)
-    setInputValue('0.00')
-  }
+    setAutoCashOutAmount(0);
+    setInputValue("0.00");
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value
+    let value = e.target.value;
 
     // Remove leading zeros, but keep a single zero if it's the only input
-    value = value.replace(/^0+(?=\d)/, '')
-    if (value === '') value = '0'
+    value = value.replace(/^0+(?=\d)/, "");
+    if (value === "") value = "0";
 
-    setInputValue(value)
+    setInputValue(value);
 
     // Update autoCashOutAmount only if the input is a valid number
-    const numValue = parseFloat(value)
+    const numValue = parseFloat(value);
     if (!isNaN(numValue)) {
-      setAutoCashOutAmount(numValue)
+      setAutoCashOutAmount(numValue);
     }
-  }
+  };
 
   return (
     <div className="flex flex-col gap-2 w-full">
@@ -150,7 +151,8 @@ const AutoSection: FC<AutoSectionProps> = ({
               type="text"
               value={inputValue}
               onChange={handleInputChange}
-              className="w-[5.7rem] text-white border-none text-right h-auto bg-[#000000b3] outline-none rounded-3xl pr-8 py-1 font-bold focus:border-none focus:outline-none" disabled={!autoCashOut}
+              className="w-[5.7rem] text-white border-none text-right h-auto bg-[#000000b3] outline-none rounded-3xl pr-8 py-1 font-bold focus:border-none focus:outline-none"
+              disabled={!autoCashOut}
               aria-label="Auto Cash Out Amount"
             />
             {autoCashOut && (
@@ -179,13 +181,14 @@ const BetControlSection: FC<BetControlSectionProps> = ({
   const [isBetting, setIsBetting] = useState<boolean>(false);
   const [autoCashOut, setAutoCashOut] = useState<boolean>(false);
   const [autoCashOutAmount, setAutoCashOutAmount] = useState<number>(2.0);
+  const { socket } = useSocket();
 
   const handleBet = async () => {
     setIsBetting((prev) => !prev);
     if (!isBetting) {
       try {
         const userId = "11542";
-        await placeBet(userId, betAmount);
+        await placeBet(userId, betAmount, socket);
       } catch (error) {
         console.error("Failed to place bet:", error);
       }
@@ -194,8 +197,9 @@ const BetControlSection: FC<BetControlSectionProps> = ({
 
   return (
     <div
-      className={`flex-1 px-4 lg:px-10 py-4 rounded-md bg-[#222222] ${isBetting ? "border-2 border-red-500" : "border-2 border-transparent"
-        }`}
+      className={`flex-1 px-4 lg:px-10 py-4 rounded-md bg-[#222222] ${
+        isBetting ? "border-2 border-red-500" : "border-2 border-transparent"
+      }`}
     >
       <Tabs
         defaultValue={defaultTab}
