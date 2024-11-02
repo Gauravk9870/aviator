@@ -1,23 +1,33 @@
 "use client";
 
-import React, { useState, FC } from "react";
+import React, { useState, FC, useEffect } from "react";
 import { Minus, Plus, X } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { cancelBet, cashOut, placeBet, setAutoCashOut } from "@/lib/features/aviatorSlice";
 
 interface BetSectionProps {
+  gameStatus: 'waiting' | 'started' | 'crashed';
   isBetting: boolean;
   handleBet: () => void;
+  handleCashOut: () => void;
+  handleCancel: () => void;
   betAmount: number;
   setBetAmount: React.Dispatch<React.SetStateAction<number>>;
+  currentMultiplier: number
 }
 
 const BetSection: FC<BetSectionProps> = ({
+  gameStatus,
   isBetting,
   handleBet,
+  handleCashOut,
+  handleCancel,
   betAmount,
   setBetAmount,
+  currentMultiplier,
 }) => {
   const handleIncrement = () => setBetAmount((prev) => prev + 1);
   const handleDecrement = () =>
@@ -27,6 +37,50 @@ const BetSection: FC<BetSectionProps> = ({
     ? "bg-[#141516] text-[#ffffff80] cursor-not-allowed opacity-50"
     : "bg-[#141516] text-white";
 
+  const renderButton = () => {
+    if (isBetting) {
+      if (gameStatus === 'waiting') {
+        return (
+          <div className="flex flex-col items-center">
+            <span className="mb-1 text-sm" style={{ color: "#777c7e" }}>
+              Waiting for the next round
+            </span>
+            <button
+              className="w-[160px] flex items-center justify-center rounded-2xl border shadow-inner bg-gray-600 h-14"
+              onClick={handleCancel}
+            >
+              <span className="text-lg font-normal uppercase text-shadow text-white">
+                Cancel
+              </span>
+            </button>
+          </div>
+        )
+      } else if (gameStatus === 'started') {
+        return (
+          <button
+            className="w-[160px] flex items-center justify-center rounded-2xl border shadow-inner bg-red-600 h-14"
+            onClick={handleCashOut}
+          >
+            <span className="text-lg font-normal uppercase text-shadow text-white">
+              Cash Out ({typeof currentMultiplier === 'number' ? currentMultiplier.toFixed(2) : currentMultiplier}x)            </span>
+          </button>
+        )
+      }
+    } else {
+      return (
+        <button
+          className="w-[160px] flex items-center justify-center rounded-2xl border shadow-inner bg-[#28a909] h-20"
+          onClick={handleBet}
+          disabled={gameStatus === 'started'}
+        >
+          <span className="text-lg font-normal uppercase text-shadow text-white">
+            Bet
+          </span>
+        </button>
+      )
+    }
+  }
+
   return (
     <div className={`flex flex-col gap-2 w-full mt-2 p-2 rounded-md`}>
       <div className="flex gap-1 items-center relative">
@@ -35,7 +89,7 @@ const BetSection: FC<BetSectionProps> = ({
             <button
               className={`w-4 h-4 flex items-center justify-center border border-[#ffffff80] rounded-full focus:outline-none ${buttonClass}`}
               onClick={handleDecrement}
-              disabled={isBetting} // Disable when betting
+              disabled={isBetting}
             >
               <Minus size={16} stroke="#ffffff80" />
             </button>
@@ -45,7 +99,7 @@ const BetSection: FC<BetSectionProps> = ({
             <button
               className={`w-4 h-4 flex items-center justify-center border border-[#ffffff80] rounded-full focus:outline-none ${buttonClass}`}
               onClick={handleIncrement}
-              disabled={isBetting} // Disable when betting
+              disabled={isBetting}
             >
               <Plus size={16} stroke="#ffffff80" />
             </button>
@@ -56,7 +110,7 @@ const BetSection: FC<BetSectionProps> = ({
                 key={amount}
                 className={`text-sm focus:outline-none rounded-3xl ${buttonClass}`}
                 onClick={() => setBetAmount(amount)}
-                disabled={isBetting} // Disable when betting
+                disabled={isBetting}
               >
                 {amount.toFixed(2)}
               </button>
@@ -65,20 +119,7 @@ const BetSection: FC<BetSectionProps> = ({
         </div>
 
         <div className="flex flex-col items-center">
-          {isBetting && (
-            <span className="mb-1 text-sm" style={{ color: "#777c7e" }}>
-              Waiting for the next round
-            </span>
-          )}
-          <button
-            className={`w-[160px] flex items-center justify-center rounded-2xl border shadow-inner ${isBetting ? "bg-red-600 h-14" : "bg-[#28a909] h-20"
-              } `}
-            onClick={handleBet}
-          >
-            <span className="text-lg font-normal uppercase text-shadow text-white">
-              {isBetting ? "Cancel" : "Bet"}
-            </span>
-          </button>
+          {renderButton()}
         </div>
       </div>
     </div>
@@ -93,14 +134,18 @@ interface AutoSectionProps extends BetSectionProps {
 }
 
 const AutoSection: FC<AutoSectionProps> = ({
+  gameStatus,
   isBetting,
   handleBet,
+  handleCashOut,
+  handleCancel,
   betAmount,
   setBetAmount,
   autoCashOut,
   setAutoCashOut,
   autoCashOutAmount,
   setAutoCashOutAmount,
+  currentMultiplier,
 }) => {
   const [inputValue, setInputValue] = useState(autoCashOutAmount.toFixed(2))
 
@@ -111,14 +156,9 @@ const AutoSection: FC<AutoSectionProps> = ({
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value
-
-    // Remove leading zeros, but keep a single zero if it's the only input
     value = value.replace(/^0+(?=\d)/, '')
     if (value === '') value = '0'
-
     setInputValue(value)
-
-    // Update autoCashOutAmount only if the input is a valid number
     const numValue = parseFloat(value)
     if (!isNaN(numValue)) {
       setAutoCashOutAmount(numValue)
@@ -128,10 +168,14 @@ const AutoSection: FC<AutoSectionProps> = ({
   return (
     <div className="flex flex-col gap-2 w-full">
       <BetSection
+        gameStatus={gameStatus}
         isBetting={isBetting}
         handleBet={handleBet}
+        handleCashOut={handleCashOut}
+        handleCancel={handleCancel}
         betAmount={betAmount}
         setBetAmount={setBetAmount}
+        currentMultiplier={currentMultiplier}
       />
       <div className="flex items-center gap-2">
         <div className="flex-1 flex items-center justify-center rounded-3xl px-3 py-2 gap-2">
@@ -169,19 +213,51 @@ const AutoSection: FC<AutoSectionProps> = ({
 
 interface BetControlSectionProps {
   defaultTab?: string;
+  userId: string;
 }
 
 const BetControlSection: FC<BetControlSectionProps> = ({
   defaultTab = "bet",
+  userId,
 }) => {
+  const dispatch = useAppDispatch();
+  const { isBetting, currentMultiplier, autoCashOut, autoCashOutAmount, gameStatus } = useAppSelector((state) => state.aviator);
   const [betAmount, setBetAmount] = useState<number>(1.0);
-  const [isBetting, setIsBetting] = useState<boolean>(false);
-  const [autoCashOut, setAutoCashOut] = useState<boolean>(false);
-  const [autoCashOutAmount, setAutoCashOutAmount] = useState<number>(2.0);
+  const [localAutoCashOut, setLocalAutoCashOut] = useState(autoCashOut)
+  const [localAutoCashOutAmount, setLocalAutoCashOutAmount] = useState(autoCashOutAmount)
+
+
 
   const handleBet = () => {
-    setIsBetting((prev) => !prev);
-  };
+    if (gameStatus === 'waiting' && !isBetting) {
+      dispatch(placeBet({ userId, amount: betAmount }))
+    }
+    console.log('bet : ', betAmount);
+
+  }
+
+  const handleCashOut = () => {
+    if (gameStatus === 'started' && isBetting) {
+      dispatch(cashOut({ userId, currentMultiplier }))
+    }
+  }
+
+  const handleCancel = () => {
+    if (gameStatus === 'waiting' && isBetting) {
+      dispatch(cancelBet(userId))
+    }
+  }
+
+  useEffect(() => {
+    if (localAutoCashOut && isBetting && gameStatus === 'started' && currentMultiplier >= localAutoCashOutAmount) {
+      dispatch(cashOut({ userId, currentMultiplier }))
+    }
+  }, [localAutoCashOut, localAutoCashOutAmount, currentMultiplier, dispatch, userId, isBetting, gameStatus])
+
+  useEffect(() => {
+    dispatch(setAutoCashOut({ enabled: localAutoCashOut, amount: localAutoCashOutAmount }))
+  }, [localAutoCashOut, localAutoCashOutAmount, dispatch])
+
 
   return (
     <div
@@ -209,34 +285,47 @@ const BetControlSection: FC<BetControlSectionProps> = ({
         <TabsContent value="bet" className="w-full">
           {/* <div className={`flex-1 px-4 lg:px-10 py-4 rounded-md bg-[#222222] `}> */}
           <BetSection
+            gameStatus={gameStatus}
             isBetting={isBetting}
             handleBet={handleBet}
+            handleCashOut={handleCashOut}
+            handleCancel={handleCancel}
             betAmount={betAmount}
             setBetAmount={setBetAmount}
+            currentMultiplier={currentMultiplier}
           />
           {/* </div> */}
         </TabsContent>
         <TabsContent value="auto" className="w-full">
           <AutoSection
+            gameStatus={gameStatus}
             isBetting={isBetting}
             handleBet={handleBet}
+            handleCashOut={handleCashOut}
+            handleCancel={handleCancel}
             betAmount={betAmount}
             setBetAmount={setBetAmount}
-            autoCashOut={autoCashOut}
-            setAutoCashOut={setAutoCashOut}
-            autoCashOutAmount={autoCashOutAmount}
-            setAutoCashOutAmount={setAutoCashOutAmount}
+            autoCashOut={localAutoCashOut}
+            setAutoCashOut={setLocalAutoCashOut}
+            autoCashOutAmount={localAutoCashOutAmount}
+            setAutoCashOutAmount={setLocalAutoCashOutAmount}
+            currentMultiplier={currentMultiplier}
           />
         </TabsContent>
       </Tabs>
     </div>
   );
 };
-const BetControl: FC = () => {
+
+interface BetControlProps {
+  userId: string
+}
+
+const BetControl: React.FC<BetControlProps> = ({ userId }) => {
   return (
     <div className="flex flex-col lg:flex-row justify-end gap-2 pt-2 pb-2 lg:pb-0">
-      <BetControlSection defaultTab="bet" />
-      <BetControlSection defaultTab="bet" />
+      <BetControlSection defaultTab="bet" userId={userId} />
+      <BetControlSection defaultTab="bet" userId={userId} />
     </div>
   );
 };

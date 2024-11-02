@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { config } from "./config";
 import { useAppDispatch } from "./hooks";
-import { resetGame, setConnectionStatus, setCurrentMultiplier, setGameCrashed, setGameStarted, setSessionId } from "./features/aviatorSlice";
+import { resetGame, setConnectionStatus, setCurrentMultiplier, setGameCrashed, setGameStarted, setSessionId, updateBet } from "./features/aviatorSlice";
 
 interface SocketContextType {
     socket: WebSocket | null;
@@ -54,6 +54,10 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
                 case typeof data.multiplier === 'string' && !isNaN(parseFloat(data.multiplier)):
                     dispatch(setCurrentMultiplier(data.multiplier));
                     break;
+                case data.type === "BETS":
+                    console.log("BETS", data.data);
+                    dispatch(updateBet(data.data))
+                    break
                 default:
                     console.log("Unhandled message type:", data);
             }
