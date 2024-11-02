@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dialog,
   DialogClose,
@@ -6,12 +6,40 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { getAviatorSetting } from "@/app/services/apis";
+interface GameRulesData {
+  _id: string;
+  name: string;
+  minimumBet: number;
+  maximumBet: number;
+  maximumWinBet: number;
+  settingText: string;
+}
 
 interface GameRulesPopupProps {
   onClose: () => void;
 }
 
 const GameRulesPopup: React.FC<GameRulesPopupProps> = ({ onClose }) => {
+  const [gameRulesData, setGameRulesData] = useState<GameRulesData | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    const fetchGameRules = async () => {
+      try {
+        const rulesData = await getAviatorSetting("Game Rules");
+        setGameRulesData(rulesData);
+      } catch (error) {
+        console.error("Error fetching game rules:", error);
+        setGameRulesData(null); 
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchGameRules();
+  }, []);
+
   return (
     <Dialog open={true} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <DialogContent className="sm:max-w-[700px] bg-[#27a409] border-gray-700">
@@ -38,6 +66,7 @@ const GameRulesPopup: React.FC<GameRulesPopupProps> = ({ onClose }) => {
         </DialogHeader>
 
         <div className="mt-4">
+          {/* Video Embed */}
           <div className="aspect-video w-full">
             <iframe
               width="100%"
@@ -50,58 +79,25 @@ const GameRulesPopup: React.FC<GameRulesPopupProps> = ({ onClose }) => {
             ></iframe>
           </div>
 
-          <div className="mt-6 space-y-4">
-            <div className="flex items-center gap-4">
-              <div className="bg-red-500 rounded-full p-2">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6 text-white"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+          {/* Loading or Game Rules Content */}
+          <div className="mt-6 text-white">
+            {loading ? (
+              <p>Loading game rules...</p>
+            ) : (
+              gameRulesData && (
+                <div>
+                  <h2 className="text-lg font-semibold mb-2">Game Rules:</h2>
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html: gameRulesData.settingText,
+                    }}
                   />
-                </svg>
-              </div>
-              <p className="text-white">
-                Make a bet, or even two at the same time, and wait for the round
-                to start.
-              </p>
-            </div>
-
-            <div className="flex items-center gap-4">
-              <div className="bg-red-500 rounded-full p-2">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6 text-white"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                  />
-                </svg>
-              </div>
-              <p className="text-white">
-                Look for the lucky plane. Your win is the bet multiplied by the
-                plane coefficient.
-              </p>
-            </div>
+                  <p>Minimum Bet: {gameRulesData.minimumBet}</p>
+                  <p>Maximum Bet: {gameRulesData.maximumBet}</p>
+                  <p>Maximum Win Bet: {gameRulesData.maximumWinBet}</p>
+                </div>
+              )
+            )}
           </div>
         </div>
       </DialogContent>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dialog,
   DialogClose,
@@ -6,16 +6,40 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import Currency from "./Currency";
-
+import { getAviatorSetting } from "@/app/services/apis";
 interface GameLimitsPopupProps {
   onClose: () => void;
 }
 
+interface GameLimitsData {
+  _id: string;
+  name: string;
+  minimumBet: number;
+  maximumBet: number;
+  maximumWinBet: number;
+}
+
 const GameLimitsPopup: React.FC<GameLimitsPopupProps> = ({ onClose }) => {
+  const [gameLimitsData, setGameLimitsData] = useState<GameLimitsData | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  useEffect(() => {
+    const fetchGameLimits = async () => {
+      try {
+        const limitsData = await getAviatorSetting("Game Limits");
+        setGameLimitsData(limitsData);
+      } catch (error) {
+        console.error("Error fetching game limits:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchGameLimits();
+  }, []);
+
   return (
     <Dialog open={true} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <DialogContent className="sm:max-w-[400px] rounded-lg shadow-lg overflow-hidden bg-[#1a1a1a] border border-gray-700 p-0 top-40 left-1/2 transform -translate-x1/2">
-        {/* Header at the top without padding */}
         <div className="bg-[#333333] px-4 py-3 flex justify-between items-center border-b border-gray-700">
           <DialogTitle className="text-sm font-semibold text-gray-300">
             GAME LIMITS
@@ -38,30 +62,39 @@ const GameLimitsPopup: React.FC<GameLimitsPopupProps> = ({ onClose }) => {
           </DialogClose>
         </div>
 
-        {/* Main content without gap between rows */}
         <div className="px-4 py-3 bg-[#1a1a1a]">
-          <div className="border border-gray-600 rounded">
-            {/* Single row without gap */}
-            <div className="flex justify-between items-center border-b border-gray-600 px-3 py-2 last:border-none">
-              <div className="text-gray-300 text-sm whitespace-nowrap">Minimum bet <Currency/>:</div>
-              <div className="text-white font-semibold border border-green-500 bg-[#004d00] px-4 py-1 rounded-full text-center text-sm">
-                0.10
+          {loading ? (
+            <p className="text-gray-300">Loading game limits...</p>
+          ) : gameLimitsData ? (
+            <div className="border border-gray-600 rounded">
+              <div className="flex justify-between items-center border-b border-gray-600 px-3 py-2 last:border-none">
+                <div className="text-gray-300 text-sm whitespace-nowrap">
+                  Minimum bet <Currency />:
+                </div>
+                <div className="text-white font-semibold border border-green-500 bg-[#004d00] px-4 py-1 rounded-full text-center text-sm">
+                  {gameLimitsData.minimumBet.toFixed(2)}
+                </div>
+              </div>
+              <div className="flex justify-between items-center border-b border-gray-600 px-3 py-2 last:border-none">
+                <div className="text-gray-300 text-sm whitespace-nowrap">
+                  Maximum bet <Currency />:
+                </div>
+                <div className="text-white font-semibold border border-green-500 bg-[#004d00] px-4 py-1 rounded-full text-center text-sm">
+                  {gameLimitsData.maximumBet.toFixed(2)}
+                </div>
+              </div>
+              <div className="flex justify-between items-center px-3 py-2">
+                <div className="text-gray-300 text-sm whitespace-nowrap">
+                  Maximum win for one bet <Currency />:
+                </div>
+                <div className="text-white font-semibold border border-green-500 bg-[#004d00] px-4 py-1 rounded-full text-center text-sm">
+                  {gameLimitsData.maximumWinBet.toFixed(2)}
+                </div>
               </div>
             </div>
-            {/* Additional rows without gap */}
-            <div className="flex justify-between items-center border-b border-gray-600 px-3 py-2 last:border-none">
-              <div className="text-gray-300 text-sm whitespace-nowrap">Maximum bet <Currency/>:</div>
-              <div className="text-white font-semibold border border-green-500 bg-[#004d00] px-4 py-1 rounded-full text-center text-sm">
-                100.00
-              </div>
-            </div>
-            <div className="flex justify-between items-center px-3 py-2">
-              <div className="text-gray-300 text-sm whitespace-nowrap">Maximum win for one bet <Currency/>:</div>
-              <div className="text-white font-semibold border border-green-500 bg-[#004d00] px-4 py-1 rounded-full text-center text-sm">
-                10,000.00
-              </div>
-            </div>
-          </div>
+          ) : (
+            <p className="text-gray-300">No game limits data available.</p>
+          )}
         </div>
       </DialogContent>
     </Dialog>

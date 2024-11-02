@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dialog,
   DialogClose,
@@ -6,12 +6,39 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { getAviatorSetting } from "@/app/services/apis";
 
 interface HowToPlayPopupProps {
   onClose: () => void;
 }
 
+interface HowToPlayData {
+  _id: string;
+  name: string;
+  settingText: string;
+}
+
 const HowToPlayPopup: React.FC<HowToPlayPopupProps> = ({ onClose }) => {
+  const [howToPlayData, setHowToPlayData] = useState<HowToPlayData | null>(
+    null
+  );
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    const fetchHowToPlayData = async () => {
+      try {
+        const data = await getAviatorSetting("How To Play");
+        setHowToPlayData(data);
+      } catch (error) {
+        console.error("Error fetching 'How To Play' data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHowToPlayData();
+  }, []);
+
   return (
     <Dialog open={true} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <DialogContent className="sm:max-w-[700px] bg-[#27a409] border-gray-700">
@@ -38,71 +65,34 @@ const HowToPlayPopup: React.FC<HowToPlayPopupProps> = ({ onClose }) => {
         </DialogHeader>
 
         <div className="mt-4">
-          <div className="aspect-video w-full">
-            <iframe
-              width="100%"
-              height="100%"
-              src="https://www.youtube.com/embed/dQw4w9WgXcQ"
-              title="How to play Spribe Aviator"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            ></iframe>
-          </div>
-
-          <div className="mt-6 space-y-4">
-            <div className="flex items-center gap-4">
-              <div className="bg-red-500 rounded-full p-2">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6 text-white"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                  />
-                </svg>
+          {loading ? (
+            <p className="text-white">Loading instructions...</p>
+          ) : howToPlayData ? (
+            <div className="space-y-4">
+              {/* Embedded video */}
+              <div className="aspect-video w-full">
+                <iframe
+                  width="100%"
+                  height="100%"
+                  src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+                  title="How to play Spribe Aviator"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                ></iframe>
               </div>
-              <p className="text-white">
-                Make a bet, or even two at the same time, and wait for the round
-                to start.
-              </p>
-            </div>
 
-            <div className="flex items-center gap-4">
-              <div className="bg-red-500 rounded-full p-2">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6 text-white"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                  />
-                </svg>
-              </div>
-              <p className="text-white">
-                Look for the lucky plane. Your win is the bet multiplied by the
-                plane coefficient.
-              </p>
+              {/* Game instructions */}
+              <div
+                className="text-white mt-6 space-y-4"
+                dangerouslySetInnerHTML={{ __html: howToPlayData.settingText }}
+              />
             </div>
-          </div>
+          ) : (
+            <p className="text-white">
+              Unable to load &#39;How to Play&#39; instructions.
+            </p>
+          )}
         </div>
       </DialogContent>
     </Dialog>

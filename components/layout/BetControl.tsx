@@ -169,7 +169,6 @@ const BetControlSection: FC<BetControlSectionProps> = ({
 
   const handleBet = async () => {
     setIsBetting((prev) => !prev);
-
     if (!isBetting) {
       try {
         const userId = "11542";
@@ -177,8 +176,6 @@ const BetControlSection: FC<BetControlSectionProps> = ({
       } catch (error) {
         console.error("Failed to place bet:", error);
       }
-
-    
     }
   };
 

@@ -39,23 +39,26 @@ const topBets = [
 export default function Sidebar() {
   const [categoryTab, setCategoryTab] = useState("huge-wins");
   const [timeTab, setTimeTab] = useState("day");
-
+  const [myBets, setMyBets] = useState([]);
   const dispatch = useDispatch();
   const activeTab = useSelector((state: RootState) => state.tabs.activeTab);
 
   const handleTabChange = (tab: string) => {
     dispatch(setActiveTab(tab));
   };
-
   useEffect(() => {
     const fetchBets = async () => {
-      switch (activeTab) {
-        case "my-bets":
-          const reponse = await getBetsByUser("11542");
-          console.log(reponse);
-          break;
-        default:
-          break;
+      try {
+        switch (activeTab) {
+          case "my-bets":
+            const response = await getBetsByUser("11542");
+            setMyBets(response);
+            break;
+          default:
+            break;
+        }
+      } catch (error) {
+        console.error("Error fetching bets:", error);
       }
     };
 
@@ -192,7 +195,7 @@ export default function Sidebar() {
           </div>
           <ScrollArea className="flex-1 hide-scrollbar">
             <div className="min-h-full">
-              {bets.length > 0 ? (
+              {myBets.length > 0 ? (
                 <div className="">
                   <div className="bg-[#1b1c1d]">
                     {bets.map((bet) => {
@@ -247,7 +250,7 @@ export default function Sidebar() {
                   </div>
                 </div>
               ) : (
-                <p className="text-sm text-gray-400">No bets available</p>
+                <p className="flex justify-center text-sm text-gray-400">No bets available</p>
               )}
             </div>
           </ScrollArea>
