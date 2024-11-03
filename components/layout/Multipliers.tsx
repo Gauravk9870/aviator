@@ -43,7 +43,7 @@ export default function Component() {
               key={index}
               className="bg-[#00000080] px-1.5 py-0.5 rounded-[11px] flex mr-1 ml-0.5 relative z-10 cursor-pointer opacity-80 hover:opacity-100 text-xs"
             >
-              <MulticolorText multiplier={parseFloat(multiplier)} />
+              <MulticolorText multiplier={multiplier} />
             </div>
             ))}
           </div>
@@ -66,7 +66,7 @@ export default function Component() {
               key={index}
               className="bg-[#00000080] px-1.5 py-0.5 rounded-[11px] flex mr-1 ml-0.5 mb-1.5 relative z-10 cursor-pointer opacity-80 hover:opacity-100 text-xs"
             >
-              <MulticolorText multiplier={parseFloat(multiplier)} />
+              <MulticolorText multiplier={multiplier} />
             </div>
             ))}
           </div>

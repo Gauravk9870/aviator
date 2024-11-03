@@ -94,7 +94,7 @@ const BetSection: FC<BetSectionProps> = ({
               <Minus size={16} stroke="#ffffff80" />
             </button>
             <span className="text-lg text-white font-bold">
-              {betAmount.toFixed(2)}
+              {betAmount}
             </span>
             <button
               className={`w-4 h-4 flex items-center justify-center border border-[#ffffff80] rounded-full focus:outline-none ${buttonClass}`}
@@ -112,7 +112,7 @@ const BetSection: FC<BetSectionProps> = ({
                 onClick={() => setBetAmount(amount)}
                 disabled={isBetting}
               >
-                {amount.toFixed(2)}
+                {amount}
               </button>
             ))}
           </div>

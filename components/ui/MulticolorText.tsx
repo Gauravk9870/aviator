@@ -14,7 +14,7 @@ const MulticolorText: React.FC<MulticolorTextProps> = ({ multiplier }) => {
   const colorClass = getTextColorClass(multiplier);
   return (
     <span className={`text-xs font-normal whitespace-nowrap ${colorClass}`}>
-      {multiplier.toFixed(2)}x
+      {multiplier}x
     </span>
   );
 };
