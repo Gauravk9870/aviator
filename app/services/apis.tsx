@@ -39,13 +39,11 @@ export const placeBet = async (
     });
 
     const data = await res.json();
-
+    console.log(data, "data");
     if (data.error) {
       console.log(data.error);
     } else if (data.status && data.bet) {
       console.log("Bet placed successfully:", data.bet);
-
-      // Emit WebSocket message for "BETS" event
       if (socket && socket.readyState === WebSocket.OPEN) {
         socket.send(
           JSON.stringify({
@@ -61,8 +59,6 @@ export const placeBet = async (
           })
         );
       }
-
-    
     }
   } catch (err) {
     console.error("Error placing bet:", err);
