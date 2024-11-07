@@ -67,7 +67,12 @@ export const placeBet = async (
 };
 
 //cashOut
-export const cashOut = async (userId: string, currentMultiplier: number) => {
+export const cashOut = async (
+  userId: string,
+  currentMultiplier: string,
+  sessionId: string | null,
+  socket: WebSocket | null
+) => {
   try {
     const res = await fetch(`${config.serverUrl}/api/aviator/cash-out`, {
       method: "POST",
@@ -84,12 +89,28 @@ export const cashOut = async (userId: string, currentMultiplier: number) => {
       console.log(data.error);
     } else if (data.status) {
       console.log("Cash out successful. Payout amount:", data.payout);
+
+      if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.send(
+          JSON.stringify({
+            type: "BETS",
+            data: {
+              userId,
+              amount: data.payout,
+              sessionId: sessionId,
+              cashedOut: true,
+              cashOutMultiplier: currentMultiplier,
+            },
+          })
+        );
+      }
     }
   } catch (err) {
     console.error("Error during cash out:", err);
     console.error("An error occurred while processing the cash out.");
   }
 };
+
 //getBetsByUser
 export const getBetsByUser = async (userId: string) => {
   try {

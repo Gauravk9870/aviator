@@ -7,13 +7,19 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format } from "date-fns";
 import { Forward, ShieldCheck, MessageCircle } from "lucide-react";
 import { getTextColorClass } from "../ui/MulticolorText";
-import { bets, formatTimestamp } from "@/lib/utils";
+import { bets } from "@/lib/utils";
 import { useDispatch, useSelector } from "react-redux";
 import { setActiveTab } from "@/lib/features/tabsSlice";
 import { RootState } from "@/lib/store";
 import Currency from "./Currency";
 import { getBetsByUser } from "@/app/services/apis";
-
+interface Bet {
+  id: string;
+  amount: number;
+  cashOutMultiplier: number;
+  cashedOut: boolean;
+  createdAt: string;
+}
 const topBets = [
   {
     id: 1,
@@ -39,7 +45,7 @@ const topBets = [
 export default function Sidebar() {
   const [categoryTab, setCategoryTab] = useState("huge-wins");
   const [timeTab, setTimeTab] = useState("day");
-  const [myBets, setMyBets] = useState([]);
+  const [myBets, setMyBets] = useState<Bet[]>([]);
   const dispatch = useDispatch();
   const activeTab = useSelector((state: RootState) => state.tabs.activeTab);
 
@@ -198,13 +204,14 @@ export default function Sidebar() {
               {myBets.length > 0 ? (
                 <div className="">
                   <div className="bg-[#1b1c1d]">
-                    {bets.map((bet) => {
-                      const { time, date } = formatTimestamp(bet.timestamp);
+                    {myBets.map((bet) => {
+                                 const date = new Date(bet.createdAt).toLocaleDateString();
+                                 const time = new Date(bet.createdAt).toLocaleTimeString();
                       return (
                         <div
                           key={bet.id}
                           className={`flex justify-between rounded-lg ${
-                            bet.x > 0
+                            bet.amount > 0
                               ? "border border-[#427f00] bg-[#123405]"
                               : "bg-[#141516]"
                           } mb-0.5`}
@@ -221,19 +228,19 @@ export default function Sidebar() {
                               {bet.amount.toFixed(2)}
                             </span>
 
-                            {bet.x > 0 && (
+                            {bet.amount > 0 && (
                               <span
                                 className={`py-[2px] px-[6px] rounded-[11px] ${getTextColorClass(
-                                  Number(bet.x)
+                                  Number(bet.amount)
                                 )} bg-[#00000080] text-[12px] ml-2 font-bold`}
                               >
-                                {bet.x}x
+                                {bet.amount}x
                               </span>
                             )}
                           </div>
                           <div className=" pl-4 pr-1 py-1 whitespace-nowrap text-right text-xs text-gray-300 flex-1">
                             <span className="text-base text-[#ffffff] font-normal">
-                              {bet.cashedOut.toFixed(2)}
+                              {bet.cashedOut}
                             </span>
                           </div>
 
@@ -250,7 +257,9 @@ export default function Sidebar() {
                   </div>
                 </div>
               ) : (
-                <p className="flex justify-center text-sm text-gray-400">No bets available</p>
+                <p className="flex justify-center text-sm text-gray-400">
+                  No bets available
+                </p>
               )}
             </div>
           </ScrollArea>

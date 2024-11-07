@@ -5,8 +5,10 @@ import { Minus, Plus, X } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { placeBet } from "@/app/services/apis";
+import { placeBet, cashOut } from "@/app/services/apis";
 import { useSocket } from "@/lib/socket";
+import { useSelector } from "react-redux";
+import { RootState } from "@/lib/store";
 interface BetSectionProps {
   isBetting: boolean;
   handleBet: () => void;
@@ -182,15 +184,29 @@ const BetControlSection: FC<BetControlSectionProps> = ({
   const [autoCashOut, setAutoCashOut] = useState<boolean>(false);
   const [autoCashOutAmount, setAutoCashOutAmount] = useState<number>(2.0);
   const { socket } = useSocket();
+  const currentMultiplier = useSelector(
+    (state: RootState) => state.aviator.currentMultiplier
+  );
+  const sessionId = useSelector((state: RootState) => state.aviator.sessionId);
 
   const handleBet = async () => {
     setIsBetting((prev) => !prev);
+
+    const userId = "11542";
     if (!isBetting) {
       try {
-        const userId = "11542";
         await placeBet(userId, betAmount, socket);
       } catch (error) {
         console.error("Failed to place bet:", error);
+      }
+    } else {
+      try {
+        if (currentMultiplier !== null) {
+          await cashOut(userId, currentMultiplier, sessionId, socket);
+          console.log("Cash out attempted at multiplier:", currentMultiplier);
+        }
+      } catch (error) {
+        console.error("Failed to cash out:", error);
       }
     }
   };
