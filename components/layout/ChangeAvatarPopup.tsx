@@ -7,124 +7,132 @@ import {
   DialogContent,
   DialogTitle,
 } from "@/components/ui/dialog";
-
+import { updateAvatar } from "@/app/services/apis";
 interface ChangeAvatarPopupProps {
   onClose: () => void;
-  onAvatarSelect: (avatarUrl: string,close : () => void) => void;
+  onAvatarSelect: (avatarUrl: string, close: () => void) => void;
   selectedAvatarUrl: string | null;
+  userEmail: string;
 }
 
 // Sample avatar URLs (replace with actual paths to your avatar images)
 const avatars = [
-  './tile000.png',
-  './tile001.png',
-  './tile002.png',
-  './tile003.png',
-  './tile004.png',
-  './tile005.png',
-  './tile000.png',
-  './tile001.png',
-  './tile002.png',
-  './tile003.png',
-  './tile004.png',
-  './tile005.png',
+  "./tile000.png",
+  "./tile001.png",
+  "./tile002.png",
+  "./tile003.png",
+  "./tile004.png",
+  "./tile005.png",
+  "./tile000.png",
+  "./tile001.png",
+  "./tile002.png",
+  "./tile003.png",
+  "./tile004.png",
+  "./tile005.png",
 
-  './tile000.png',
-  './tile001.png',
-  './tile002.png',
-  './tile003.png',
-  './tile004.png',
-  './tile005.png',
+  "./tile000.png",
+  "./tile001.png",
+  "./tile002.png",
+  "./tile003.png",
+  "./tile004.png",
+  "./tile005.png",
 
-  './tile000.png',
-  './tile001.png',
-  './tile002.png',
-  './tile003.png',
-  './tile004.png',
-  './tile005.png',
+  "./tile000.png",
+  "./tile001.png",
+  "./tile002.png",
+  "./tile003.png",
+  "./tile004.png",
+  "./tile005.png",
 
-  './tile000.png',
-  './tile001.png',
-  './tile002.png',
-  './tile003.png',
-  './tile004.png',
-  './tile005.png',
+  "./tile000.png",
+  "./tile001.png",
+  "./tile002.png",
+  "./tile003.png",
+  "./tile004.png",
+  "./tile005.png",
 
-  './tile000.png',
-  './tile001.png',
-  './tile002.png',
-  './tile003.png',
-  './tile004.png',
-  './tile005.png',
+  "./tile000.png",
+  "./tile001.png",
+  "./tile002.png",
+  "./tile003.png",
+  "./tile004.png",
+  "./tile005.png",
 
-  './tile000.png',
-  './tile001.png',
-  './tile002.png',
-  './tile003.png',
-  './tile004.png',
-  './tile005.png',
+  "./tile000.png",
+  "./tile001.png",
+  "./tile002.png",
+  "./tile003.png",
+  "./tile004.png",
+  "./tile005.png",
 
-  './tile000.png',
-  './tile001.png',
-  './tile002.png',
-  './tile003.png',
-  './tile004.png',
-  './tile005.png',
+  "./tile000.png",
+  "./tile001.png",
+  "./tile002.png",
+  "./tile003.png",
+  "./tile004.png",
+  "./tile005.png",
 
-  './tile000.png',
-  './tile001.png',
-  './tile002.png',
-  './tile003.png',
-  './tile004.png',
-  './tile005.png',
- './tile000.png',
-'./tile001.png',
-'./tile002.png',
-'./tile003.png',
-'./tile004.png',
-'./tile005.png',
-'./tile000.png',
-'./tile001.png',
-'./tile002.png',
-'./tile003.png',
-'./tile004.png',
-'./tile005.png',
-'./tile000.png',
-'./tile001.png',
-'./tile002.png',
-'./tile003.png',
-'./tile004.png',
-'./tile005.png',
+  "./tile000.png",
+  "./tile001.png",
+  "./tile002.png",
+  "./tile003.png",
+  "./tile004.png",
+  "./tile005.png",
+  "./tile000.png",
+  "./tile001.png",
+  "./tile002.png",
+  "./tile003.png",
+  "./tile004.png",
+  "./tile005.png",
+  "./tile000.png",
+  "./tile001.png",
+  "./tile002.png",
+  "./tile003.png",
+  "./tile004.png",
+  "./tile005.png",
+  "./tile000.png",
+  "./tile001.png",
+  "./tile002.png",
+  "./tile003.png",
+  "./tile004.png",
+  "./tile005.png",
 
-'./tile000.png',
-'./tile001.png',
-'./tile002.png',
-'./tile003.png',
-'./tile004.png',
-'./tile005.png',
+  "./tile000.png",
+  "./tile001.png",
+  "./tile002.png",
+  "./tile003.png",
+  "./tile004.png",
+  "./tile005.png",
 
-'./tile000.png',
-'./tile001.png',
-'./tile002.png',
-
-
-
-] // Sample placeholder avatars
+  "./tile000.png",
+  "./tile001.png",
+  "./tile002.png",
+]; // Sample placeholder avatars
 
 const ChangeAvatarPopup: React.FC<ChangeAvatarPopupProps> = ({
   onClose,
   onAvatarSelect,
   selectedAvatarUrl,
+  userEmail,
 }) => {
-  const handleAvatarClick = (avatarUrl: string) => {
-    onAvatarSelect(avatarUrl,onClose);
+  const handleAvatarClick = async (avatarUrl: string) => {
+    try {
+      const response = await updateAvatar(userEmail, avatarUrl);
+      if (response && response.status) {
+        console.log("Avatar updated successfully");
+        onAvatarSelect(avatarUrl, onClose);
+      } else {
+        console.error("Failed to update avatar:", response?.message || "No message returned");
+      }
+    } catch (error) {
+      console.error("Error updating avatar:", error);
+    }
   };
-
+  
   return (
     <Dialog
       open={true}
       onOpenChange={(isOpen) => {
-
         if (!isOpen) {
           onClose();
         }

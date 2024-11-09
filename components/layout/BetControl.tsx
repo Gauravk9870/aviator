@@ -90,6 +90,7 @@ const BetSection: FC<BetSectionProps> = ({
               className={`w-4 h-4 flex items-center justify-center border border-[#ffffff80] rounded-full focus:outline-none ${buttonClass}`}
               onClick={handleDecrement}
               disabled={isBetting}
+           
             >
               <Minus size={16} stroke="#ffffff80" />
             </button>
@@ -100,6 +101,7 @@ const BetSection: FC<BetSectionProps> = ({
               className={`w-4 h-4 flex items-center justify-center border border-[#ffffff80] rounded-full focus:outline-none ${buttonClass}`}
               onClick={handleIncrement}
               disabled={isBetting}
+         
             >
               <Plus size={16} stroke="#ffffff80" />
             </button>
@@ -111,6 +113,7 @@ const BetSection: FC<BetSectionProps> = ({
                 className={`text-sm focus:outline-none rounded-3xl ${buttonClass}`}
                 onClick={() => setBetAmount(amount)}
                 disabled={isBetting}
+               
               >
                 {amount}
               </button>
@@ -147,12 +150,12 @@ const AutoSection: FC<AutoSectionProps> = ({
   setAutoCashOutAmount,
   currentMultiplier,
 }) => {
-  const [inputValue, setInputValue] = useState(autoCashOutAmount.toFixed(2))
+  const [inputValue, setInputValue] = useState(autoCashOutAmount.toFixed(2));
 
   const handleClearAutoCashOut = () => {
-    setAutoCashOutAmount(0)
-    setInputValue('0.00')
-  }
+    setAutoCashOutAmount(0);
+    setInputValue("0.00");
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value
@@ -161,9 +164,9 @@ const AutoSection: FC<AutoSectionProps> = ({
     setInputValue(value)
     const numValue = parseFloat(value)
     if (!isNaN(numValue)) {
-      setAutoCashOutAmount(numValue)
+      setAutoCashOutAmount(numValue);
     }
-  }
+  };
 
   return (
     <div className="flex flex-col gap-2 w-full">
@@ -193,7 +196,8 @@ const AutoSection: FC<AutoSectionProps> = ({
               type="text"
               value={inputValue}
               onChange={handleInputChange}
-              className="w-[5.7rem] text-white border-none text-right h-auto bg-[#000000b3] outline-none rounded-3xl pr-8 py-1 font-bold focus:border-none focus:outline-none" disabled={!autoCashOut}
+              className="w-[5.7rem] text-white border-none text-right h-auto bg-[#000000b3] outline-none rounded-3xl pr-8 py-1 font-bold focus:border-none focus:outline-none"
+              disabled={!autoCashOut}
               aria-label="Auto Cash Out Amount"
             />
             {autoCashOut && (
@@ -274,8 +278,9 @@ const BetControlSection: FC<BetControlSectionProps> = ({
 
   return (
     <div
-      className={`flex-1 px-4 lg:px-10 py-4 rounded-md bg-[#222222] ${isBetting ? "border-2 border-red-500" : "border-2 border-transparent"
-        }`}
+      className={`flex-1 px-4 lg:px-10 py-4 rounded-md bg-[#222222] ${
+        isBetting ? "border-2 border-red-500" : "border-2 border-transparent"
+      }`}
     >
       <Tabs
         defaultValue={defaultTab}
@@ -296,7 +301,6 @@ const BetControlSection: FC<BetControlSectionProps> = ({
           </TabsTrigger>
         </TabsList>
         <TabsContent value="bet" className="w-full">
-          {/* <div className={`flex-1 px-4 lg:px-10 py-4 rounded-md bg-[#222222] `}> */}
           <BetSection
             gameStatus={gameStatus}
             isBetting={isBetting}
@@ -307,7 +311,6 @@ const BetControlSection: FC<BetControlSectionProps> = ({
             setBetAmount={setBetAmount}
             currentMultiplier={currentMultiplier}
           />
-          {/* </div> */}
         </TabsContent>
         <TabsContent value="auto" className="w-full">
           <AutoSection

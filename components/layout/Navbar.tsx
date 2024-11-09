@@ -124,7 +124,7 @@ export default function Navbar() {
   const [showHomeButton, setShowHomeButton] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const dispatch = useAppDispatch();
-  const {balance} = useAppSelector((state) => state.currency);
+  const { balance } = useAppSelector((state) => state.currency);
 
   useEffect(() => {
     const savedAvatar = localStorage.getItem("selectedAvatar");
@@ -237,8 +237,10 @@ export default function Navbar() {
         </div>
         <div className="flex items-center">
           <div className="px-3">
-            <span className="text-base font-bold text-[#28a909]">{balance}</span>
-            <Currency/>
+            <span className="text-base font-bold text-[#28a909]">
+              {balance}
+            </span>
+            <Currency />
           </div>
           <div className="flex items-center justify-center border-l-2 border-[#464648]">
             <Menubar className="h-auto w-auto cursor-pointer border-none bg-transparent p-0 data-[state=open]:bg-transparent">
@@ -347,6 +349,7 @@ export default function Navbar() {
           onClose={toggleChangeAvatar}
           onAvatarSelect={handleAvatarSelect}
           selectedAvatarUrl={avatarUrl}
+          userEmail={"8376944575@gmail.com"}
         />
       )}
     </div>
