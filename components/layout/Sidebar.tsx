@@ -205,8 +205,8 @@ export default function Sidebar() {
                 <div className="">
                   <div className="bg-[#1b1c1d]">
                     {myBets.map((bet) => {
-                                 const date = new Date(bet.createdAt).toLocaleDateString();
-                                 const time = new Date(bet.createdAt).toLocaleTimeString();
+                      const date = new Date(bet.createdAt).toLocaleDateString();
+                      const time = new Date(bet.createdAt).toLocaleTimeString();
                       return (
                         <div
                           key={bet.id}
@@ -240,7 +240,7 @@ export default function Sidebar() {
                           </div>
                           <div className=" pl-4 pr-1 py-1 whitespace-nowrap text-right text-xs text-gray-300 flex-1">
                             <span className="text-base text-[#ffffff] font-normal">
-                              {bet.cashedOut}
+                              {bet.cashOutMultiplier * bet.amount}
                             </span>
                           </div>
 

@@ -29,7 +29,7 @@ export default function Home() {
         </div>
       )}
       <Avitor setIsLoading={setIsLoading} />
-      <BetControl userId="User" />
+      <BetControl userId="11542" />
     </main>
   );
 }
