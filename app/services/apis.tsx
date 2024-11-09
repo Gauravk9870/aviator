@@ -1,12 +1,12 @@
-import { config } from "./config";
+import { config } from "@/lib/config";
 //verifyToken
 export const verifyToken = async () => {
   try {
-    const res = await fetch(`${config.serverUrl}/api/user/verifyToken`, {
+    const res = await fetch(`${config.server}/api/user/verifyToken`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `${config.userToken}`,
+        Authorization: `${config.token}`,
       },
     });
     const data = await res.json();
@@ -21,109 +21,17 @@ export const verifyToken = async () => {
     throw new Error("An error occurred during token verification.");
   }
 };
-//PlaceBet
-
-export const placeBet = async (
-  userId: string,
-  amount: number,
-  socket: WebSocket | null
-) => {
-  try {
-    const res = await fetch(`${config.serverUrl}/api/aviator/place-bet`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `${config.userToken}`,
-      },
-      body: JSON.stringify({ userId, amount }),
-    });
-
-    const data = await res.json();
-    console.log(data, "data");
-    if (data.error) {
-      console.log(data.error);
-    } else if (data.status && data.bet) {
-      console.log("Bet placed successfully:", data.bet);
-      if (socket && socket.readyState === WebSocket.OPEN) {
-        socket.send(
-          JSON.stringify({
-            type: "BETS",
-            data: {
-              userId,
-              amount,
-              sessionId: data.bet.sessionId,
-              cashedOut: false,
-              cashOutMultiplier: 1,
-              ...data.bet,
-            },
-          })
-        );
-      }
-    }
-  } catch (err) {
-    console.error("Error placing bet:", err);
-    console.error("An error occurred while placing the bet.");
-  }
-};
-
-//cashOut
-export const cashOut = async (
-  userId: string,
-  currentMultiplier: string,
-  sessionId: string | null,
-  socket: WebSocket | null
-) => {
-  try {
-    const res = await fetch(`${config.serverUrl}/api/aviator/cash-out`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `${config.userToken}`,
-      },
-      body: JSON.stringify({ userId, currentMultiplier }),
-    });
-
-    const data = await res.json();
-
-    if (data.error) {
-      console.log(data.error);
-    } else if (data.status) {
-      console.log("Cash out successful. Payout amount:", data.payout);
-
-      if (socket && socket.readyState === WebSocket.OPEN) {
-        socket.send(
-          JSON.stringify({
-            type: "BETS",
-            data: {
-              userId,
-              amount: data.payout,
-              sessionId: sessionId,
-              cashedOut: true,
-              cashOutMultiplier: currentMultiplier,
-            },
-          })
-        );
-      }
-    }
-  } catch (err) {
-    console.error("Error during cash out:", err);
-    console.error("An error occurred while processing the cash out.");
-  }
-};
 
 //getBetsByUser
 export const getBetsByUser = async (userId: string) => {
   try {
-    const res = await fetch(
-      `${config.serverUrl}/api/aviator/getBets/${userId}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `${config.userToken}`,
-        },
-      }
-    );
+    const res = await fetch(`${config.server}/api/aviator/getBets/${userId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `${config.token}`,
+      },
+    });
     const data = await res.json();
     if (data.status && data.data) {
       console.log("Bets fetched successfully:", data.data);
@@ -144,11 +52,11 @@ export const getBetsByUser = async (userId: string) => {
 
 export const getCrashPoints = async () => {
   try {
-    const res = await fetch(`${config.serverUrl}/api/aviator/getCrashPoint`, {
+    const res = await fetch(`${config.server}/api/aviator/getCrashPoint`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `${config.userToken}`,
+        Authorization: `${config.token}`,
       },
     });
 
@@ -168,13 +76,14 @@ export const getCrashPoints = async () => {
 //getAviatorSetting
 export const getAviatorSetting = async (settingName: string) => {
   try {
+    console.log(config.token);
     const res = await fetch(
-      `${config.serverUrl}/api/aviator/aviatorSetting/${settingName}`,
+      `${config.server}/api/aviator/aviatorSetting/${settingName}`,
       {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `${config.userToken}`,
+          Authorization: `${config.token}`,
         },
       }
     );
@@ -196,11 +105,11 @@ export const getAviatorSetting = async (settingName: string) => {
 //getGameLogo
 export const getGameLogo = async () => {
   try {
-    const res = await fetch(`${config.serverUrl}/api/aviator/getLogo`, {
+    const res = await fetch(`${config.server}/api/aviator/getLogo`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `${config.userToken}`,
+        Authorization: `${config.token}`,
       },
     });
 
@@ -221,11 +130,11 @@ export const getGameLogo = async () => {
 //updateAvatar
 export const updateAvatar = async (userEmail: string, avatar: string) => {
   try {
-    const res = await fetch(`${config.serverUrl}/api/user/updateAvtar`, {
+    const res = await fetch(`${config.server}/api/user/updateAvtar`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `${config.userToken}`,
+        Authorization: `${config.token}`,
       },
       body: JSON.stringify({ userEmail, avatar }),
     });
