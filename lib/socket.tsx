@@ -48,6 +48,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         ws.onopen = () => {
             console.log("Connected to Aviator WebSocket")
             dispatch(setConnectionStatus(true))
+             ws.send(JSON.stringify({type : "SUBSCRIBE", gameType : "aviator"}));
         }
 
         ws.onmessage = (event) => {
