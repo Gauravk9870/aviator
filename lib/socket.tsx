@@ -48,7 +48,9 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         ws.onopen = () => {
             console.log("Connected to Aviator WebSocket")
             dispatch(setConnectionStatus(true))
-             ws.send(JSON.stringify({type : "SUBSCRIBE", gameType : "aviator"}));
+            ws.send(JSON.stringify({ type: "SUBSCRIBE", gameType: "aviator" }));
+            playWelcome()
+
         }
 
         ws.onmessage = (event) => {
@@ -58,7 +60,6 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             switch (true) {
                 case data.message === "Welcome to Aviator!":
                     console.log(data.message)
-                    playWelcome()
                     break
 
                 case data.multiplier === "Started":
