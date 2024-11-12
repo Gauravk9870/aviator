@@ -35,7 +35,7 @@ export const useSocket = (): SocketContextType => {
     }
     return context
 }
-const sendMessageToIframe = (data: { type: any; data: boolean }) => {
+const sendMessageToIframe = (data: { type: string; data: string | number}) => {
     const iframe = document.getElementById("iframeID") as HTMLIFrameElement;
     if (iframe && iframe.contentWindow) {
       iframe.contentWindow.postMessage(data, "*");
