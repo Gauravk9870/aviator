@@ -35,7 +35,12 @@ export const useSocket = (): SocketContextType => {
     }
     return context
 }
-
+const sendMessageToIframe = (data: { type: any; data: boolean }) => {
+    const iframe = document.getElementById("iframeID") as HTMLIFrameElement;
+    if (iframe && iframe.contentWindow) {
+      iframe.contentWindow.postMessage(data, "*");
+    }
+  };
 export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const dispatch = useAppDispatch()
     const [socket, setSocket] = useState<WebSocket | null>(null)
@@ -55,7 +60,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
         ws.onmessage = (event) => {
             const data = JSON.parse(event.data)
-            console.log("Received message from Aviator WebSocket:", data)
+            // console.log("Received message from Aviator WebSocket:", data)
 
             switch (true) {
                 case data.message === "Welcome to Aviator!":
@@ -65,6 +70,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                 case data.multiplier === "Started":
                     console.log("Game started")
                     dispatch(setGameStarted())
+                    sendMessageToIframe({ type: "Start", data: data.multiplier });
                     playStarted()
                     if (pendingBet) {
                         dispatch(placeBet({ ...pendingBet, socket: ws }))
@@ -85,10 +91,13 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                 case data.multiplier === "Crashed":
                     dispatch(setGameCrashed(data.finalMultiplier))
                     playCrashed()
+                    sendMessageToIframe({ type: "Crashed", data: data.multiplier });
                     break
 
                 case typeof data.multiplier === 'string' && !isNaN(parseFloat(data.multiplier)):
                     dispatch(setCurrentMultiplier(parseFloat(data.multiplier)))
+                    sendMessageToIframe({ type: "multiplier", data: data.multiplier });
+                    
                     break
 
                 case data.type === "BETS":

@@ -147,12 +147,7 @@ export default function Navbar() {
   const toggleGameLimits = () => setShowGameLimits((prev) => !prev);
   const toggleChangeAvatar = () => setShowChangeAvatar((prev) => !prev);
 
-  const sendMessageToIframe = (data: { type: string; enabled: boolean }) => {
-    const iframe = document.getElementById("iframeID") as HTMLIFrameElement;
-    if (iframe && iframe.contentWindow) {
-      iframe.contentWindow.postMessage(data, "*");
-    }
-  };
+ 
 
   const handleAvatarSelect = (url: string) => {
     setAvatarUrl(url);
@@ -173,7 +168,6 @@ export default function Navbar() {
       state: soundEnabled,
       setState: (checked: boolean) => {
         setSoundEnabled(checked);
-        sendMessageToIframe({ type: "sound-toggle", enabled: checked });
       },
     },
     {
@@ -183,7 +177,6 @@ export default function Navbar() {
       state: musicEnabled,
       setState: (checked: boolean) => {
         setMusicEnabled(checked);
-        sendMessageToIframe({ type: "bgMusic-toggle", enabled: checked });
       },
       isLastToggle: true,
     },
