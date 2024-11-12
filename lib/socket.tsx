@@ -1,94 +1,108 @@
-"use client";
+'use client'
 
-import { createContext, useContext, useEffect, useState } from "react";
-import { config } from "./config";
-import { useAppDispatch } from "./hooks";
-import { placeBet, resetGame, setConnectionStatus, setCurrentMultiplier, setGameCrashed, setGameStarted, setSessionId, updateBet } from "./features/aviatorSlice";
-import { useAudio } from "./audioContext";
+import React, { createContext, useContext, useEffect, useState } from "react"
+import { config } from "@/lib/config"
+import { useAppDispatch } from "@/lib/hooks"
+import {
+    placeBet,
+    resetGame,
+    setConnectionStatus,
+    setCurrentMultiplier,
+    setGameCrashed,
+    setGameStarted,
+    setSessionId,
+    updateBet,
+} from "@/lib/features/aviatorSlice"
+import { useAudio } from "@/lib/audioContext"
 
-interface SocketContextType {
-    socket: WebSocket | null;
-    setPendingBet: React.Dispatch<React.SetStateAction<{ userId: string; amount: number } | null>>;
+interface PendingBet {
+    userId: string
+    amount: number
+    sectionId: string
 }
 
-const SocketContext = createContext<SocketContextType | undefined>(undefined);
+interface SocketContextType {
+    socket: WebSocket | null
+    setPendingBet: React.Dispatch<React.SetStateAction<PendingBet | null>>
+}
+
+const SocketContext = createContext<SocketContextType | undefined>(undefined)
 
 export const useSocket = (): SocketContextType => {
-    const context = useContext(SocketContext);
+    const context = useContext(SocketContext)
     if (!context) {
-        throw new Error("useSocket must be used within a SocketProvider");
+        throw new Error("useSocket must be used within a SocketProvider")
     }
-    return context;
-};
+    return context
+}
 
-export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
-    children,
-}) => {
-    const dispatch = useAppDispatch();
-    const [socket, setSocket] = useState<WebSocket | null>(null);
-    const [pendingBet, setPendingBet] = useState<{ userId: string, amount: number } | null>(null);
+export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const dispatch = useAppDispatch()
+    const [socket, setSocket] = useState<WebSocket | null>(null)
+    const [pendingBet, setPendingBet] = useState<PendingBet | null>(null)
     const { playWelcome, playStarted, playCrashed, stopAll } = useAudio()
 
     useEffect(() => {
         const ws = new WebSocket(`${config.ws}`)
 
         ws.onopen = () => {
-            console.log("Connected to Aviator WebSocket");
-            dispatch(setConnectionStatus(true));
+            console.log("Connected to Aviator WebSocket")
+            dispatch(setConnectionStatus(true))
         }
 
         ws.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            console.log("Received message from Aviator WebSocket:", data);
+            const data = JSON.parse(event.data)
+            console.log("Received message from Aviator WebSocket:", data)
 
             switch (true) {
                 case data.message === "Welcome to Aviator!":
-                    console.log(data.message);
+                    console.log(data.message)
                     playWelcome()
-                    break;
+                    break
 
                 case data.multiplier === "Started":
-                    console.log("Game started");
-                    dispatch(setGameStarted());
+                    console.log("Game started")
+                    dispatch(setGameStarted())
                     playStarted()
                     if (pendingBet) {
-                        dispatch(placeBet(pendingBet))
+                        dispatch(placeBet({ ...pendingBet, socket: ws }))
                         setPendingBet(null)
                     }
-                    break;
+                    break
 
                 case data.multiplier === "sessionId":
-                    console.log("Session ID:", data.sessionId);
-                    dispatch(setSessionId(data.sessionId));
-                    dispatch(resetGame());
+                    console.log("Session ID:", data.sessionId)
+                    dispatch(setSessionId(data.sessionId))
+                    dispatch(resetGame())
                     if (pendingBet) {
-                        dispatch(placeBet(pendingBet))
+                        dispatch(placeBet({ ...pendingBet, socket: ws }))
                         setPendingBet(null)
                     }
-                    break;
+                    break
 
                 case data.multiplier === "Crashed":
-                    dispatch(setGameCrashed(data.finalMultiplier));
+                    dispatch(setGameCrashed(data.finalMultiplier))
                     playCrashed()
-                    break;
+                    break
 
                 case typeof data.multiplier === 'string' && !isNaN(parseFloat(data.multiplier)):
-                    dispatch(setCurrentMultiplier(data.multiplier));
-                    break;
+                    dispatch(setCurrentMultiplier(parseFloat(data.multiplier)))
+                    break
 
                 case data.type === "BETS":
                     dispatch(updateBet(data.data))
                     break
+
                 default:
-                    console.log("Unhandled message type:", data);
+                    console.log("Unhandled message type:", data)
             }
-        };
+        }
 
         ws.onclose = () => {
-            console.log("Disconnected from Aviator WebSocket");
-            dispatch(setConnectionStatus(false));
+            console.log("Disconnected from Aviator WebSocket")
+            dispatch(setConnectionStatus(false))
             stopAll()
-        };
+        }
 
         setSocket(ws)
 
@@ -96,7 +110,15 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
             ws.close()
         }
     }, [dispatch, pendingBet, playWelcome, playStarted, playCrashed, stopAll])
+
+    useEffect(() => {
+        if (pendingBet && socket && socket.readyState === WebSocket.OPEN) {
+            dispatch(placeBet({ ...pendingBet, socket }))
+            setPendingBet(null)
+        }
+    }, [pendingBet, socket, dispatch])
+
     return (
         <SocketContext.Provider value={{ socket, setPendingBet }}>{children}</SocketContext.Provider>
-    );
-};
+    )
+}
