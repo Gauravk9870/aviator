@@ -89,7 +89,10 @@ export const placeBet = createAsyncThunk(
 
         return { bet, sectionId };
       } else {
+        console.log(response.data.error)
         return rejectWithValue(response.data.error);
+
+
       }
     } catch (error) {
       if (error instanceof AxiosError && error.response) {
