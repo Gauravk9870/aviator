@@ -35,7 +35,12 @@ export const useSocket = (): SocketContextType => {
     }
     return context
 }
-
+const sendMessageToIframe = (data: { type: string; data: string | number}) => {
+    const iframe = document.getElementById("iframeID") as HTMLIFrameElement;
+    if (iframe && iframe.contentWindow) {
+      iframe.contentWindow.postMessage(data, "*");
+    }
+  };
 export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const dispatch = useAppDispatch()
     const [socket, setSocket] = useState<WebSocket | null>(null)
@@ -48,21 +53,24 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         ws.onopen = () => {
             console.log("Connected to Aviator WebSocket")
             dispatch(setConnectionStatus(true))
+            ws.send(JSON.stringify({ type: "SUBSCRIBE", gameType: "aviator" }));
+            playWelcome()
+
         }
 
         ws.onmessage = (event) => {
             const data = JSON.parse(event.data)
-            console.log("Received message from Aviator WebSocket:", data)
+            // console.log("Received message from Aviator WebSocket:", data)
 
             switch (true) {
                 case data.message === "Welcome to Aviator!":
                     console.log(data.message)
-                    playWelcome()
                     break
 
                 case data.multiplier === "Started":
                     console.log("Game started")
                     dispatch(setGameStarted())
+                    sendMessageToIframe({ type: "Start", data: data.multiplier });
                     playStarted()
                     if (pendingBet) {
                         dispatch(placeBet({ ...pendingBet, socket: ws }))
@@ -83,10 +91,13 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                 case data.multiplier === "Crashed":
                     dispatch(setGameCrashed(data.finalMultiplier))
                     playCrashed()
+                    sendMessageToIframe({ type: "Crashed", data: data.multiplier });
                     break
 
                 case typeof data.multiplier === 'string' && !isNaN(parseFloat(data.multiplier)):
                     dispatch(setCurrentMultiplier(parseFloat(data.multiplier)))
+                    sendMessageToIframe({ type: "multiplier", data: data.multiplier });
+                    
                     break
 
                 case data.type === "BETS":
