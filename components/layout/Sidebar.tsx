@@ -57,7 +57,7 @@ export default function Sidebar() {
       try {
         switch (activeTab) {
           case "my-bets":
-            const response = await getBetsByUser("11542");
+            const response = await getBetsByUser("8376944575");
             setMyBets(response);
             break;
           default:
