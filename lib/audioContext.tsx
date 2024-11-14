@@ -1,4 +1,5 @@
 "use client";
+
 import React, {
   createContext,
   useContext,
@@ -77,6 +78,14 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
       welcomeRef.current.currentTime = 0;
     }
   }, [musicEnabled]); // Triggered each time `musicEnabled` changes
+
+  useEffect(() => {
+    // Stop all sound effects if `soundEnabled` is disabled
+    if (!soundEnabled) {
+      stopAudio(startedRef); // Stop game start sound
+      stopAudio(crashedRef); // Stop crash sound
+    }
+  }, [soundEnabled]); // Triggered each time `soundEnabled` changes
 
   const playAudio = async (
     audioRef: React.RefObject<HTMLAudioElement>,
