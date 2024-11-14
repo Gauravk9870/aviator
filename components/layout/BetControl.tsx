@@ -240,11 +240,12 @@ const BetControlSection: React.FC<BetControlSectionProps> = ({
       dispatch(placeBet({ userId, amount: betAmount, socket, sectionId }))
     } else if (gameStatus === "started") {
       setPendingBet({ userId, amount: betAmount, sectionId })
+      setIsBetting(true)
     }
   }
 
   const handleCashOut = () => {
-    if (gameStatus === "started" && isBetting && socket) {
+    if (isBetting && socket ) {
       dispatch(cashOut({ userId, currentMultiplier, socket, sessionId, sectionId }))
       setIsBetting(false)
     }
@@ -261,7 +262,7 @@ const BetControlSection: React.FC<BetControlSectionProps> = ({
     if (gameStatus === "waiting" && isBetting) {
       dispatch(placeBet({ userId, amount: betAmount, socket, sectionId }))
     }
-  }, [gameStatus, isBetting, dispatch, userId, betAmount, socket, sectionId])
+  }, [gameStatus])
 
   useEffect(() => {
     if (
@@ -287,11 +288,11 @@ const BetControlSection: React.FC<BetControlSectionProps> = ({
     sectionId
   ])
 
-  useEffect(() => {
-    if (gameStatus === "crashed") {
-      setIsBetting(false)
-    }
-  }, [gameStatus])
+  // useEffect(() => {
+  //   if (gameStatus === "crashed") {
+  //     setIsBetting(false)
+  //   }
+  // }, [gameStatus])
 
   return (
     <div
