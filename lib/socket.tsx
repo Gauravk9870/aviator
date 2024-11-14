@@ -49,7 +49,6 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
     useEffect(() => {
         const ws = new WebSocket(`${config.ws}`)
-
         ws.onopen = () => {
             console.log("Connected to Aviator WebSocket")
             dispatch(setConnectionStatus(true))
@@ -60,20 +59,24 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
         ws.onmessage = (event) => {
             const data = JSON.parse(event.data);
-            console.log("Received message from Aviator WebSocket:", data);
+            // console.log("Received message from Aviator WebSocket:", data);
         
             switch (data.type) {
                 case undefined:
                     if (data.message == "Welcome to Aviator!") {
                         console.log(data.message);
-                    } else if (typeof data.MULTIPLIER === 'string' && !isNaN(parseFloat(data.MULTIPLIER))) {
-                        dispatch(setCurrentMultiplier(parseFloat(data.MULTIPLIER)));
-                        sendMessageToIframe({ type: "MULTIPLIER", data: data.MULTIPLIER });
+                    
                     } else {
                         console.log("Unhandled message type:", data);
                     }
                     break;
-        
+
+                case "MULTIPLIER":
+                    if (typeof data.currentMultiplier === 'string' && !isNaN(parseFloat(data.currentMultiplier))) {
+                        dispatch(setCurrentMultiplier(parseFloat(data.currentMultiplier)));
+                        sendMessageToIframe({ type: "multiplier", data: data.currentMultiplier });
+                    }
+                break;
                 case "STARTED":
                     console.log("Game Started");
                     dispatch(setGameStarted());
@@ -96,13 +99,15 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                     break;
         
                 case "TIMES":
-                    console.log("TIMES:", data.resultShowTime);
+                    console.log("TIMES:", data);
+                    sendMessageToIframe({ type: "Times", data: data });
+
                     break;
         
                 case "CRASHED":
                     dispatch(setGameCrashed(data.finalMultiplier));
                     playCrashed();
-                    sendMessageToIframe({ type: "CRASHED", data: data.finalMultiplier });
+                    sendMessageToIframe({ type: "Crashed", data: data.finalMultiplier });
                     break;
         
                 case "BETS":
