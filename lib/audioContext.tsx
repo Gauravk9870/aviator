@@ -1,142 +1,149 @@
-'use client'
-
-import React, { createContext, useContext, useRef, useState, useEffect } from "react"
-
-declare global {
-    interface Window {
-        webkitAudioContext: typeof AudioContext
-    }
-}
+"use client";
+import React, {
+  createContext,
+  useContext,
+  useRef,
+  useState,
+  useEffect,
+} from "react";
 
 interface AudioContextType {
-    playWelcome: () => void
-    playStarted: () => void
-    playCrashed: () => void
-    stopAll: () => void
-    setVolume: (volume: number) => void
-    volume: number
+  playWelcome: () => void;
+  playStarted: () => void;
+  playCrashed: () => void;
+  stopAll: () => void;
+  setVolume: (volume: number) => void;
+  volume: number;
+  setSoundEnabled: (enabled: boolean) => void;
+  setMusicEnabled: (enabled: boolean) => void;
+  soundEnabled: boolean;
+  musicEnabled: boolean;
 }
 
-const AudioContextValue = createContext<AudioContextType | undefined>(undefined)
+const AudioContextValue = createContext<AudioContextType | undefined>(
+  undefined
+);
 
 export const useAudio = () => {
-    const context = useContext(AudioContextValue)
-    if (context === undefined) {
-        throw new Error('useAudio must be used within an AudioProvider')
-    }
-    return context
-}
+  const context = useContext(AudioContextValue);
+  if (context === undefined) {
+    throw new Error("useAudio must be used within an AudioProvider");
+  }
+  return context;
+};
 
-export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [volume, setVolume] = useState(1.0)
-    const welcomeRef = useRef<HTMLAudioElement | null>(null)
-    const startedRef = useRef<HTMLAudioElement | null>(null)
-    const crashedRef = useRef<HTMLAudioElement | null>(null)
-    const audioContextRef = useRef<AudioContext | null>(null)
-    const reducedVolume = 0.5
+export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const [volume, setVolume] = useState(1.0);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [musicEnabled, setMusicEnabled] = useState(true);
 
-    useEffect(() => {
-        const AudioContextClass = window.AudioContext || window.webkitAudioContext
-        audioContextRef.current = new AudioContextClass()
+  const welcomeRef = useRef<HTMLAudioElement | null>(null);
+  const startedRef = useRef<HTMLAudioElement | null>(null);
+  const crashedRef = useRef<HTMLAudioElement | null>(null);
 
-        welcomeRef.current = new Audio('/background.ogg')
-        startedRef.current = new Audio('/game-start.ogg')
-        crashedRef.current = new Audio('/plane-crash.ogg')
+  useEffect(() => {
+    // Initialize audio elements
+    welcomeRef.current = new Audio("/background.ogg");
+    startedRef.current = new Audio("/game-start.ogg");
+    crashedRef.current = new Audio("/plane-crash.ogg");
 
-        const connectAudioElement = (audioElement: HTMLAudioElement) => {
-            if (audioContextRef.current) {
-                const source = audioContextRef.current.createMediaElementSource(audioElement)
-                source.connect(audioContextRef.current.destination)
-            }
+    return () => {
+      [welcomeRef, startedRef, crashedRef].forEach((ref) => {
+        if (ref.current) {
+          ref.current.pause();
+          ref.current.currentTime = 0;
         }
+      });
+    };
+  }, []);
 
-        connectAudioElement(welcomeRef.current)
-        connectAudioElement(startedRef.current)
-        connectAudioElement(crashedRef.current)
+  useEffect(() => {
+    // Update volume across all audio elements when it changes
+    [welcomeRef, startedRef, crashedRef].forEach((ref) => {
+      if (ref.current) {
+        ref.current.volume = volume;
+      }
+    });
+  }, [volume]);
 
-        return () => {
-            [welcomeRef, startedRef, crashedRef].forEach(ref => {
-                if (ref.current) {
-                    ref.current.pause()
-                    ref.current.currentTime = 0
-                }
-            })
-            if (audioContextRef.current) {
-                audioContextRef.current.close()
-            }
+  useEffect(() => {
+    // Automatically play or stop background music based on `musicEnabled`
+    if (musicEnabled) {
+      playWelcome(); // Start music if enabled
+    } else if (welcomeRef.current) {
+      welcomeRef.current.pause(); // Stop music if disabled
+      welcomeRef.current.currentTime = 0;
+    }
+  }, [musicEnabled]); // Triggered each time `musicEnabled` changes
+
+  const playAudio = async (
+    audioRef: React.RefObject<HTMLAudioElement>,
+    isSound: boolean
+  ) => {
+    if ((isSound && soundEnabled) || (!isSound && musicEnabled)) {
+      if (audioRef.current) {
+        audioRef.current.currentTime = 0;
+        try {
+          await audioRef.current.play();
+        } catch (error) {
+          console.error("Error playing audio:", error);
         }
-    }, [])
-
-    useEffect(() => {
-        [welcomeRef, startedRef, crashedRef].forEach(ref => {
-            if (ref.current) {
-                ref.current.volume = volume
-            }
-        })
-    }, [volume])
-
-    const playAudio = async (audioRef: React.RefObject<HTMLAudioElement>, lowerOthers: boolean = false) => {
-        if (audioRef.current) {
-            if (lowerOthers) {
-                adjustOtherVolumes(audioRef, reducedVolume)
-            }
-            audioRef.current.currentTime = 0
-            try {
-                await audioRef.current.play()
-                audioRef.current.onended = () => restoreVolumes()
-            } catch (error) {
-                console.error("Error playing audio:", error)
-                restoreVolumes() // Restore volumes even if there's an error
-            }
-        }
+      }
     }
+  };
 
-    const stopAudio = (audioRef: React.RefObject<HTMLAudioElement>) => {
-        if (audioRef.current) {
-            audioRef.current.pause()
-            audioRef.current.currentTime = 0
-        }
-        restoreVolumes()
+  const stopAudio = (audioRef: React.RefObject<HTMLAudioElement>) => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
     }
+  };
 
-    const adjustOtherVolumes = (activeAudioRef: React.RefObject<HTMLAudioElement>, newVolume: number) => {
-        [welcomeRef, startedRef, crashedRef].forEach(ref => {
-            if (ref !== activeAudioRef && ref.current) {
-                ref.current.volume = newVolume
-            }
-        })
+  const playWelcome = () => {
+    if (musicEnabled && welcomeRef.current) {
+      playAudio(welcomeRef, false);
     }
+  };
+  const playStarted = () => {
+    if (soundEnabled) playAudio(startedRef, true);
+  };
+  const playCrashed = () => {
+    if (soundEnabled) {
+      stopAudio(startedRef);
+      playAudio(crashedRef, true);
+    }
+  };
 
-    const restoreVolumes = () => {
-        [welcomeRef, startedRef, crashedRef].forEach(ref => {
-            if (ref.current) {
-                ref.current.volume = volume
-            }
-        })
-    }
+  const setSoundEnabledWithLog = (enabled: boolean) => {
+    console.log("Sound toggled:", enabled ? "Enabled" : "Disabled");
+    setSoundEnabled(enabled);
+  };
 
-    const playWelcome = () => playAudio(welcomeRef)
-    const playStarted = () => playAudio(startedRef, true)
-    const playCrashed = () => {
-        stopAudio(startedRef)  // Stop any started audio if playing
-        playAudio(crashedRef, true)
-    }
-    const stopAll = () => {
-        [welcomeRef, startedRef, crashedRef].forEach(stopAudio)
-        restoreVolumes()
-    }
-    const updateVolume = (newVolume: number) => setVolume(Math.max(0, Math.min(1, newVolume)))
+  const setMusicEnabledWithLog = (enabled: boolean) => {
+    console.log("Music toggled:", enabled ? "Enabled" : "Disabled");
+    setMusicEnabled(enabled);
+  };
 
-    return (
-        <AudioContextValue.Provider value={{
-            playWelcome,
-            playStarted,
-            playCrashed,
-            stopAll,
-            setVolume: updateVolume,
-            volume
-        }}>
-            {children}
-        </AudioContextValue.Provider>
-    )
-}
+  return (
+    <AudioContextValue.Provider
+      value={{
+        playWelcome,
+        playStarted,
+        playCrashed,
+        stopAll: () => {
+          [welcomeRef, startedRef, crashedRef].forEach(stopAudio);
+        },
+        setVolume,
+        volume,
+        setSoundEnabled: setSoundEnabledWithLog,
+        setMusicEnabled: setMusicEnabledWithLog,
+        soundEnabled,
+        musicEnabled,
+      }}
+    >
+      {children}
+    </AudioContextValue.Provider>
+  );
+};

@@ -28,7 +28,7 @@ export default function Home() {
           <p>Loading...</p>
         </div>
       )}
-      <Avitor setIsLoading={setIsLoading} />
+      {/* <Avitor setIsLoading={setIsLoading} /> */}
       <BetControl userId="8376944575" />
     </main>
   );
