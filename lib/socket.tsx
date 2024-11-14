@@ -96,7 +96,6 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                     dispatch(resetGame());
                     if (pendingBet) {
                         dispatch(placeBet({ ...pendingBet, socket: ws }));
-                        setGameStarted()
                         setPendingBet(null);
                     }
                     break;
