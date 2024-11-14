@@ -96,7 +96,6 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                     dispatch(resetGame());
                     if (pendingBet) {
                         dispatch(placeBet({ ...pendingBet, socket: ws }));
-                        setGameStarted()
                         setPendingBet(null);
                     }
                     break;
@@ -108,7 +107,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                 case "CRASHED":
                     dispatch(setGameCrashed(data.finalMultiplier));
                     playCrashed();
-                    sendMessageToIframe({ type: "CRASHED", data: data.finalMultiplier });
+                    sendMessageToIframe({ type: "Crashed", data: data.finalMultiplier });
                     break;
         
                 case "BETS":
@@ -138,7 +137,6 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     useEffect(() => {
         if (pendingBet && socket && socket.readyState === WebSocket.OPEN) {
             dispatch(placeBet({ ...pendingBet, socket }))
-            setGameStarted()
             setPendingBet(null)
         }
     }, [pendingBet, socket, dispatch])
