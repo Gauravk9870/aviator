@@ -36,6 +36,7 @@ import {
   closeMenu,
 } from "@/lib/features/menuSlice";
 import Currency from "./Currency";
+import { useAudio } from "@/lib/audioContext";
 
 const useMenu = () => {
   const dispatch = useAppDispatch();
@@ -112,9 +113,9 @@ const useMenu = () => {
 export default function Navbar() {
   const { isOpen, toggleMenu, menuRef, triggerRef, handleCloseMenu } =
     useMenu();
+  const { soundEnabled, musicEnabled, setSoundEnabled, setMusicEnabled } =
+    useAudio();
 
-  const [soundEnabled, setSoundEnabled] = useState(true);
-  const [musicEnabled, setMusicEnabled] = useState(true);
   const [showHowToPlay, setShowHowToPlay] = useState(false);
   const [showGameRules, setShowGameRules] = useState(false);
   const [showProvablyFairSettings, setShowProvablyFairSettings] =
@@ -146,8 +147,6 @@ export default function Navbar() {
     setShowProvablyFairSettings((prev) => !prev);
   const toggleGameLimits = () => setShowGameLimits((prev) => !prev);
   const toggleChangeAvatar = () => setShowChangeAvatar((prev) => !prev);
-
- 
 
   const handleAvatarSelect = (url: string) => {
     setAvatarUrl(url);
