@@ -49,7 +49,6 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
     useEffect(() => {
         const ws = new WebSocket(`${config.ws}`)
-
         ws.onopen = () => {
             console.log("Connected to Aviator WebSocket")
             dispatch(setConnectionStatus(true))
@@ -59,55 +58,67 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         }
 
         ws.onmessage = (event) => {
-            const data = JSON.parse(event.data)
-            // console.log("Received message from Aviator WebSocket:", data)
-
-            switch (true) {
-                case data.message === "Welcome to Aviator!":
-                    console.log(data.message)
-                    break
-
-                case data.multiplier === "Started":
-                    console.log("Game started")
-                    dispatch(setGameStarted())
-                    sendMessageToIframe({ type: "Start", data: data.multiplier });
-                    playStarted()
-                    if (pendingBet) {
-                        dispatch(placeBet({ ...pendingBet, socket: ws }))
-                        setPendingBet(null)
-                    }
-                    break
-
-                case data.multiplier === "sessionId":
-                    console.log("Session ID:", data.sessionId)
-                    dispatch(setSessionId(data.sessionId))
-                    dispatch(resetGame())
-                    if (pendingBet) {
-                        dispatch(placeBet({ ...pendingBet, socket: ws }))
-                        setPendingBet(null)
-                    }
-                    break
-
-                case data.multiplier === "Crashed":
-                    dispatch(setGameCrashed(data.finalMultiplier))
-                    playCrashed()
-                    sendMessageToIframe({ type: "Crashed", data: data.multiplier });
-                    break
-
-                case typeof data.multiplier === 'string' && !isNaN(parseFloat(data.multiplier)):
-                    dispatch(setCurrentMultiplier(parseFloat(data.multiplier)))
-                    sendMessageToIframe({ type: "multiplier", data: data.multiplier });
+            const data = JSON.parse(event.data);
+            // console.log("Received message from Aviator WebSocket:", data);
+        
+            switch (data.type) {
+                case undefined:
+                    if (data.message == "Welcome to Aviator!") {
+                        console.log(data.message);
                     
-                    break
+                    } else {
+                        console.log("Unhandled message type:", data);
+                    }
+                    break;
 
-                case data.type === "BETS":
-                    dispatch(updateBet(data.data))
-                    break
+                case "MULTIPLIER":
+                    if (typeof data.currentMultiplier === 'string' && !isNaN(parseFloat(data.currentMultiplier))) {
+                        dispatch(setCurrentMultiplier(parseFloat(data.currentMultiplier)));
+                        sendMessageToIframe({ type: "multiplier", data: data.currentMultiplier });
+                    }
+                break;
+                case "STARTED":
+                    console.log("Game Started");
+                    dispatch(setGameStarted());
+                    sendMessageToIframe({ type: "Start", data: data.currentValue });
+                    playStarted();
+                    if (pendingBet) {
+                        dispatch(placeBet({ ...pendingBet, socket: ws }));
+                        setPendingBet(null);
+                    }
+                    break;
+        
+                case "SESSION_ID":
+                    console.log("Session ID:", data.sessionId);
+                    dispatch(setSessionId(data.sessionId));
+                    dispatch(resetGame());
+                    if (pendingBet) {
+                        dispatch(placeBet({ ...pendingBet, socket: ws }));
+                        setPendingBet(null);
+                    }
+                    break;
+        
+                case "TIMES":
+                    console.log("TIMES:", data);
+                    sendMessageToIframe({ type: "Times", data: data });
 
+                    break;
+        
+                case "CRASHED":
+                    dispatch(setGameCrashed(data.finalMultiplier));
+                    playCrashed();
+                    sendMessageToIframe({ type: "Crashed", data: data.finalMultiplier });
+                    break;
+        
+                case "BETS":
+                    dispatch(updateBet(data.data));
+                    break;
+        
                 default:
-                    console.log("Unhandled message type:", data)
+                    // console.log("Unhandled message type:", data);
             }
-        }
+        };
+        
 
         ws.onclose = () => {
             console.log("Disconnected from Aviator WebSocket")
