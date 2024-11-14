@@ -68,31 +68,12 @@ export const placeBet = createAsyncThunk(
           headers: { Authorization: config.token },
         }
       );
-      console.log(response, "placebet");
+      console.log(response)
       if (response.data.status) {
         const bet = response.data.bet;
-        if (socket && socket.readyState === WebSocket.OPEN) {
-          socket.send(
-            JSON.stringify({
-              type: "BETS",
-              data: {
-                userId,
-                amount,
-                sessionId: bet.sessionId,
-                cashedOut: false,
-                cashOutMultiplier: 1,
-                ...bet,
-              },
-            })
-          );
-        }
-
         return { bet, sectionId };
       } else {
-        console.log(response.data.error)
         return rejectWithValue(response.data.error);
-
-
       }
     } catch (error) {
       if (error instanceof AxiosError && error.response) {
@@ -104,7 +85,7 @@ export const placeBet = createAsyncThunk(
 );
 
 export const cashOut = createAsyncThunk(
-  "aviator/cashOut",
+  "aviator/cash-out",
   async (
     {
       userId,
@@ -129,13 +110,12 @@ export const cashOut = createAsyncThunk(
           headers: { Authorization: config.token },
         }
       );
-
       if (response.data.status) {
         const payout = response.data.payout;
         if (socket && socket.readyState === WebSocket.OPEN) {
           socket.send(
             JSON.stringify({
-              type: "BETS",
+              type: "CASHED_OUT_BETS",
               data: {
                 userId,
                 amount: payout,
