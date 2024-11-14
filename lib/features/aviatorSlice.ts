@@ -56,7 +56,7 @@ export const placeBet = createAsyncThunk(
       userId: string;
       amount: number;
       socket?: WebSocket | null;
-      sectionId: string
+      sectionId: string;
     },
     { rejectWithValue }
   ) => {
@@ -68,21 +68,25 @@ export const placeBet = createAsyncThunk(
           headers: { Authorization: config.token },
         }
       );
-      console.log(response)
+
       if (response.data.status) {
         const bet = response.data.bet;
         return { bet, sectionId };
       } else {
+        console.error("API error:", response.data.error);
         return rejectWithValue(response.data.error);
       }
     } catch (error) {
       if (error instanceof AxiosError && error.response) {
+        alert(error.response.data.error);
         return rejectWithValue(error.response.data);
       }
+      console.error("Unexpected error:", error);
       return rejectWithValue("An unexpected error occurred");
     }
   }
 );
+
 
 export const cashOut = createAsyncThunk(
   "aviator/cash-out",
@@ -92,7 +96,7 @@ export const cashOut = createAsyncThunk(
       currentMultiplier,
       socket,
       sessionId,
-      sectionId
+      sectionId,
     }: {
       userId: string;
       currentMultiplier: number;
@@ -110,8 +114,10 @@ export const cashOut = createAsyncThunk(
           headers: { Authorization: config.token },
         }
       );
+
       if (response.data.status) {
         const payout = response.data.payout;
+
         if (socket && socket.readyState === WebSocket.OPEN) {
           socket.send(
             JSON.stringify({
@@ -129,12 +135,15 @@ export const cashOut = createAsyncThunk(
 
         return { payout, sectionId };
       } else {
+        console.error("API error:", response.data.error);
         return rejectWithValue(response.data.error);
       }
     } catch (error) {
       if (error instanceof AxiosError && error.response) {
+        alert(error.response.data.error);
         return rejectWithValue(error.response.data);
       }
+      console.error("Unexpected error:", error);
       return rejectWithValue("An unexpected error occurred");
     }
   }

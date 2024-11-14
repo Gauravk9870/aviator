@@ -61,7 +61,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
         ws.onmessage = (event) => {
             const data = JSON.parse(event.data);
-            console.log("Received message from Aviator WebSocket:", data);
+            // console.log("Received message from Aviator WebSocket:", data);
         
             switch (data.type) {
                 case undefined:
@@ -76,6 +76,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                     if (typeof data.currentMultiplier === 'string' && !isNaN(parseFloat(data.currentMultiplier))) {
                         dispatch(setCurrentMultiplier(parseFloat(data.currentMultiplier)));
                         sendMessageToIframe({ type: "multiplier", data: data.currentMultiplier });
+                        resetGame()
                     }
                     break;
                 case "STARTED":
@@ -85,16 +86,17 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                     playStarted();
                     if (pendingBet) {
                         dispatch(placeBet({ ...pendingBet, socket: ws }));
+                        setGameStarted()
                         setPendingBet(null);
                     }
                     break;
         
                 case "SESSION_ID":
-                    console.log("Session ID:", data.sessionId);
                     dispatch(setSessionId(data.sessionId));
                     dispatch(resetGame());
                     if (pendingBet) {
                         dispatch(placeBet({ ...pendingBet, socket: ws }));
+                        setGameStarted()
                         setPendingBet(null);
                     }
                     break;
@@ -136,6 +138,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     useEffect(() => {
         if (pendingBet && socket && socket.readyState === WebSocket.OPEN) {
             dispatch(placeBet({ ...pendingBet, socket }))
+            setGameStarted()
             setPendingBet(null)
         }
     }, [pendingBet, socket, dispatch])
