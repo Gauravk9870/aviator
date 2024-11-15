@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/dialog";
 import Currency from "./Currency";
 import { getAviatorSetting } from "@/app/services/apis";
+import { config } from "@/lib/config";
 interface GameLimitsPopupProps {
   onClose: () => void;
 }
@@ -25,7 +26,7 @@ const GameLimitsPopup: React.FC<GameLimitsPopupProps> = ({ onClose }) => {
   useEffect(() => {
     const fetchGameLimits = async () => {
       try {
-        const limitsData = await getAviatorSetting("Game Limits");
+        const limitsData = await getAviatorSetting(`${config.gameLimits}`);
         setGameLimitsData(limitsData);
       } catch (error) {
         console.error("Error fetching game limits:", error);
@@ -33,7 +34,6 @@ const GameLimitsPopup: React.FC<GameLimitsPopupProps> = ({ onClose }) => {
         setLoading(false);
       }
     };
-
     fetchGameLimits();
   }, []);
 

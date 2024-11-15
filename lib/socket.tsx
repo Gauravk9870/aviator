@@ -93,7 +93,6 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         
                 case "SESSION_ID":
                     dispatch(setSessionId(data.sessionId));
-                    dispatch(resetGame());
                     if (pendingBet) {
                         dispatch(placeBet({ ...pendingBet, socket: ws }));
                         setPendingBet(null);

@@ -77,7 +77,7 @@ export const placeBet = createAsyncThunk(
       }
     } catch (error) {
       if (error instanceof AxiosError && error.response) {
-        alert(error.response.data.error);
+        // alert(error.response.data.error);
         return rejectWithValue(error.response.data);
       }
       console.error("Unexpected error:", error);
@@ -116,7 +116,6 @@ export const cashOut = createAsyncThunk(
 
       if (response.data.status) {
         const payout = response.data.payout;
-
         if (socket && socket.readyState === WebSocket.OPEN) {
           socket.send(
             JSON.stringify({
@@ -139,7 +138,7 @@ export const cashOut = createAsyncThunk(
       }
     } catch (error) {
       if (error instanceof AxiosError && error.response) {
-        alert(error.response.data.error);
+        // alert(error.response.data.error);
         return rejectWithValue(error.response.data);
       }
       console.error("Unexpected error:", error);

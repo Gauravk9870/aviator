@@ -6,7 +6,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { getAviatorSetting } from "@/app/services/apis";
+import { getAviatorSetting, getCrashPoints } from "@/app/services/apis";
+import { config } from "@/lib/config";
 
 interface HowToPlayPopupProps {
   onClose: () => void;
@@ -27,8 +28,9 @@ const HowToPlayPopup: React.FC<HowToPlayPopupProps> = ({ onClose }) => {
   useEffect(() => {
     const fetchHowToPlayData = async () => {
       try {
-        const data = await getAviatorSetting("How To Play");
+        const data = await getAviatorSetting(`${config.howToPlay}`);
         setHowToPlayData(data);
+        getCrashPoints()
       } catch (error) {
         console.error("Error fetching 'How To Play' data:", error);
       } finally {
