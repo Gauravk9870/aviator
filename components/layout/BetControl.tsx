@@ -6,23 +6,18 @@ import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import {
-
-  placeBet,
-  cashOut,
-
-} from "@/lib/features/aviatorSlice";
+import { placeBet, cashOut } from "@/lib/features/aviatorSlice";
 import { useSocket } from "@/lib/socket";
 
 interface BetSectionProps {
-  gameStatus: "waiting" | "started" | "crashed"
-  isBetting: boolean
-  handleBet: () => void
-  handleCashOut: () => void
-  handleCancel: () => void
-  betAmount: number
-  setBetAmount: React.Dispatch<React.SetStateAction<number>>
-  currentMultiplier: number
+  gameStatus: "waiting" | "started" | "crashed";
+  isBetting: boolean;
+  handleBet: () => void;
+  handleCashOut: () => void;
+  handleCancel: () => void;
+  betAmount: number;
+  setBetAmount: React.Dispatch<React.SetStateAction<number>>;
+  currentMultiplier: number;
 }
 
 const BetSection: React.FC<BetSectionProps> = ({
@@ -35,12 +30,13 @@ const BetSection: React.FC<BetSectionProps> = ({
   setBetAmount,
   currentMultiplier,
 }) => {
-  const handleIncrement = () => setBetAmount((prev) => prev + 1)
-  const handleDecrement = () => setBetAmount((prev) => (prev > 1 ? prev - 1 : 1))
+  const handleIncrement = () => setBetAmount((prev) => prev + 1);
+  const handleDecrement = () =>
+    setBetAmount((prev) => (prev > 1 ? prev - 1 : 1));
 
   const buttonClass = isBetting
     ? "bg-[#141516] text-[#ffffff80] cursor-not-allowed opacity-50"
-    : "bg-[#141516] text-white"
+    : "bg-[#141516] text-white";
 
   const renderButton = () => {
     if (gameStatus === "waiting" && isBetting) {
@@ -58,7 +54,7 @@ const BetSection: React.FC<BetSectionProps> = ({
             </span>
           </button>
         </>
-      )
+      );
     } else if (gameStatus === "started" && isBetting) {
       return (
         <button
@@ -69,7 +65,7 @@ const BetSection: React.FC<BetSectionProps> = ({
             Cash Out <br /> {currentMultiplier}x
           </span>
         </button>
-      )
+      );
     } else {
       return (
         <button
@@ -80,9 +76,9 @@ const BetSection: React.FC<BetSectionProps> = ({
             Bet
           </span>
         </button>
-      )
+      );
     }
-  }
+  };
 
   return (
     <div className={`flex flex-col gap-2 w-full mt-2 p-2 rounded-md`}>
@@ -122,14 +118,14 @@ const BetSection: React.FC<BetSectionProps> = ({
         <div className="flex flex-col items-center">{renderButton()}</div>
       </div>
     </div>
-  )
-}
+  );
+};
 
 interface AutoSectionProps extends BetSectionProps {
-  autoCashOut: boolean
-  setAutoCashOut: React.Dispatch<React.SetStateAction<boolean>>
-  autoCashOutAmount: number
-  setAutoCashOutAmount: React.Dispatch<React.SetStateAction<number>>
+  autoCashOut: boolean;
+  setAutoCashOut: React.Dispatch<React.SetStateAction<boolean>>;
+  autoCashOutAmount: number;
+  setAutoCashOutAmount: React.Dispatch<React.SetStateAction<number>>;
 }
 
 const AutoSection: React.FC<AutoSectionProps> = ({
@@ -146,23 +142,23 @@ const AutoSection: React.FC<AutoSectionProps> = ({
   setAutoCashOutAmount,
   currentMultiplier,
 }) => {
-  const [inputValue, setInputValue] = useState(autoCashOutAmount.toFixed(2))
+  const [inputValue, setInputValue] = useState(autoCashOutAmount.toFixed(2));
 
   const handleClearAutoCashOut = () => {
-    setAutoCashOutAmount(0)
-    setInputValue("0.00")
-  }
+    setAutoCashOutAmount(0);
+    setInputValue("0.00");
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value
-    value = value.replace(/^0+(?=\d)/, "")
-    if (value === "") value = "0"
-    setInputValue(value)
-    const numValue = parseFloat(value)
+    let value = e.target.value;
+    value = value.replace(/^0+(?=\d)/, "");
+    if (value === "") value = "0";
+    setInputValue(value);
+    const numValue = parseFloat(value);
     if (!isNaN(numValue)) {
-      setAutoCashOutAmount(numValue)
+      setAutoCashOutAmount(numValue);
     }
-  }
+  };
 
   return (
     <div className="flex flex-col gap-2 w-full">
@@ -208,62 +204,61 @@ const AutoSection: React.FC<AutoSectionProps> = ({
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
 interface BetControlSectionProps {
-  defaultTab?: string
-  userId: string
-  sectionId: string
+  defaultTab?: string;
+  userId: string;
+  sectionId: string;
 }
 
 const BetControlSection: React.FC<BetControlSectionProps> = ({
   defaultTab = "bet",
   userId,
-  sectionId
+  sectionId,
 }) => {
-  const dispatch = useAppDispatch()
-  const {
-    currentMultiplier,
-    gameStatus,
-    sessionId,
-  } = useAppSelector((state) => state.aviator)
-  const [betAmount, setBetAmount] = useState<number>(1.0)
-  const [isBetting, setIsBetting] = useState(false)
-  const [autoCashOut, setAutoCashOut] = useState(false)
-  const [autoCashOutAmount, setAutoCashOutAmount] = useState(2)
-  const { socket, setPendingBet } = useSocket()
+  const dispatch = useAppDispatch();
+  const { currentMultiplier, gameStatus, sessionId } = useAppSelector(
+    (state) => state.aviator
+  );
+  const [betAmount, setBetAmount] = useState<number>(1.0);
+  const [isBetting, setIsBetting] = useState(false);
+  const [autoCashOut, setAutoCashOut] = useState(false);
+  const [autoCashOutAmount, setAutoCashOutAmount] = useState(2);
+  const { socket, setPendingBet } = useSocket();
 
   const handleBet = () => {
     if (gameStatus === "waiting" && !isBetting) {
-      setIsBetting(true)
-      dispatch(placeBet({ userId, amount: betAmount, socket, sectionId }))
+      setIsBetting(true);
+      dispatch(placeBet({ userId, amount: betAmount, socket, sectionId }));
     } else if (gameStatus === "started") {
-      setPendingBet({ userId, amount: betAmount, sectionId })
-     
+      setPendingBet({ userId, amount: betAmount, sectionId });
     }
-  }
+  };
 
   const handleCashOut = () => {
-    if (isBetting && socket ) {
-      dispatch(cashOut({ userId, currentMultiplier, socket, sessionId, sectionId }))
-      setIsBetting(false)
+    if (isBetting && socket) {
+      dispatch(
+        cashOut({ userId, currentMultiplier, socket, sessionId, sectionId })
+      );
+      setIsBetting(false);
     }
-  }
+  };
 
   const handleCancel = () => {
     if (isBetting) {
-      setPendingBet(null)
-      setIsBetting(false)
+      setPendingBet(null);
+      setIsBetting(false);
     }
-  }
+  };
 
   useEffect(() => {
     if (gameStatus === "waiting" && isBetting) {
-      dispatch(placeBet({ userId, amount: betAmount, socket, sectionId }))
-      setIsBetting(false)
+      dispatch(placeBet({ userId, amount: betAmount, socket, sectionId }));
+      setIsBetting(false);
     }
-  }, [gameStatus])
+  }, [gameStatus]);
 
   useEffect(() => {
     if (
@@ -273,8 +268,10 @@ const BetControlSection: React.FC<BetControlSectionProps> = ({
       currentMultiplier >= autoCashOutAmount &&
       socket
     ) {
-      dispatch(cashOut({ userId, currentMultiplier, socket, sessionId, sectionId }))
-      setIsBetting(false)
+      dispatch(
+        cashOut({ userId, currentMultiplier, socket, sessionId, sectionId })
+      );
+      setIsBetting(false);
     }
   }, [
     autoCashOut,
@@ -286,8 +283,8 @@ const BetControlSection: React.FC<BetControlSectionProps> = ({
     gameStatus,
     socket,
     sessionId,
-    sectionId
-  ])
+    sectionId,
+  ]);
 
   // useEffect(() => {
   //   if (gameStatus === "crashed") {
@@ -297,8 +294,9 @@ const BetControlSection: React.FC<BetControlSectionProps> = ({
 
   return (
     <div
-      className={`flex-1 px-4 lg:px-10 py-4 rounded-md bg-[#222222] ${isBetting ? "border-2 border-red-500" : "border-2 border-transparent"
-        }`}
+      className={`flex-1 px-4 lg:px-10 py-4 rounded-md bg-[#222222] ${
+        isBetting ? "border-2 border-red-500" : "border-2 border-transparent"
+      }`}
     >
       <Tabs
         defaultValue={defaultTab}
@@ -348,8 +346,8 @@ const BetControlSection: React.FC<BetControlSectionProps> = ({
         </TabsContent>
       </Tabs>
     </div>
-  )
-}
+  );
+};
 
 interface BetControlProps {
   userId: string;
@@ -358,8 +356,16 @@ interface BetControlProps {
 const BetControl: React.FC<BetControlProps> = ({ userId }) => {
   return (
     <div className="flex flex-col lg:flex-row justify-end gap-2 pt-2 pb-2 lg:pb-0">
-      <BetControlSection defaultTab="bet" userId={userId} sectionId="section1" />
-      <BetControlSection defaultTab="bet" userId={userId} sectionId="section2" />
+      <BetControlSection
+        defaultTab="bet"
+        userId={userId}
+        sectionId="section1"
+      />
+      <BetControlSection
+        defaultTab="bet"
+        userId={userId}
+        sectionId="section2"
+      />
     </div>
   );
 };

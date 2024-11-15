@@ -1,6 +1,9 @@
 import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
 import axios, { AxiosError } from "axios";
 import { config } from "../config";
+import showCashoutNotification from "@/components/layout/Notification";
+
+
 
 interface Bet {
   userId: string
@@ -43,6 +46,9 @@ const initialState: AviatorState = {
   autoCashOutAmount: 2,
   error: null,
 };
+
+
+
 
 export const placeBet = createAsyncThunk(
   "aviator/placeBet",
@@ -253,9 +259,11 @@ const aviatorSlice = createSlice({
           (bet) => bet.userId === action.meta.arg.userId
         );
         if (betIndex !== -1) {
-          state.bets[betIndex].cashedOut = true;
-          state.bets[betIndex].cashOutMultiplier =
-            action.meta.arg.currentMultiplier;
+          const bet = state.bets[betIndex];
+          bet.cashedOut = true;
+          bet.cashOutMultiplier = action.meta.arg.currentMultiplier;
+
+          showCashoutNotification(bet.cashOutMultiplier, action.payload.payout)
         }
         state.error = null;
       })
