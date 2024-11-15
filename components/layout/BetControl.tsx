@@ -240,7 +240,7 @@ const BetControlSection: React.FC<BetControlSectionProps> = ({
       dispatch(placeBet({ userId, amount: betAmount, socket, sectionId }))
     } else if (gameStatus === "started") {
       setPendingBet({ userId, amount: betAmount, sectionId })
-      setIsBetting(true)
+     
     }
   }
 
@@ -261,6 +261,7 @@ const BetControlSection: React.FC<BetControlSectionProps> = ({
   useEffect(() => {
     if (gameStatus === "waiting" && isBetting) {
       dispatch(placeBet({ userId, amount: betAmount, socket, sectionId }))
+      setIsBetting(false)
     }
   }, [gameStatus])
 
