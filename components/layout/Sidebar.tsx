@@ -12,7 +12,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setActiveTab } from "@/lib/features/tabsSlice";
 import { RootState } from "@/lib/store";
 import Currency from "./Currency";
-import { getBetsByUser } from "@/app/services/apis";
+import { getBetsByUser, getTopBets } from "@/app/services/apis";
 interface Bet {
   id: string;
   amount: number;
@@ -43,9 +43,11 @@ const topBets = [
 ];
 
 export default function Sidebar() {
-  const [categoryTab, setCategoryTab] = useState("huge-wins");
+  const [categoryTab, setCategoryTab] = useState("hugeWins");
   const [timeTab, setTimeTab] = useState("day");
   const [myBets, setMyBets] = useState<Bet[]>([]);
+
+  // const [topBets,setTopBets]=useState[]
   const dispatch = useDispatch();
   const activeTab = useSelector((state: RootState) => state.tabs.activeTab);
 
@@ -57,9 +59,14 @@ export default function Sidebar() {
       try {
         switch (activeTab) {
           case "my-bets":
-            const response = await getBetsByUser("8376944575");
-            setMyBets(response);
+            const mybets = await getBetsByUser("8376944575");
+            setMyBets(mybets);
             break;
+            case "top":
+              const topBets = await getTopBets("multipliers","year");
+              // setTopBets(topBets);
+              console.log(topBets,'topBets',categoryTab,timeTab)
+              break;
           default:
             break;
         }
@@ -69,8 +76,7 @@ export default function Sidebar() {
     };
 
     fetchBets();
-    console.log(activeTab);
-  }, [activeTab]);
+  }, [activeTab,categoryTab,timeTab]);
 
   return (
     <div className="lg:w-96 text-white flex flex-col bg-[#1b1c1d] rounded-xl p-1 lg:m-0">
@@ -276,7 +282,7 @@ export default function Sidebar() {
             >
               <TabsList className="bg-[#1b1c1d] p-1 rounded-lg flex items-center justify-center gap-1 h-auto">
                 <TabsTrigger
-                  value="huge-wins"
+                  value="hugeWins"
                   className="text-white mx-1 data-[state=active]:bg-transparent data-[state=active]:text-white rounded-2xl text-xs data-[state=active]:border data-[state=active]:border-[#e11d48] py-1 px-1 hover:text-[#e11d48]"
                 >
                   HUGE WINS

@@ -152,7 +152,7 @@ export const updateAvatar = async (userEmail: string, avatar: string) => {
 //
 
 export const getTopBets = async function getTopBets(
-  category: "hugeWins" | "biggestWins" | "MULTIPLIERs",
+  category: "hugeWins" | "biggestWins" | "multipliers",
   filter: "today" | "month" | "year"
 ) {
   try {

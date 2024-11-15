@@ -7,6 +7,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { getAviatorSetting } from "@/app/services/apis";
+import { config } from "@/lib/config";
 interface GameRulesData {
   _id: string;
   name: string;
@@ -27,7 +28,7 @@ const GameRulesPopup: React.FC<GameRulesPopupProps> = ({ onClose }) => {
   useEffect(() => {
     const fetchGameRules = async () => {
       try {
-        const rulesData = await getAviatorSetting("Game Rules");
+        const rulesData = await getAviatorSetting(`${config.gamesRule}`);
         setGameRulesData(rulesData);
       } catch (error) {
         console.error("Error fetching game rules:", error);
