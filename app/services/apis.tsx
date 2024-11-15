@@ -152,17 +152,20 @@ export const updateAvatar = async (userEmail: string, avatar: string) => {
 //
 
 export const getTopBets = async function getTopBets(
-  category: 'hugeWins' | 'biggestWins' | 'MULTIPLIERs',
-  filter: 'today' | 'month' | 'year'
-): Promise<any[] | null> {
+  category: "hugeWins" | "biggestWins" | "MULTIPLIERs",
+  filter: "today" | "month" | "year"
+) {
   try {
-    const response = await fetch(`${config.server}/api/aviator/getTopBets/${category}/${filter}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `${config.token}`,
-      },
-    });
+    const response = await fetch(
+      `${config.server}/api/aviator/getTopBets/${category}/${filter}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `${config.token}`,
+        },
+      }
+    );
 
     if (!response.ok) {
       console.error("Failed to fetch: ", response.statusText);
@@ -170,7 +173,9 @@ export const getTopBets = async function getTopBets(
     }
 
     const resultText = await response.text();
-    const result = resultText ? JSON.parse(resultText) : { status: false, data: [], message: "Empty response" };
+    const result = resultText
+      ? JSON.parse(resultText)
+      : { status: false, data: [], message: "Empty response" };
 
     if (result.status) {
       console.log("Top Bets Fetched Successfully:", result.data);
