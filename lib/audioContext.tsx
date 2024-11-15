@@ -39,6 +39,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
   const [volume, setVolume] = useState(1.0);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [musicEnabled, setMusicEnabled] = useState(true);
+  const [isMusicPlaying, setIsMusicPlaying] = useState(false); // Track if music is playing
 
   const welcomeRef = useRef<HTMLAudioElement | null>(null);
   const startedRef = useRef<HTMLAudioElement | null>(null);
@@ -70,35 +71,23 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [volume]);
 
   useEffect(() => {
-    // Automatically play or stop background music based on `musicEnabled`
+    // Handle background music play/pause based on `musicEnabled` and `isMusicPlaying`
     if (musicEnabled) {
-      playWelcome(); // Start music if enabled
-    } else if (welcomeRef.current) {
-      welcomeRef.current.pause(); // Stop music if disabled
-      welcomeRef.current.currentTime = 0;
+      if (isMusicPlaying) {
+        welcomeRef.current?.play();
+      }
+    } else {
+      welcomeRef.current?.pause();
     }
-  }, [musicEnabled]); // Triggered each time `musicEnabled` changes
+  }, [musicEnabled, isMusicPlaying]);
 
-  useEffect(() => {
-    // Stop all sound effects if `soundEnabled` is disabled
-    if (!soundEnabled) {
-      stopAudio(startedRef); // Stop game start sound
-      stopAudio(crashedRef); // Stop crash sound
-    }
-  }, [soundEnabled]); // Triggered each time `soundEnabled` changes
-
-  const playAudio = async (
-    audioRef: React.RefObject<HTMLAudioElement>,
-    isSound: boolean
-  ) => {
-    if ((isSound && soundEnabled) || (!isSound && musicEnabled)) {
-      if (audioRef.current) {
-        audioRef.current.currentTime = 0;
-        try {
-          await audioRef.current.play();
-        } catch (error) {
-          console.error("Error playing audio:", error);
-        }
+  const playAudio = async (audioRef: React.RefObject<HTMLAudioElement>) => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = 0;
+      try {
+        await audioRef.current.play();
+      } catch (error) {
+        console.error("Error playing audio:", error);
       }
     }
   };
@@ -112,27 +101,45 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const playWelcome = () => {
     if (musicEnabled && welcomeRef.current) {
-      playAudio(welcomeRef, false);
+      setIsMusicPlaying(true);
+      playAudio(welcomeRef);
     }
   };
+
   const playStarted = () => {
-    if (soundEnabled) playAudio(startedRef, true);
+    if (soundEnabled && startedRef.current) {
+      // Ensure sound only plays if enabled
+      playAudio(startedRef);
+    }
   };
+
   const playCrashed = () => {
-    if (soundEnabled) {
-      stopAudio(startedRef);
-      playAudio(crashedRef, true);
+    if (soundEnabled && crashedRef.current) {
+      // Ensure sound only plays if enabled
+      stopAudio(startedRef); // Stop any playing sounds
+      playAudio(crashedRef);
     }
   };
 
   const setSoundEnabledWithLog = (enabled: boolean) => {
     console.log("Sound toggled:", enabled ? "Enabled" : "Disabled");
     setSoundEnabled(enabled);
+
+    if (!enabled) {
+      // Stop any active sounds if sound is disabled
+      stopAudio(startedRef);
+      stopAudio(crashedRef);
+    }
   };
 
   const setMusicEnabledWithLog = (enabled: boolean) => {
     console.log("Music toggled:", enabled ? "Enabled" : "Disabled");
     setMusicEnabled(enabled);
+    if (enabled) {
+      setIsMusicPlaying(true); // Resume playing if enabled
+    } else {
+      setIsMusicPlaying(false); // Pause the music if disabled
+    }
   };
 
   return (
@@ -142,7 +149,9 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
         playStarted,
         playCrashed,
         stopAll: () => {
+          // Ensure both sound and music stop when stopAll is called
           [welcomeRef, startedRef, crashedRef].forEach(stopAudio);
+          setIsMusicPlaying(false);
         },
         setVolume,
         volume,
