@@ -49,6 +49,8 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     // Initialize audio elements
     welcomeRef.current = new Audio("/background.ogg");
+    welcomeRef.current.loop = true; // Enable looping for background music
+
     startedRef.current = new Audio("/game-start.ogg");
     crashedRef.current = new Audio("/plane-crash.ogg");
 
