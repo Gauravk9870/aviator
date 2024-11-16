@@ -40,6 +40,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [musicEnabled, setMusicEnabled] = useState(true);
   const [isMusicPlaying, setIsMusicPlaying] = useState(false); // Track if music is playing
+  const [playingOnHide, setPlayingOnHide] = useState(false); // Track if music was playing before visibility change
 
   const welcomeRef = useRef<HTMLAudioElement | null>(null);
   const startedRef = useRef<HTMLAudioElement | null>(null);
@@ -48,6 +49,8 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     // Initialize audio elements
     welcomeRef.current = new Audio("/background.ogg");
+    welcomeRef.current.loop = true; // Enable looping for background music
+
     startedRef.current = new Audio("/game-start.ogg");
     crashedRef.current = new Audio("/plane-crash.ogg");
 
@@ -80,6 +83,27 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
       welcomeRef.current?.pause();
     }
   }, [musicEnabled, isMusicPlaying]);
+
+  useEffect(() => {
+    // Handle visibility change
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        // Pause audio and track if it was playing before hiding
+        setPlayingOnHide(!welcomeRef.current?.paused);
+        welcomeRef.current?.pause();
+      } else {
+        // Resume playing if it was playing before hiding
+        if (playingOnHide && musicEnabled) {
+          welcomeRef.current?.play();
+        }
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [playingOnHide, musicEnabled]);
 
   const playAudio = async (audioRef: React.RefObject<HTMLAudioElement>) => {
     if (audioRef.current) {
