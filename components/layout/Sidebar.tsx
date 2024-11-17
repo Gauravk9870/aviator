@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format } from "date-fns";
 import { Forward, ShieldCheck, MessageCircle } from "lucide-react";
 import { getTextColorClass } from "../ui/MulticolorText";
-import { bets } from "@/lib/utils";
+import { bets, TopBet } from "@/lib/utils";
 import { setActiveTab } from "@/lib/features/tabsSlice";
 import { RootState } from "@/lib/store";
 import Currency from "./Currency";
@@ -32,10 +32,12 @@ export default function Sidebar() {
 
   useEffect(() => {
     if (activeTab === "my-bets") {
-      dispatch(fetchBetsByUser("8376944575")); // Replace with dynamic userId if applicable
+      dispatch(fetchBetsByUser("8376944575"));
     } else if (activeTab === "top") {
       dispatch(fetchTopBets({ category: categoryTab, filter: timeTab }));
     }
+
+    console.log(topBets,'topbets')
   }, [activeTab, categoryTab, timeTab, dispatch]);
 
   return (
@@ -299,8 +301,8 @@ export default function Sidebar() {
           </div>
           <div className="flex-grow overflow-y-auto hide-scrollbar">
             <div className="py-2 min-h-full">
-              {topBets.length > 0 ? (
-                bets.map((bet) => (
+              {/* {topBets.length > 0 ? (
+                topBets.map((bet:any) => (
                   <div
                     key={bet.id}
                     className="mb-4 bg-[#101112] rounded-lg shadow-lg"
@@ -308,13 +310,13 @@ export default function Sidebar() {
                     <div className="flex items-center justify-between p-4 relative">
                       <div className="flex flex-col items-center">
                         <Avatar className="w-8 h-8">
-                          <AvatarImage src={bet.avatar} alt={bet.user} />
+                          <AvatarImage src={bet.userImage} alt={bet.userName} />
                           <AvatarFallback>
-                            {bet.user.charAt(0).toUpperCase()}
+                            {bet.userName.charAt(0).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
                         <h3 className="text-sm font-bold text-white">
-                          {bet.user}
+                          {bet.userName}
                         </h3>
                       </div>
                       <div className="grid grid-cols-3 gap-4">
@@ -322,18 +324,18 @@ export default function Sidebar() {
                           <p className="text-xs text-[#9ea0a3] text-center mb-1">
                             Bet <Currency />:{" "}
                             <span className="font-semibold text-white">
-                              {bet.amount.toFixed(2)}
+                              {bet.betAmount.toFixed(2)}
                             </span>
                           </p>
                           <p className="text-xs text-[#9ea0a3] text-center mb-1">
                             Cashed Out:{" "}
                             <span className="font-bold text-[#C017B4] bg-[#00000080] py-1 px-2 rounded-2xl">
-                              {bet.cashedOut.toFixed(2)}x
+                              {bet.cashOutPoint.toFixed(2)}x
                             </span>
                           </p>
                           <p className="text-xs text-[#9ea0a3] text-center">
                             Win <Currency />:{" "}
-                            <span className="font-semibold">Yes</span>
+                            <span className="font-semibold">{bet.winAmount}</span>
                           </p>
                         </div>
                       </div>
@@ -361,7 +363,7 @@ export default function Sidebar() {
                 ))
               ) : (
                 <p className="text-sm text-gray-400">No top bets available</p>
-              )}
+              )} */}
             </div>
           </div>
         </TabsContent>

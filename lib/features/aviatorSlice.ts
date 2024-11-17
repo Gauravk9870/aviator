@@ -25,6 +25,7 @@ interface Bet {
 }
 
 interface AviatorState {
+
   pendingBet: SetPendingBetPayload | null;
   isConnected: boolean
   sessionId: string | null
