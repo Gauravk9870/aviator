@@ -8,75 +8,35 @@ import { format } from "date-fns";
 import { Forward, ShieldCheck, MessageCircle } from "lucide-react";
 import { getTextColorClass } from "../ui/MulticolorText";
 import { bets } from "@/lib/utils";
-import { useDispatch, useSelector } from "react-redux";
 import { setActiveTab } from "@/lib/features/tabsSlice";
 import { RootState } from "@/lib/store";
 import Currency from "./Currency";
-import { getBetsByUser, getTopBets } from "@/app/services/apis";
-interface Bet {
-  id: string;
-  amount: number;
-  cashOutMultiplier: number;
-  cashedOut: boolean;
-  createdAt: string;
-}
-const topBets = [
-  {
-    id: 1,
-    user: "User1",
-    amount: 300,
-    cashedOut: 450,
-    timestamp: "2023-10-05 10:00:00",
-    x: 0,
-    avatar: "avatar1.png",
-  },
-  {
-    id: 2,
-    user: "User2",
-    amount: 500,
-    cashedOut: 232,
-    timestamp: "2023-10-06 11:30:00",
-    x: 1.34,
-    avatar: "avatar2.png",
-  },
-  // ... (other top bet objects)
-];
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { fetchBetsByUser, fetchTopBets } from "@/lib/features/aviatorSlice";
 
 export default function Sidebar() {
-  const [categoryTab, setCategoryTab] = useState("hugeWins");
-  const [timeTab, setTimeTab] = useState("day");
-  const [myBets, setMyBets] = useState<Bet[]>([]);
+  const [categoryTab, setCategoryTab] = useState<
+    "hugeWins" | "biggestWins" | "multipliers"
+  >("hugeWins");
+  const [timeTab, setTimeTab] = useState<"day" | "month" | "year">("day");
 
-  // const [topBets,setTopBets]=useState[]
-  const dispatch = useDispatch();
-  const activeTab = useSelector((state: RootState) => state.tabs.activeTab);
+  const dispatch = useAppDispatch();
+  const activeTab = useAppSelector((state) => state.tabs.activeTab);
+  const myBets = useAppSelector((state: RootState) => state.aviator.myBets);
+  const topBets = useAppSelector((state: RootState) => state.aviator.topBets);
+  const error = useAppSelector((state: RootState) => state.aviator.error);
 
   const handleTabChange = (tab: string) => {
     dispatch(setActiveTab(tab));
   };
-  useEffect(() => {
-    const fetchBets = async () => {
-      try {
-        switch (activeTab) {
-          case "my-bets":
-            const mybets = await getBetsByUser("8376944575");
-            setMyBets(mybets);
-            break;
-          case "top":
-            const topBets = await getTopBets("multipliers", "year");
-            // setTopBets(topBets);
-            console.log(topBets, "topBets", categoryTab, timeTab);
-            break;
-          default:
-            break;
-        }
-      } catch (error) {
-        console.error("Error fetching bets:", error);
-      }
-    };
 
-    fetchBets();
-  }, [activeTab, categoryTab, timeTab]);
+  useEffect(() => {
+    if (activeTab === "my-bets") {
+      dispatch(fetchBetsByUser("8376944575")); // Replace with dynamic userId if applicable
+    } else if (activeTab === "top") {
+      dispatch(fetchTopBets({ category: categoryTab, filter: timeTab }));
+    }
+  }, [activeTab, categoryTab, timeTab, dispatch]);
 
   return (
     <div className="lg:w-96 text-white flex flex-col justify-between bg-[#1b1c1d] rounded-xl p-1 lg:m-0">
@@ -180,7 +140,9 @@ export default function Sidebar() {
                 </div>
               </div>
             ) : (
-              <p className="text-sm text-gray-400">No bets available</p>
+              <p className="text-sm text-gray-400 text-center">
+                No bets available
+              </p>
             )}
           </div>
         </TabsContent>
@@ -207,6 +169,7 @@ export default function Sidebar() {
           </div>
           <ScrollArea className="flex-1 hide-scrollbar">
             <div className="min-h-full">
+              {error && <p className="text-red-500">{error}</p>}
               {myBets.length > 0 ? (
                 <div className="">
                   <div className="bg-[#1b1c1d]">
@@ -215,7 +178,7 @@ export default function Sidebar() {
                       const time = new Date(bet.createdAt).toLocaleTimeString();
                       return (
                         <div
-                          key={bet.id}
+                          key={bet._id}
                           className={`flex justify-between rounded-lg ${
                             bet.amount > 0
                               ? "border border-[#427f00] bg-[#123405]"
@@ -263,7 +226,7 @@ export default function Sidebar() {
                   </div>
                 </div>
               ) : (
-                <p className="flex justify-center text-sm text-gray-400">
+                <p className="flex justify-center text-sm text-gray-400 text-center">
                   No bets available
                 </p>
               )}
@@ -277,7 +240,11 @@ export default function Sidebar() {
           <div className="p-0">
             <Tabs
               value={categoryTab}
-              onValueChange={setCategoryTab}
+              onValueChange={(value) =>
+                setCategoryTab(
+                  value as "hugeWins" | "biggestWins" | "multipliers"
+                )
+              }
               className="w-full p-0"
             >
               <TabsList className="bg-[#1b1c1d] p-1 rounded-lg flex items-center justify-center gap-1 h-auto">
@@ -303,7 +270,9 @@ export default function Sidebar() {
             </Tabs>
             <Tabs
               value={timeTab}
-              onValueChange={setTimeTab}
+              onValueChange={(value) =>
+                setTimeTab(value as "day" | "month" | "year")
+              }
               className="w-full flex items-center justify-center mb-2"
             >
               <TabsList className="grid w-3/4 grid-cols-3 bg-[#141516] rounded-3xl p-0 h-auto">
