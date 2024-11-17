@@ -8,83 +8,43 @@ import { format } from "date-fns";
 import { Forward, ShieldCheck, MessageCircle } from "lucide-react";
 import { getTextColorClass } from "../ui/MulticolorText";
 import { bets } from "@/lib/utils";
-import { useDispatch, useSelector } from "react-redux";
 import { setActiveTab } from "@/lib/features/tabsSlice";
 import { RootState } from "@/lib/store";
 import Currency from "./Currency";
-import { getBetsByUser, getTopBets } from "@/app/services/apis";
-interface Bet {
-  id: string;
-  amount: number;
-  cashOutMultiplier: number;
-  cashedOut: boolean;
-  createdAt: string;
-}
-const topBets = [
-  {
-    id: 1,
-    user: "User1",
-    amount: 300,
-    cashedOut: 450,
-    timestamp: "2023-10-05 10:00:00",
-    x: 0,
-    avatar: "avatar1.png",
-  },
-  {
-    id: 2,
-    user: "User2",
-    amount: 500,
-    cashedOut: 232,
-    timestamp: "2023-10-06 11:30:00",
-    x: 1.34,
-    avatar: "avatar2.png",
-  },
-  // ... (other top bet objects)
-];
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { fetchBetsByUser, fetchTopBets } from "@/lib/features/aviatorSlice";
 
 export default function Sidebar() {
-  const [categoryTab, setCategoryTab] = useState("hugeWins");
-  const [timeTab, setTimeTab] = useState("day");
-  const [myBets, setMyBets] = useState<Bet[]>([]);
+  const [categoryTab, setCategoryTab] = useState<
+    "hugeWins" | "biggestWins" | "multipliers"
+  >("hugeWins");
+  const [timeTab, setTimeTab] = useState<"day" | "month" | "year">("day");
 
-  // const [topBets,setTopBets]=useState[]
-  const dispatch = useDispatch();
-  const activeTab = useSelector((state: RootState) => state.tabs.activeTab);
+  const dispatch = useAppDispatch();
+  const activeTab = useAppSelector((state) => state.tabs.activeTab);
+  const myBets = useAppSelector((state: RootState) => state.aviator.myBets);
+  const topBets = useAppSelector((state: RootState) => state.aviator.topBets);
+  const error = useAppSelector((state: RootState) => state.aviator.error);
 
   const handleTabChange = (tab: string) => {
     dispatch(setActiveTab(tab));
   };
-  useEffect(() => {
-    const fetchBets = async () => {
-      try {
-        switch (activeTab) {
-          case "my-bets":
-            const mybets = await getBetsByUser("8376944575");
-            setMyBets(mybets);
-            break;
-            case "top":
-              const topBets = await getTopBets("multipliers","year");
-              // setTopBets(topBets);
-              console.log(topBets,'topBets',categoryTab,timeTab)
-              break;
-          default:
-            break;
-        }
-      } catch (error) {
-        console.error("Error fetching bets:", error);
-      }
-    };
 
-    fetchBets();
-  }, [activeTab,categoryTab,timeTab]);
+  useEffect(() => {
+    if (activeTab === "my-bets") {
+      dispatch(fetchBetsByUser("8376944575")); // Replace with dynamic userId if applicable
+    } else if (activeTab === "top") {
+      dispatch(fetchTopBets({ category: categoryTab, filter: timeTab }));
+    }
+  }, [activeTab, categoryTab, timeTab, dispatch]);
 
   return (
-    <div className="lg:w-96 text-white flex flex-col bg-[#1b1c1d] rounded-xl p-1 lg:m-0">
+    <div className="lg:w-96 text-white flex flex-col justify-between bg-[#1b1c1d] rounded-xl p-1 lg:m-0">
       <Tabs
         defaultValue="all-bets"
         value={activeTab}
         onValueChange={handleTabChange}
-        className="flex flex-col h-full items-center justify-center"
+        className="flex flex-col h-full sm:h-[calc(100%-37px)] items-center "
       >
         <TabsList className="grid w-3/4 grid-cols-3 bg-[#141516] rounded-3xl p-0 h-auto mt-0.2">
           <TabsTrigger
@@ -180,7 +140,9 @@ export default function Sidebar() {
                 </div>
               </div>
             ) : (
-              <p className="text-sm text-gray-400">No bets available</p>
+              <p className="text-sm text-gray-400 text-center">
+                No bets available
+              </p>
             )}
           </div>
         </TabsContent>
@@ -207,6 +169,7 @@ export default function Sidebar() {
           </div>
           <ScrollArea className="flex-1 hide-scrollbar">
             <div className="min-h-full">
+              {error && <p className="text-red-500">{error}</p>}
               {myBets.length > 0 ? (
                 <div className="">
                   <div className="bg-[#1b1c1d]">
@@ -215,7 +178,7 @@ export default function Sidebar() {
                       const time = new Date(bet.createdAt).toLocaleTimeString();
                       return (
                         <div
-                          key={bet.id}
+                          key={bet._id}
                           className={`flex justify-between rounded-lg ${
                             bet.amount > 0
                               ? "border border-[#427f00] bg-[#123405]"
@@ -263,7 +226,7 @@ export default function Sidebar() {
                   </div>
                 </div>
               ) : (
-                <p className="flex justify-center text-sm text-gray-400">
+                <p className="flex justify-center text-sm text-gray-400 text-center">
                   No bets available
                 </p>
               )}
@@ -277,7 +240,11 @@ export default function Sidebar() {
           <div className="p-0">
             <Tabs
               value={categoryTab}
-              onValueChange={setCategoryTab}
+              onValueChange={(value) =>
+                setCategoryTab(
+                  value as "hugeWins" | "biggestWins" | "multipliers"
+                )
+              }
               className="w-full p-0"
             >
               <TabsList className="bg-[#1b1c1d] p-1 rounded-lg flex items-center justify-center gap-1 h-auto">
@@ -303,7 +270,9 @@ export default function Sidebar() {
             </Tabs>
             <Tabs
               value={timeTab}
-              onValueChange={setTimeTab}
+              onValueChange={(value) =>
+                setTimeTab(value as "day" | "month" | "year")
+              }
               className="w-full flex items-center justify-center mb-2"
             >
               <TabsList className="grid w-3/4 grid-cols-3 bg-[#141516] rounded-3xl p-0 h-auto">
@@ -396,35 +365,34 @@ export default function Sidebar() {
             </div>
           </div>
         </TabsContent>
-
-        <div className="flex justify-between items-center text-gray-300 text-xs mt-2 p-2 border-t border-gray-700 bg-black w-full">
-          <span className="flex items-center gap-1">
-            This game is
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="text-green-500 mx-1"
-            >
-              <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path>
-              <path d="m9 12 2 2 4-4"></path>
-            </svg>
-            <span style={{ color: "#afb2be", marginRight: "8px" }}>
-              Provably Fair
-            </span>
-          </span>
-          <span className="flex items-center gap-1">
-            Powered by
-            <img src="./logo.png" alt="Logo" className="w-5 h-5" />
-          </span>
-        </div>
       </Tabs>
+      <div className="flex justify-between items-center text-gray-300 text-xs mt-2 p-2 border-t border-gray-700 bg-black w-full">
+        <span className="flex items-center gap-1">
+          This game is
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="text-green-500 mx-1"
+          >
+            <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path>
+            <path d="m9 12 2 2 4-4"></path>
+          </svg>
+          <span style={{ color: "#afb2be", marginRight: "8px" }}>
+            Provably Fair
+          </span>
+        </span>
+        <span className="flex items-center gap-1">
+          Powered by
+          <img src="./logo.png" alt="Logo" className="w-5 h-5" />
+        </span>
+      </div>
     </div>
   );
 }

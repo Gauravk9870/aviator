@@ -228,5 +228,6 @@ export const bets: Bet[] = [
     cashedOut: 108,
     timestamp: "2024-10-25T14:44:10Z",
   },
+
   // Continue similarly for the remaining 30 entries
 ];
