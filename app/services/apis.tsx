@@ -50,29 +50,29 @@ export const getBetsByUser = async (userId: string) => {
 
 //getCrashPoints
 
-export const getCrashPoints = async () => {
-  try {
-    const res = await fetch(`${config.server}/api/aviator/getCrashPoint`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `${config.token}`,
-      },
-    });
+// export const getCrashPoints = async () => {
+//   try {
+//     const res = await fetch(`${config.server}/api/aviator/getCrashPoint`, {
+//       method: "GET",
+//       headers: {
+//         "Content-Type": "application/json",
+//         Authorization: `${config.token}`,
+//       },
+//     });
 
-    const data = await res.json();
-    if (!data.status) {
-      console.log("Error fetching crash points:", data.message);
-      return null;
-    }
+//     const data = await res.json();
+//     if (!data.status) {
+//       console.log("Error fetching crash points:", data.message);
+//       return null;
+//     }
 
-    console.log("Crash Points:", data.data);
-    return data.data;
-  } catch (err) {
-    console.error("Error fetching crash points:", err);
-    throw new Error("An error occurred while fetching crash points.");
-  }
-};
+//     console.log("Crash Points:", data.data);
+//     return data.data;
+//   } catch (err) {
+//     console.error("Error fetching crash points:", err);
+//     throw new Error("An error occurred while fetching crash points.");
+//   }
+// };
 //getAviatorSetting
 export const getAviatorSetting = async (settingName: string) => {
   try {

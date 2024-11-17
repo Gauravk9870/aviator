@@ -177,6 +177,30 @@ export const fetchUserBets = createAsyncThunk(
   }
 );
 
+export const fetchCrashPoints = createAsyncThunk(
+  "aviator/fetchCrashPoints",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`${config.server}/api/aviator/getCrashPoint`, {
+        headers: { Authorization: config.token },
+      });
+
+      if (response.data.status) {
+        return response.data.data;
+      } else {
+        console.error("Error fetching crash points:", response.data.message);
+        return rejectWithValue(response.data.message);
+      }
+    } catch (error) {
+      if (error instanceof AxiosError && error.response) {
+        return rejectWithValue(error.response.data);
+      }
+      console.error("Error fetching crash points:", error);
+      return rejectWithValue("An error occurred while fetching crash points.");
+    }
+  }
+);
+
 const aviatorSlice = createSlice({
   name: "aviator",
   initialState,
@@ -279,6 +303,17 @@ const aviatorSlice = createSlice({
       })
       .addCase(fetchUserBets.rejected, (state, action) => {
         state.error = action.payload as string;
+      })
+      .addCase(fetchCrashPoints.pending, (state) => {
+        state.error = null;
+      })
+      .addCase(fetchCrashPoints.fulfilled, (state, action) => {
+        state.multiplierHistory = action.payload; // Update as needed
+        state.error = null;
+      })
+      .addCase(fetchCrashPoints.rejected, (state, action) => {
+        state.error =
+          (action.payload as string) || "An error occurred while fetching crash points.";
       });
   },
 });
