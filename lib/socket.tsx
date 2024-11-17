@@ -4,8 +4,9 @@ import React, { createContext, useContext, useEffect, useState } from "react"
 import { config } from "@/lib/config"
 import { useAppDispatch } from "@/lib/hooks"
 import {
+    clearPendingBet,
     placeBet,
-    resetGame,
+    setBetId,
     setConnectionStatus,
     setCurrentMultiplier,
     setGameCrashed,
@@ -16,15 +17,10 @@ import {
 } from "@/lib/features/aviatorSlice"
 import { useAudio } from "@/lib/audioContext"
 
-interface PendingBet {
-    userId: string
-    amount: number
-    sectionId: string
-}
 
 interface SocketContextType {
     socket: WebSocket | null
-    setPendingBet: React.Dispatch<React.SetStateAction<PendingBet | null>>
+   
 }
 
 const SocketContext = createContext<SocketContextType | undefined>(undefined)
@@ -45,72 +41,57 @@ const sendMessageToIframe = (data: { type: string; data: string | number}) => {
 export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const dispatch = useAppDispatch()
     const [socket, setSocket] = useState<WebSocket | null>(null)
-    const [pendingBet, setPendingBet] = useState<PendingBet | null>(null)
     const { playWelcome, playStarted, playCrashed, stopAll } = useAudio()
 
     useEffect(() => {
         const ws = new WebSocket(`${config.ws}`)
-
         ws.onopen = () => {
             console.log("Connected to Aviator WebSocket")
             dispatch(setConnectionStatus(true))
             ws.send(JSON.stringify({ type: "SUBSCRIBE", gameType: "aviator" }));
             playWelcome()
-
         }
 
         ws.onmessage = (event) => {
             const data = JSON.parse(event.data);
-            // console.log("Received message from Aviator WebSocket:", data);
-        
+            console.log("Received message from Aviator WebSocket:", data);
             switch (data.type) {
-                case undefined:
+                case undefined:        
                     if (data.message == "Welcome to Aviator!") {
                         console.log(data.message);
                     }  else {
-                        // console.log("Unhandled message type:", data);
+                        console.log("Unhandled message type:", data);
                     }
                     break;
-        
-                    case "MULTIPLIER":
-                    if (typeof data.currentMultiplier === 'string' && !isNaN(parseFloat(data.currentMultiplier))) {
-                        dispatch(setCurrentMultiplier(parseFloat(data.currentMultiplier)));
-                        sendMessageToIframe({ type: "multiplier", data: data.currentMultiplier });
-                        resetGame()
-                    }
-                    break;
+                    case "SESSION_ID":
+                        dispatch(setSessionId(data.sessionId));
+                        dispatch(setGameStarted());
+                      
+                        break;
                 case "STARTED":
-                    console.log("Game Started");
-                    dispatch(setGameStarted());
                     sendMessageToIframe({ type: "Start", data: data.currentValue });
                     playStarted();
-                    if (pendingBet) {
-                        dispatch(placeBet({ ...pendingBet, socket: ws }));
-                        setGameStarted()
-                        setPendingBet(null);
-                    }
                     break;
-        
-                case "SESSION_ID":
-                    dispatch(setSessionId(data.sessionId));
-                    if (pendingBet) {
-                        dispatch(placeBet({ ...pendingBet, socket: ws }));
-                        setPendingBet(null);
-                    }
-                    break;
-        
+                    case "MULTIPLIER":
+                        if (typeof data.currentMultiplier === 'string' && !isNaN(parseFloat(data.currentMultiplier))) {
+                            dispatch(setCurrentMultiplier(parseFloat(data.currentMultiplier)));
+                            sendMessageToIframe({ type: "multiplier", data: data.currentMultiplier });
+                            
+                        }
+                        break;
                 case "TIMES":
                     console.log("TIMES:", data.resultShowTime);
                     break;
-        
                 case "CRASHED":
                     dispatch(setGameCrashed(data.finalMultiplier));
+                 
                     playCrashed();
                     sendMessageToIframe({ type: "Crashed", data: data.finalMultiplier });
                     break;
-        
                 case "BETS":
+                console.log('BETS')
                     dispatch(updateBet(data.newBet));
+                    dispatch(setBetId(data.newBet._id))
                     break;
         
                 default:
@@ -133,14 +114,9 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         }
     }, [])
 
-    useEffect(() => {
-        if (pendingBet && socket && socket.readyState === WebSocket.OPEN) {
-            dispatch(placeBet({ ...pendingBet, socket }))
-            setPendingBet(null)
-        }
-    }, [pendingBet, socket, dispatch])
+   
 
     return (
-        <SocketContext.Provider value={{ socket, setPendingBet }}>{children}</SocketContext.Provider>
+        <SocketContext.Provider value={{ socket }}>{children}</SocketContext.Provider>
     )
 }

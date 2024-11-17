@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Minus, Plus, X } from "lucide-react";
+import { ImportIcon, Minus, Plus, X } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { placeBet, cashOut } from "@/lib/features/aviatorSlice";
+import { placeBet, cashOut ,setPendingBet,clearPendingBet} from "@/lib/features/aviatorSlice";
 import { useSocket } from "@/lib/socket";
 
 interface BetSectionProps {
@@ -219,46 +219,82 @@ const BetControlSection: React.FC<BetControlSectionProps> = ({
   sectionId,
 }) => {
   const dispatch = useAppDispatch();
-  const { currentMultiplier, gameStatus, sessionId } = useAppSelector(
+  const { currentMultiplier, gameStatus, sessionId, bet_id, pendingBet } = useAppSelector(
     (state) => state.aviator
   );
   const [betAmount, setBetAmount] = useState<number>(1.0);
   const [isBetting, setIsBetting] = useState(false);
   const [autoCashOut, setAutoCashOut] = useState(false);
   const [autoCashOutAmount, setAutoCashOutAmount] = useState(2);
-  const { socket, setPendingBet } = useSocket();
+  const { socket } = useSocket();
 
   const handleBet = () => {
+    console.log('clickede')
+    console.log(gameStatus)
     if (gameStatus === "waiting" && !isBetting) {
-      setIsBetting(true);
+      dispatch(setPendingBet({ userId, amount: betAmount, sectionId }));
+      setIsBetting(true)
+      console.log("Bet is pending until the game starts.");
+    } else if (gameStatus === "started" && !isBetting && !pendingBet) {
       dispatch(placeBet({ userId, amount: betAmount, socket, sectionId }));
-    } else if (gameStatus === "started") {
-      setPendingBet({ userId, amount: betAmount, sectionId });
+      setIsBetting(true)
     }
   };
 
   const handleCashOut = () => {
     if (isBetting && socket) {
-      dispatch(
-        cashOut({ userId, currentMultiplier, socket, sessionId, sectionId })
-      );
-      setIsBetting(false);
+      if (bet_id) {
+        dispatch(
+          cashOut({
+            betId: bet_id,
+            userId,
+            currentMultiplier,
+            socket,
+            sessionId,
+            sectionId,
+          })
+        );
+        setIsBetting(false);
+        clearPendingBet()
+      } else {
+        console.error("No bet_id found in Redux!");
+      }
     }
   };
 
   const handleCancel = () => {
     if (isBetting) {
-      setPendingBet(null);
       setIsBetting(false);
+      clearPendingBet()
     }
   };
 
   useEffect(() => {
-    if (gameStatus === "waiting" && isBetting) {
-      dispatch(placeBet({ userId, amount: betAmount, socket, sectionId }));
-      setIsBetting(false);
+    if (gameStatus === "started" && isBetting && pendingBet) {
+      const { userId, amount, sectionId } = pendingBet;
+      console.log("Placing pending bet:", pendingBet);
+  
+      dispatch(placeBet({ userId, amount, socket, sectionId }));
+      dispatch(clearPendingBet());
+      
     }
-  }, [gameStatus]);
+  }, [gameStatus, isBetting, pendingBet, dispatch, socket]);
+  
+  useEffect(() => {
+    if (gameStatus === "crashed" && isBetting) {
+      if (!pendingBet) {
+        console.log("Clearing state on crash with no pending bet.");
+        dispatch(clearPendingBet());
+       
+      }
+    }
+  }, [gameStatus, pendingBet, dispatch]);
+  
+  useEffect(() => {
+    console.log("isBetting:", isBetting, "gameStatus:", gameStatus);
+  }, [isBetting, gameStatus]);
+  
+  
 
   useEffect(() => {
     if (
@@ -268,10 +304,24 @@ const BetControlSection: React.FC<BetControlSectionProps> = ({
       currentMultiplier >= autoCashOutAmount &&
       socket
     ) {
-      dispatch(
-        cashOut({ userId, currentMultiplier, socket, sessionId, sectionId })
-      );
-      setIsBetting(false);
+      if (isBetting && socket) {
+        if (bet_id) {
+          dispatch(
+            cashOut({
+              betId: bet_id,
+              userId,
+              currentMultiplier,
+              socket,
+              sessionId,
+              sectionId,
+            })
+          );
+          setIsBetting(false);
+          clearPendingBet()
+        } else {
+          console.error("No bet_id found in Redux!");
+        }
+      }
     }
   }, [
     autoCashOut,
@@ -285,12 +335,10 @@ const BetControlSection: React.FC<BetControlSectionProps> = ({
     sessionId,
     sectionId,
   ]);
+  
+  
+  
 
-  // useEffect(() => {
-  //   if (gameStatus === "crashed") {
-  //     setIsBetting(false)
-  //   }
-  // }, [gameStatus])
 
   return (
     <div

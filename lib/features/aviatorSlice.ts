@@ -4,6 +4,11 @@ import { config } from "../config";
 import showCashoutNotification from "@/components/layout/Notification";
 
 
+type SetPendingBetPayload = {
+  userId: string;
+  amount: number;
+  sectionId: string;
+};
 
 interface Bet {
   userId: string
@@ -20,6 +25,7 @@ interface Bet {
 }
 
 interface AviatorState {
+  pendingBet: SetPendingBetPayload | null;
   isConnected: boolean
   sessionId: string | null
   gameStatus: "waiting" | "started" | "crashed"
@@ -31,9 +37,11 @@ interface AviatorState {
   autoCashOut: boolean
   autoCashOutAmount: number
   error: string | null
+  bet_id: string | null;
 }
 
 const initialState: AviatorState = {
+  pendingBet: null,
   isConnected: false,
   sessionId: null,
   gameStatus: "waiting",
@@ -45,6 +53,7 @@ const initialState: AviatorState = {
   autoCashOut: false,
   autoCashOutAmount: 2,
   error: null,
+  bet_id: null,
 };
 
 
@@ -56,12 +65,13 @@ export const placeBet = createAsyncThunk(
     {
       userId,
       amount,
+      socket,
       sectionId,
     }: {
       userId: string;
       amount: number;
       socket?: WebSocket | null;
-      sectionId: string;
+      sectionId: string
     },
     { rejectWithValue }
   ) => {
@@ -73,36 +83,38 @@ export const placeBet = createAsyncThunk(
           headers: { Authorization: config.token },
         }
       );
-
       if (response.data.status) {
         const bet = response.data.bet;
+
+
         return { bet, sectionId };
       } else {
-        console.error("API error:", response.data.error);
+        console.log(response.data.error)
         return rejectWithValue(response.data.error);
+
+
       }
     } catch (error) {
       if (error instanceof AxiosError && error.response) {
-        // alert(error.response.data.error);
         return rejectWithValue(error.response.data);
       }
-      console.error("Unexpected error:", error);
       return rejectWithValue("An unexpected error occurred");
     }
   }
 );
 
-
 export const cashOut = createAsyncThunk(
   "aviator/cash-out",
   async (
     {
+      betId,
       userId,
       currentMultiplier,
       socket,
       sessionId,
       sectionId,
     }: {
+      betId: string
       userId: string;
       currentMultiplier: number;
       socket: WebSocket;
@@ -112,9 +124,10 @@ export const cashOut = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
+
       const response = await axios.post(
         `${config.server}/api/aviator/cash-out`,
-        { userId, currentMultiplier },
+        { betId, userId, currentMultiplier },
         {
           headers: { Authorization: config.token },
         }
@@ -181,15 +194,24 @@ const aviatorSlice = createSlice({
   name: "aviator",
   initialState,
   reducers: {
+    setPendingBet: (state, action: PayloadAction<SetPendingBetPayload>) => {
+      state.pendingBet = action.payload;
+    },
+
+    clearPendingBet: (state) => {
+      state.pendingBet = null;
+    },
     setConnectionStatus: (state, action: PayloadAction<boolean>) => {
       state.isConnected = action.payload;
     },
     setBetPlaced: (state, action: PayloadAction<string | null>) => {
       state.isBetting = action.payload
     },
+    setWaiting: (state) => {
+      state.gameStatus = "waiting"
+    },
     setSessionId: (state, action: PayloadAction<string>) => {
       state.sessionId = action.payload;
-      state.gameStatus = "waiting";
     },
     setGameStarted: (state) => {
       state.gameStatus = "started";
@@ -206,7 +228,6 @@ const aviatorSlice = createSlice({
       state.isBetting = null;
     },
     resetGame: (state) => {
-      state.gameStatus = "waiting";
       state.currentMultiplier = 1;
       state.finalMultiplier = null;
     },
@@ -223,6 +244,9 @@ const aviatorSlice = createSlice({
         state.bets.push(action.payload as Bet);
       }
     },
+    setBetId: (state, action: PayloadAction<string | null>) => {
+      state.bet_id = action.payload;
+    },
     setAutoCashOut: (
       state,
       action: PayloadAction<{ enabled: boolean; amount: number; sectionId: string }>
@@ -234,6 +258,7 @@ const aviatorSlice = createSlice({
     },
     setError: (state, action: PayloadAction<string | null>) => {
       state.error = action.payload;
+      state.gameStatus = "waiting"
     },
   },
   extraReducers(builder) {
@@ -241,11 +266,13 @@ const aviatorSlice = createSlice({
       .addCase(placeBet.pending, (state) => {
         state.error = null;
       })
-      .addCase(placeBet.fulfilled, (state, action) => {
-        state.bets.push(action.payload.bet)
-        state.isBetting = action.payload.sectionId
-        state.error = null
-      })
+    builder.addCase(placeBet.fulfilled, (state, action) => {
+      state.bets.push(action.payload.bet);
+      state.isBetting = action.payload.sectionId;
+      state.bet_id = action.payload.bet._id;
+      state.error = null;
+    })
+
       .addCase(placeBet.rejected, (state, action) => {
         state.error = action.payload as string;
       })
@@ -261,11 +288,14 @@ const aviatorSlice = createSlice({
           const bet = state.bets[betIndex];
           bet.cashedOut = true;
           bet.cashOutMultiplier = action.meta.arg.currentMultiplier;
-
+          state.bet_id = null;
           showCashoutNotification(bet.cashOutMultiplier, action.payload.payout)
         }
         state.error = null;
       })
+    builder.addCase(resetGame, (state) => {
+      state.bet_id = null;
+    })
       .addCase(cashOut.rejected, (state, action) => {
         state.error =
           (action.payload as string) || "An error occurred during cash out";
@@ -284,8 +314,11 @@ const aviatorSlice = createSlice({
 });
 
 export const {
+  setPendingBet,
+  clearPendingBet,
   setConnectionStatus,
   setSessionId,
+  setWaiting,
   setGameStarted,
   setCurrentMultiplier,
   setGameCrashed,
@@ -295,6 +328,7 @@ export const {
   setAutoCashOut,
   setError,
   setBetPlaced,
+  setBetId
 } = aviatorSlice.actions;
 
 export default aviatorSlice.reducer;
