@@ -8,6 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { updateAvatar } from "@/app/services/apis";
+import { useAppSelector } from "@/lib/hooks";
 interface ChangeAvatarPopupProps {
   onClose: () => void;
   onAvatarSelect: (avatarUrl: string, close: () => void) => void;
@@ -115,20 +116,25 @@ const ChangeAvatarPopup: React.FC<ChangeAvatarPopupProps> = ({
   selectedAvatarUrl,
   userEmail,
 }) => {
-  const handleAvatarClick = async (avatarUrl: string) => {
+  const token = useAppSelector((state) => state.aviator.token);
+
+  const handleAvatarClick = async (avatarUrl: string, token: string) => {
     try {
-      const response = await updateAvatar(userEmail, avatarUrl);
+      const response = await updateAvatar(userEmail, avatarUrl, token);
       if (response && response.status) {
         console.log("Avatar updated successfully");
         onAvatarSelect(avatarUrl, onClose);
       } else {
-        console.error("Failed to update avatar:", response?.message || "No message returned");
+        console.error(
+          "Failed to update avatar:",
+          response?.message || "No message returned"
+        );
       }
     } catch (error) {
       console.error("Error updating avatar:", error);
     }
   };
-  
+
   return (
     <Dialog
       open={true}
@@ -163,26 +169,28 @@ const ChangeAvatarPopup: React.FC<ChangeAvatarPopupProps> = ({
         </div>
 
         {/* Responsive avatar grid with hidden scrollbar on mobile */}
+
         <div className="flex-grow grid grid-cols-5 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-9 gap-1 px-2 sm:px-10 py-4 bg-[#1b1c1d] overflow-y-auto justify-center scrollbar-hide">
-          {avatars.map((avatarUrl, index) => (
-            <div
-              key={index}
-              onClick={() => handleAvatarClick(avatarUrl)}
-              className={`flex justify-center items-center 
+          {token &&
+            avatars.map((avatarUrl, index) => (
+              <div
+                key={index}
+                onClick={() => handleAvatarClick(avatarUrl, token)}
+                className={`flex justify-center items-center 
                           w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 lg:w-18 lg:h-18 
                           rounded-full transition-transform transform hover:scale-110 cursor-pointer ${
                             selectedAvatarUrl === avatarUrl
                               ? " border-4 border-gray-600"
                               : "border-4 border-gray-600"
                           }`}
-            >
-              <img
-                src={avatarUrl}
-                alt={`Avatar ${index + 1}`}
-                className="w-full h-full object-cover rounded-full"
-              />
-            </div>
-          ))}
+              >
+                <img
+                  src={avatarUrl}
+                  alt={`Avatar ${index + 1}`}
+                  className="w-full h-full object-cover rounded-full"
+                />
+              </div>
+            ))}
         </div>
 
         {/* Footer with minimal height and centered button */}

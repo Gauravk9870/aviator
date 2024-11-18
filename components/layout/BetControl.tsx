@@ -6,7 +6,12 @@ import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { placeBet, cashOut ,setPendingBet,clearPendingBet} from "@/lib/features/aviatorSlice";
+import {
+  placeBet,
+  cashOut,
+  setPendingBet,
+  clearPendingBet,
+} from "@/lib/features/aviatorSlice";
 import { useSocket } from "@/lib/socket";
 
 interface BetSectionProps {
@@ -219,9 +224,14 @@ const BetControlSection: React.FC<BetControlSectionProps> = ({
   sectionId,
 }) => {
   const dispatch = useAppDispatch();
-  const { currentMultiplier, gameStatus, sessionId, bet_id, pendingBet } = useAppSelector(
-    (state) => state.aviator
-  );
+  const {
+    currentMultiplier,
+    gameStatus,
+    sessionId,
+    bet_id,
+    pendingBet,
+    token,
+  } = useAppSelector((state) => state.aviator);
   const [betAmount, setBetAmount] = useState<number>(1.0);
   const [isBetting, setIsBetting] = useState(false);
   const [autoCashOut, setAutoCashOut] = useState(false);
@@ -229,21 +239,23 @@ const BetControlSection: React.FC<BetControlSectionProps> = ({
   const { socket } = useSocket();
 
   const handleBet = () => {
-    console.log('clickede')
-    console.log(gameStatus)
+    console.log("clickede");
+    console.log(gameStatus);
     if (gameStatus === "waiting" && !isBetting) {
       dispatch(setPendingBet({ userId, amount: betAmount, sectionId }));
-      setIsBetting(true)
+      setIsBetting(true);
       console.log("Bet is pending until the game starts.");
-    } else if (gameStatus === "started" && !isBetting && !pendingBet) {
-      dispatch(placeBet({ userId, amount: betAmount, socket, sectionId }));
-      setIsBetting(true)
+    } else if (gameStatus === "started" && !isBetting && !pendingBet && token) {
+      dispatch(
+        placeBet({ userId, amount: betAmount, socket, sectionId, token })
+      );
+      setIsBetting(true);
     }
   };
 
   const handleCashOut = () => {
     if (isBetting && socket) {
-      if (bet_id) {
+      if (bet_id && token) {
         dispatch(
           cashOut({
             betId: bet_id,
@@ -252,10 +264,11 @@ const BetControlSection: React.FC<BetControlSectionProps> = ({
             socket,
             sessionId,
             sectionId,
+            token,
           })
         );
         setIsBetting(false);
-        clearPendingBet()
+        clearPendingBet();
       } else {
         console.error("No bet_id found in Redux!");
       }
@@ -265,36 +278,32 @@ const BetControlSection: React.FC<BetControlSectionProps> = ({
   const handleCancel = () => {
     if (isBetting) {
       setIsBetting(false);
-      clearPendingBet()
+      clearPendingBet();
     }
   };
 
   useEffect(() => {
-    if (gameStatus === "started" && isBetting && pendingBet) {
+    if (gameStatus === "started" && isBetting && pendingBet && token) {
       const { userId, amount, sectionId } = pendingBet;
       console.log("Placing pending bet:", pendingBet);
-  
-      dispatch(placeBet({ userId, amount, socket, sectionId }));
+
+      dispatch(placeBet({ userId, amount, socket, sectionId, token }));
       dispatch(clearPendingBet());
-      
     }
-  }, [gameStatus, isBetting, pendingBet, dispatch, socket]);
-  
+  }, [gameStatus, isBetting, pendingBet, dispatch, socket, token]);
+
   useEffect(() => {
     if (gameStatus === "crashed" && isBetting) {
       if (!pendingBet) {
         console.log("Clearing state on crash with no pending bet.");
         dispatch(clearPendingBet());
-       
       }
     }
-  }, [gameStatus, pendingBet, dispatch]);
-  
+  }, [gameStatus, pendingBet, dispatch, isBetting]);
+
   useEffect(() => {
     console.log("isBetting:", isBetting, "gameStatus:", gameStatus);
   }, [isBetting, gameStatus]);
-  
-  
 
   useEffect(() => {
     if (
@@ -305,7 +314,7 @@ const BetControlSection: React.FC<BetControlSectionProps> = ({
       socket
     ) {
       if (isBetting && socket) {
-        if (bet_id) {
+        if (bet_id && token) {
           dispatch(
             cashOut({
               betId: bet_id,
@@ -314,10 +323,11 @@ const BetControlSection: React.FC<BetControlSectionProps> = ({
               socket,
               sessionId,
               sectionId,
+              token,
             })
           );
           setIsBetting(false);
-          clearPendingBet()
+          clearPendingBet();
         } else {
           console.error("No bet_id found in Redux!");
         }
@@ -334,11 +344,9 @@ const BetControlSection: React.FC<BetControlSectionProps> = ({
     socket,
     sessionId,
     sectionId,
+    bet_id,
+    token,
   ]);
-  
-  
-  
-
 
   return (
     <div

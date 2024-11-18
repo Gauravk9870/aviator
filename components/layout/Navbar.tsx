@@ -38,6 +38,7 @@ import {
 import Currency from "./Currency";
 import { useAudio } from "@/lib/audioContext";
 import { fetchBalance } from "@/lib/features/currencySlice";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const useMenu = () => {
   const dispatch = useAppDispatch();
@@ -111,6 +112,7 @@ const useMenu = () => {
 
   return { isOpen, toggleMenu, menuRef, triggerRef, handleCloseMenu };
 };
+
 export default function Navbar() {
   const { isOpen, toggleMenu, menuRef, triggerRef, handleCloseMenu } =
     useMenu();
@@ -123,12 +125,26 @@ export default function Navbar() {
     useState(false);
   const [showGameLimits, setShowGameLimits] = useState(false);
   const [showChangeAvatar, setShowChangeAvatar] = useState(false);
-  const [showHomeButton, setShowHomeButton] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [returnURL, setReturnURL] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
   const dispatch = useAppDispatch();
   const { balance } = useAppSelector((state) => state.currency);
+
+  const parseReturnURL = useCallback((url: string | null) => {
+    if (!url) return null;
+    try {
+      return new URL(url).toString();
+    } catch (error) {
+      console.error("Error parsing return URL:", error);
+      return null;
+    }
+  }, []);
+
   useEffect(() => {
-    dispatch(fetchBalance("8376944575")); 
+    dispatch(fetchBalance("8376944575"));
   }, [dispatch]);
 
   useEffect(() => {
@@ -137,13 +153,10 @@ export default function Navbar() {
       setAvatarUrl(savedAvatar);
     }
 
-    const params = new URLSearchParams(window.location.search);
-    const returnUrl = params.get("return_url");
-
-    if (returnUrl) {
-      setShowHomeButton(true);
-    }
-  }, []);
+    const return_url = searchParams.get("return_url");
+    const parsedReturnURL = parseReturnURL(return_url);
+    setReturnURL(parsedReturnURL);
+  }, [searchParams, parseReturnURL]);
 
   const toggleHowToPlay = () => setShowHowToPlay((prev) => !prev);
   const toggleGameRules = () => setShowGameRules((prev) => !prev);
@@ -162,6 +175,16 @@ export default function Navbar() {
     dispatch(setActiveTab("my-bets"));
     console.log("Active tab set to 'my-bets'");
   };
+
+  const handleHomeClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      if (returnURL) {
+        router.push(returnURL);
+      }
+    },
+    [returnURL, router]
+  );
 
   const menuItems = [
     {
@@ -313,14 +336,12 @@ export default function Navbar() {
                     ))}
                     <MenubarSeparator className="m-0 h-[1px] bg-gray-700 p-0" />
 
-                    {showHomeButton && (
-                      <MenubarItem
-                        className="flex items-center justify-center bg-[#2c2d30] py-3 px-3 hover:bg-[#2c2d30] focus:bg-[#2c2d30] focus:text-white cursor-pointer"
-                        onClick={() =>
-                          (window.location.href = "https://spribe.co/games")
-                        }
-                      >
-                        <div className="flex items-center gap-1">
+                    {returnURL && (
+                      <MenubarItem className="flex items-center justify-center bg-[#2c2d30] py-3 px-3 hover:bg-[#2c2d30] focus:bg-[#2c2d30] focus:text-white cursor-pointer">
+                        <div
+                          onClick={handleHomeClick}
+                          className="flex items-center gap-1"
+                        >
                           <Home size={16} className="text-[#83878e]" />
                           <span className="text-xs text-[#9ea0a3]">Home</span>
                         </div>

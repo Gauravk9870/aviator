@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { config } from "@/lib/config";
-import { useAppDispatch } from "@/lib/hooks";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import {
   fetchCrashPoints,
   setConnectionStatus,
@@ -11,12 +11,10 @@ import {
   setGameStarted,
   setSessionId,
   updateBet,
-  setBetId
+  setBetId,
 } from "@/lib/features/aviatorSlice";
 import { useAudio } from "@/lib/audioContext";
 import { setBalance } from "./features/currencySlice";
-
-
 
 interface SocketContextType {
   socket: WebSocket | null;
@@ -43,6 +41,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
   const dispatch = useAppDispatch();
   const [socket, setSocket] = useState<WebSocket | null>(null);
   const { playWelcome, playStarted, playCrashed, stopAll } = useAudio();
+  const token = useAppSelector((state) => state.aviator.token);
 
   useEffect(() => {
     const ws = new WebSocket(`${config.ws}`);
@@ -52,14 +51,16 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
       dispatch(setConnectionStatus(true));
       ws.send(JSON.stringify({ type: "SUBSCRIBE", gameType: "aviator" }));
       playWelcome();
-      dispatch(fetchCrashPoints())
-        .unwrap()
-        .then((crashPoints) => {
-          console.log("Fetched Crash Points:", crashPoints);
-        })
-        .catch((error) => {
-          console.error("Error fetching crash points:", error);
-        });
+      if (token) {
+        dispatch(fetchCrashPoints({ token }))
+          .unwrap()
+          .then((crashPoints) => {
+            console.log("Fetched Crash Points:", crashPoints);
+          })
+          .catch((error) => {
+            console.error("Error fetching crash points:", error);
+          });
+      }
     };
 
     ws.onmessage = (event) => {
@@ -75,45 +76,50 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
           }
           break;
 
-          case "STARTED":
-            sendMessageToIframe({ type: "Start", data: data.currentValue });
-            playStarted();
-            break;
-            case "MULTIPLIER":
-                if (typeof data.currentMultiplier === 'string' && !isNaN(parseFloat(data.currentMultiplier))) {
-                    dispatch(setCurrentMultiplier(parseFloat(data.currentMultiplier)));
-                    sendMessageToIframe({ type: "multiplier", data: data.currentMultiplier });
-                    
-                }
-                break;
+        case "STARTED":
+          sendMessageToIframe({ type: "Start", data: data.currentValue });
+          playStarted();
+          break;
+        case "MULTIPLIER":
+          if (
+            typeof data.currentMultiplier === "string" &&
+            !isNaN(parseFloat(data.currentMultiplier))
+          ) {
+            dispatch(setCurrentMultiplier(parseFloat(data.currentMultiplier)));
+            sendMessageToIframe({
+              type: "multiplier",
+              data: data.currentMultiplier,
+            });
+          }
+          break;
 
-          case "SESSION_ID":
-            dispatch(setSessionId(data.sessionId));
-            dispatch(setGameStarted());
-          
-            break;
+        case "SESSION_ID":
+          dispatch(setSessionId(data.sessionId));
+          dispatch(setGameStarted());
+
+          break;
 
         case "TIMES":
           console.log("TIMES:", data.resultShowTime);
           break;
 
-          case "CRASHED":
-            dispatch(setGameCrashed(data.finalMultiplier));
-         
-            playCrashed();
-            sendMessageToIframe({ type: "Crashed", data: data.finalMultiplier });
-            break;
+        case "CRASHED":
+          dispatch(setGameCrashed(data.finalMultiplier));
 
-          case"BETS":
-            dispatch(updateBet(data.newBet));
-            dispatch(setBetId(data.newBet._id))
-            break;
-            case "CASHED_OUT_BETS":
-              console.log("CASHED_OUT_BETS:", data);
-              if (data.userBalance !== undefined) {
-                dispatch(setBalance(data.userBalance)); 
-              }
-              break;
+          playCrashed();
+          sendMessageToIframe({ type: "Crashed", data: data.finalMultiplier });
+          break;
+
+        case "BETS":
+          dispatch(updateBet(data.newBet));
+          dispatch(setBetId(data.newBet._id));
+          break;
+        case "CASHED_OUT_BETS":
+          console.log("CASHED_OUT_BETS:", data);
+          if (data.userBalance !== undefined) {
+            dispatch(setBalance(data.userBalance));
+          }
+          break;
         default:
           console.log("Unhandled message type:", data);
           break;
