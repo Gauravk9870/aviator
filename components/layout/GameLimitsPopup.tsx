@@ -8,6 +8,7 @@ import {
 import Currency from "./Currency";
 import { getAviatorSetting } from "@/app/services/apis";
 import { config } from "@/lib/config";
+import { useAppSelector } from "@/lib/hooks";
 interface GameLimitsPopupProps {
   onClose: () => void;
 }
@@ -21,12 +22,19 @@ interface GameLimitsData {
 }
 
 const GameLimitsPopup: React.FC<GameLimitsPopupProps> = ({ onClose }) => {
-  const [gameLimitsData, setGameLimitsData] = useState<GameLimitsData | null>(null);
+  const [gameLimitsData, setGameLimitsData] = useState<GameLimitsData | null>(
+    null
+  );
   const [loading, setLoading] = useState<boolean>(true);
+  const token = useAppSelector((state) => state.aviator.token);
+
   useEffect(() => {
-    const fetchGameLimits = async () => {
+    const fetchGameLimits = async (token: string) => {
       try {
-        const limitsData = await getAviatorSetting(`${config.gameLimits}`);
+        const limitsData = await getAviatorSetting(
+          `${config.gameLimits}`,
+          token
+        );
         setGameLimitsData(limitsData);
       } catch (error) {
         console.error("Error fetching game limits:", error);
@@ -34,8 +42,12 @@ const GameLimitsPopup: React.FC<GameLimitsPopupProps> = ({ onClose }) => {
         setLoading(false);
       }
     };
-    fetchGameLimits();
-  }, []);
+    if (token) {
+      fetchGameLimits(token);
+    } else {
+      console.error("Token not found");
+    }
+  }, [token]);
 
   return (
     <Dialog open={true} onOpenChange={(isOpen) => !isOpen && onClose()}>

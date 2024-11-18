@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { getAviatorSetting } from "@/app/services/apis";
 import { config } from "@/lib/config";
+import { useAppSelector } from "@/lib/hooks";
 
 interface HowToPlayPopupProps {
   onClose: () => void;
@@ -24,11 +25,12 @@ const HowToPlayPopup: React.FC<HowToPlayPopupProps> = ({ onClose }) => {
     null
   );
   const [loading, setLoading] = useState<boolean>(true);
+  const token = useAppSelector((state) => state.aviator.token);
 
   useEffect(() => {
-    const fetchHowToPlayData = async () => {
+    const fetchHowToPlayData = async (token: string) => {
       try {
-        const data = await getAviatorSetting(`${config.howToPlay}`);
+        const data = await getAviatorSetting(`${config.howToPlay}`, token);
         setHowToPlayData(data);
       } catch (error) {
         console.error("Error fetching 'How To Play' data:", error);
@@ -37,8 +39,12 @@ const HowToPlayPopup: React.FC<HowToPlayPopupProps> = ({ onClose }) => {
       }
     };
 
-    fetchHowToPlayData();
-  }, []);
+    if (token) {
+      fetchHowToPlayData(token);
+    } else {
+      console.error("Token not found");
+    }
+  }, [token]);
 
   return (
     <Dialog open={true} onOpenChange={(isOpen) => !isOpen && onClose()}>

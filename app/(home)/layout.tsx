@@ -7,6 +7,7 @@ import Sidebar from "@/components/layout/Sidebar";
 import Multipliers from "@/components/layout/Multipliers";
 import { AudioProvider } from "@/lib/audioContext";
 import { Toaster } from "react-hot-toast";
+import TokenHandler from "@/components/layout/TokenHandler";
 
 export default async function RootLayout({
   children,
@@ -18,6 +19,7 @@ export default async function RootLayout({
       <StoreProvider>
         <SocketProvider>
           <Navbar />
+          <TokenHandler />
           <Suspense fallback={null}>
             <CurrencyHandler />
           </Suspense>

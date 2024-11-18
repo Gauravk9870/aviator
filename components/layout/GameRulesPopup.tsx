@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { getAviatorSetting } from "@/app/services/apis";
 import { config } from "@/lib/config";
+import { useAppSelector } from "@/lib/hooks";
 interface GameRulesData {
   _id: string;
   name: string;
@@ -22,24 +23,31 @@ interface GameRulesPopupProps {
 }
 
 const GameRulesPopup: React.FC<GameRulesPopupProps> = ({ onClose }) => {
-  const [gameRulesData, setGameRulesData] = useState<GameRulesData | null>(null);
+  const [gameRulesData, setGameRulesData] = useState<GameRulesData | null>(
+    null
+  );
   const [loading, setLoading] = useState<boolean>(true);
+  const token = useAppSelector((state) => state.aviator.token);
 
   useEffect(() => {
-    const fetchGameRules = async () => {
+    const fetchGameRules = async (token: string) => {
       try {
-        const rulesData = await getAviatorSetting(`${config.gamesRule}`);
+        const rulesData = await getAviatorSetting(`${config.gamesRule}`, token);
         setGameRulesData(rulesData);
       } catch (error) {
         console.error("Error fetching game rules:", error);
-        setGameRulesData(null); 
+        setGameRulesData(null);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchGameRules();
-  }, []);
+    if (token) {
+      fetchGameRules(token);
+    } else {
+      console.error("Token not found");
+    }
+  }, [token]);
 
   return (
     <Dialog open={true} onOpenChange={(isOpen) => !isOpen && onClose()}>

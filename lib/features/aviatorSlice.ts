@@ -22,10 +22,12 @@ interface Bet {
   __v: number
   userName: string
   userImage: string
+  date: string
 }
 
 interface AviatorState {
-
+  user: string | null;
+  token: string | null;
   pendingBet: SetPendingBetPayload | null;
   isConnected: boolean
   sessionId: string | null
@@ -47,6 +49,8 @@ interface AviatorState {
 }
 
 const initialState: AviatorState = {
+  user: null,
+  token: null,
   pendingBet: null,
   isConnected: false,
   sessionId: null,
@@ -76,11 +80,13 @@ export const placeBet = createAsyncThunk(
       userId,
       amount,
       sectionId,
+      token,
     }: {
       userId: string;
       amount: number;
       socket?: WebSocket | null;
       sectionId: string
+      token: string;
     },
     { rejectWithValue }
   ) => {
@@ -89,7 +95,7 @@ export const placeBet = createAsyncThunk(
         `${config.server}/api/aviator/place-bet`,
         { userId, amount },
         {
-          headers: { Authorization: config.token },
+          headers: { Authorization: token },
         }
       );
       if (response.data.status) {
@@ -122,6 +128,7 @@ export const cashOut = createAsyncThunk(
       socket,
       sessionId,
       sectionId,
+      token,
     }: {
       betId: string
       userId: string;
@@ -129,6 +136,7 @@ export const cashOut = createAsyncThunk(
       socket: WebSocket;
       sessionId: string | null;
       sectionId: string;
+      token: string;
     },
     { rejectWithValue }
   ) => {
@@ -138,7 +146,7 @@ export const cashOut = createAsyncThunk(
         `${config.server}/api/aviator/cash-out`,
         { betId, userId, currentMultiplier },
         {
-          headers: { Authorization: config.token },
+          headers: { Authorization: token },
         }
       );
 
@@ -177,12 +185,15 @@ export const cashOut = createAsyncThunk(
 
 export const fetchUserBets = createAsyncThunk(
   "aviator/fetchUserBets",
-  async (userId: string, { rejectWithValue }) => {
+  async ({ userId, token }: {
+    userId: string;
+    token: string;
+  }, { rejectWithValue }) => {
     try {
       const response = await axios.get(
         `${config.server}/api/aviator/getBets/${userId}`,
         {
-          headers: { Authorization: config.token },
+          headers: { Authorization: token },
         }
       );
       if (response.data.status) {
@@ -201,10 +212,10 @@ export const fetchUserBets = createAsyncThunk(
 
 export const fetchCrashPoints = createAsyncThunk(
   "aviator/fetchCrashPoints",
-  async (_, { rejectWithValue }) => {
+  async ({ token }: { token: string }, { rejectWithValue }) => {
     try {
       const response = await axios.get(`${config.server}/api/aviator/getCrashPoint`, {
-        headers: { Authorization: config.token },
+        headers: { Authorization: token },
       });
 
       if (response.data.status) {
@@ -229,14 +240,15 @@ export const fetchTopBets = createAsyncThunk(
     {
       category,
       filter,
-    }: { category: "hugeWins" | "biggestWins" | "multipliers"; filter: "day" | "month" | "year" },
+      token
+    }: { category: "hugeWins" | "biggestWins" | "multipliers"; filter: "day" | "month" | "year", token: string },
     { rejectWithValue }
   ) => {
     try {
       const response = await axios.get(
         `${config.server}/api/aviator/getTopBets/${category}/${filter}`,
         {
-          headers: { Authorization: config.token },
+          headers: { Authorization: token },
         }
       );
 
@@ -256,10 +268,10 @@ export const fetchTopBets = createAsyncThunk(
 
 export const fetchBetsByUser = createAsyncThunk(
   "aviator/fetchBetsByUser",
-  async (userId: string, { rejectWithValue }) => {
+  async ({ userId, token }: { userId: string, token: string }, { rejectWithValue }) => {
     try {
       const response = await axios.get(`${config.server}/api/aviator/getBets/${userId}`, {
-        headers: { Authorization: config.token },
+        headers: { Authorization: token },
       });
 
       if (response.data.status && response.data.data) {
@@ -283,6 +295,12 @@ const aviatorSlice = createSlice({
   name: "aviator",
   initialState,
   reducers: {
+    setUser: (state, action: PayloadAction<string | null>) => {
+      state.user = action.payload;
+    },
+    setToken: (state, action: PayloadAction<string | null>) => {
+      state.token = action.payload;
+    },
     setPendingBet: (state, action: PayloadAction<SetPendingBetPayload>) => {
       state.pendingBet = action.payload;
     },
@@ -444,6 +462,8 @@ const aviatorSlice = createSlice({
 });
 
 export const {
+  setUser,
+  setToken,
   clearTopBets,
   setPendingBet,
   clearPendingBet,

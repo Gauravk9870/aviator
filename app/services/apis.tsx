@@ -74,16 +74,15 @@ export const verifyToken = async () => {
 //   }
 // };
 //getAviatorSetting
-export const getAviatorSetting = async (settingName: string) => {
+export const getAviatorSetting = async (settingName: string, token: string) => {
   try {
-    console.log(config.token);
     const res = await fetch(
       `${config.server}/api/aviator/aviatorSetting/${settingName}`,
       {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `${config.token}`,
+          Authorization: `${token}`,
         },
       }
     );
@@ -103,13 +102,13 @@ export const getAviatorSetting = async (settingName: string) => {
   }
 };
 //getGameLogo
-export const getGameLogo = async () => {
+export const getGameLogo = async (token: string) => {
   try {
     const res = await fetch(`${config.server}/api/aviator/getLogo`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `${config.token}`,
+        Authorization: `${token}`,
       },
     });
 
@@ -128,13 +127,17 @@ export const getGameLogo = async () => {
   }
 };
 //updateAvatar
-export const updateAvatar = async (userEmail: string, avatar: string) => {
+export const updateAvatar = async (
+  userEmail: string,
+  avatar: string,
+  token: string
+) => {
   try {
     const res = await fetch(`${config.server}/api/user/updateAvtar`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `${config.token}`,
+        Authorization: `${token}`,
       },
       body: JSON.stringify({ userEmail, avatar }),
     });
@@ -151,4 +154,3 @@ export const updateAvatar = async (userEmail: string, avatar: string) => {
 };
 
 ///
-
