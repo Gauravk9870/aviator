@@ -47,13 +47,15 @@ export type Bet = {
   timestamp: string;
 };
 export type TopBet = {
-  betAmount: number;
-  cashOutPoint: number;
-  date: string;
-  sessionCrashPoint: number;
-  userImage: string;
-  userName: string;
-  winAmount: number;
+  id?: string;
+  crashPoint?: number;
+  date?: string;
+  userImage?: string;
+  userName?: string;
+  betAmount?: number;
+  cashOutPoint?: number;
+  winAmount?: number;
+  x?: string;
 };
 
 export const bets: Bet[] = [
