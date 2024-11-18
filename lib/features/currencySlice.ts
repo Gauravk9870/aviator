@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import axios, { AxiosError } from "axios";
 import { config } from '../config';
 
 interface CurrencyState {
@@ -16,7 +16,6 @@ const initialState: CurrencyState = {
   error: null,
 };
 
-// Async Thunk to Fetch Balance from API
 export const fetchBalance = createAsyncThunk(
   'currency/fetchBalance',
   async (userId: string, { rejectWithValue }) => {
@@ -29,8 +28,11 @@ export const fetchBalance = createAsyncThunk(
       } else {
         return rejectWithValue(response.data.message || 'Failed to fetch balance');
       }
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data || 'An error occurred');
+    } catch (error) {
+      if (error instanceof AxiosError && error.response) {
+        return rejectWithValue(error.response.data || 'An error occurred');
+      }
+      return rejectWithValue('An unknown error occurred');
     }
   }
 );
@@ -44,13 +46,13 @@ const currencySlice = createSlice({
       state.isInitialized = true;
     },
     setBalance: (state, action: PayloadAction<number>) => {
-      state.balance = action.payload; 
+      state.balance = action.payload;
     },
   },
   extraReducers: (builder) => {
     builder
       .addCase(fetchBalance.pending, (state) => {
-        state.error = null; 
+        state.error = null;
       })
       .addCase(fetchBalance.fulfilled, (state, action) => {
         state.balance = action.payload;

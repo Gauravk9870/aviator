@@ -126,7 +126,7 @@ export default function Navbar() {
   const [showHomeButton, setShowHomeButton] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const dispatch = useAppDispatch();
-  const { balance, error } = useAppSelector((state) => state.currency);
+  const { balance } = useAppSelector((state) => state.currency);
   useEffect(() => {
     dispatch(fetchBalance("8376944575")); 
   }, [dispatch]);

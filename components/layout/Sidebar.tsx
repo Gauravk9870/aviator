@@ -42,9 +42,8 @@ export default function Sidebar() {
         dispatch(fetchTopBets({ category: categoryTab, filter: timeTab }));
       }
     }
-    console.log(categoryTab,'categoryTab')
    
-  }, [activeTab, dispatch,categoryTab]);
+  }, [activeTab,categoryTab,timeTab, dispatch]);
 
   return (
     <div className="lg:w-96 text-white flex flex-col justify-between bg-[#1b1c1d] rounded-xl p-1 lg:m-0">
@@ -304,11 +303,11 @@ export default function Sidebar() {
             </Tabs>
           </div>
           <div className="flex-grow overflow-y-auto hide-scrollbar">
-            <div className="py-2 min-h-full" key={categoryTab}>
+            <div className="py-2 min-h-full" key={categoryTab ||timeTab}>
             {loadingTopBets ? (
   <p className="text-center text-sm text-gray-400">Loading...</p>
 ) : Array.isArray(topBets) && topBets.length > 0 ? (
-  topBets.map((bet: any) => {
+  topBets.map((bet: TopBet) => {
     switch (categoryTab) {
       case "multipliers":
         console.log("multipliers");
