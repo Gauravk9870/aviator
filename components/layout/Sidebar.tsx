@@ -301,7 +301,7 @@ export default function Sidebar() {
           </div>
           <div className="flex-grow overflow-y-auto hide-scrollbar">
             <div className="py-2 min-h-full">
-              {topBets.length > 0 ? (
+              {Array.isArray(topBets) && topBets.length > 0  ? (
                 topBets.map((bet:any) => (
                   <div
                     key={bet.id}

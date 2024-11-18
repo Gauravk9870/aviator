@@ -399,7 +399,7 @@ const aviatorSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchCrashPoints.fulfilled, (state, action) => {
-        state.multiplierHistory = action.payload; // Update as needed
+        state.multiplierHistory = action.payload;
         state.error = null;
       })
       .addCase(fetchCrashPoints.rejected, (state, action) => {
@@ -409,14 +409,14 @@ const aviatorSlice = createSlice({
 
       // Hanlde fetchUserBets
       .addCase(fetchBetsByUser.pending, (state) => {
-        state.error = null; // Clear previous errors
+        state.error = null;
       })
       .addCase(fetchBetsByUser.fulfilled, (state, action) => {
-        state.myBets = action.payload; // Update the `myBets` state
+        state.myBets = action.payload;
         state.error = null;
       })
       .addCase(fetchBetsByUser.rejected, (state, action) => {
-        state.error = action.payload as string; // Handle errors
+        state.error = action.payload as string;
       })
 
       // Handle fetchTopBets
@@ -424,9 +424,11 @@ const aviatorSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchTopBets.fulfilled, (state, action) => {
-        state.topBets = action.payload;
+        const bets = Array.isArray(action.payload) ? action.payload : [];
+        state.topBets = bets;
         state.error = null;
       })
+
       .addCase(fetchTopBets.rejected, (state, action) => {
         state.error = action.payload as string;
       });
