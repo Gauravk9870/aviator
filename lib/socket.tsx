@@ -136,7 +136,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     return () => {
       ws.close();
     };
-  }, [dispatch, playCrashed, playStarted, playWelcome, stopAll, token]);
+  }, [token]);
 
   return (
     <SocketContext.Provider value={{ socket }}>
