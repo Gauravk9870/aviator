@@ -12,7 +12,7 @@ import { setActiveTab } from "@/lib/features/tabsSlice";
 import { RootState } from "@/lib/store";
 import Currency from "./Currency";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { fetchBetsByUser, fetchTopBets } from "@/lib/features/aviatorSlice";
+import { fetchBetsByUser, fetchTopBets,clearTopBets } from "@/lib/features/aviatorSlice";
 
 export default function Sidebar() {
   const [categoryTab, setCategoryTab] = useState<
@@ -25,7 +25,9 @@ export default function Sidebar() {
   const myBets = useAppSelector((state: RootState) => state.aviator.myBets);
   const topBets = useAppSelector((state: RootState) => state.aviator.topBets);
   const error = useAppSelector((state: RootState) => state.aviator.error);
-
+  const loadingMyBets = useAppSelector((state: RootState) => state.aviator.loadingMyBets);
+  const loadingTopBets = useAppSelector((state: RootState) => state.aviator.loadingTopBets);
+  
   const handleTabChange = (tab: string) => {
     dispatch(setActiveTab(tab));
   };
@@ -34,11 +36,15 @@ export default function Sidebar() {
     if (activeTab === "my-bets") {
       dispatch(fetchBetsByUser("8376944575"));
     } else if (activeTab === "top") {
-      dispatch(fetchTopBets({ category: categoryTab, filter: timeTab }));
+      if (activeTab === "top") {
+        console.log(topBets,'testingf')
+        dispatch(clearTopBets());
+        dispatch(fetchTopBets({ category: categoryTab, filter: timeTab }));
+      }
     }
-
-    console.log(topBets,'topbets')
-  }, [activeTab, categoryTab, timeTab, dispatch]);
+    console.log(categoryTab,'categoryTab')
+   
+  }, [activeTab, dispatch,categoryTab]);
 
   return (
     <div className="lg:w-96 text-white flex flex-col justify-between bg-[#1b1c1d] rounded-xl p-1 lg:m-0">
@@ -172,66 +178,64 @@ export default function Sidebar() {
           <ScrollArea className="flex-1 hide-scrollbar">
             <div className="min-h-full">
               {error && <p className="text-red-500">{error}</p>}
-              {myBets.length > 0 ? (
-                <div className="">
-                  <div className="bg-[#1b1c1d]">
-                    {myBets.map((bet) => {
-                      const date = new Date(bet.createdAt).toLocaleDateString();
-                      const time = new Date(bet.createdAt).toLocaleTimeString();
-                      return (
-                        <div
-                          key={bet._id}
-                          className={`flex justify-between rounded-lg ${
-                            bet.amount > 0
-                              ? "border border-[#427f00] bg-[#123405]"
-                              : "bg-[#141516]"
-                          } mb-0.5`}
-                        >
-                          <div
-                            className="flex items-left justify-center flex-col gap-0 px-0.5 flex-1 ml-2 text-[#bbbfc5] text-[12px]"
-                            style={{ lineHeight: "1" }}
-                          >
-                            <span>{time}</span>
-                            <span>{date}</span>
-                          </div>
-                          <div className="px-4 py-1 whitespace-nowrap flex flex-row justify-center">
-                            <span className="text-base text-[#ffffff] font-normal">
-                              {bet.amount.toFixed(2)}
-                            </span>
+              {loadingMyBets ? (
+  <p className="text-center text-sm text-gray-400">Loading...</p>
+) : myBets.length > 0 ? (
+  <div className="">
+    <div className="bg-[#1b1c1d]">
+      {myBets.map((bet) => {
+        const date = new Date(bet.createdAt).toLocaleDateString();
+        const time = new Date(bet.createdAt).toLocaleTimeString();
+        return (
+          <div
+            key={bet._id}
+            className={`flex justify-between rounded-lg ${
+              bet.amount > 0
+                ? "border border-[#427f00] bg-[#123405]"
+                : "bg-[#141516]"
+            } mb-0.5`}
+          >
+            <div
+              className="flex items-left justify-center flex-col gap-0 px-0.5 flex-1 ml-2 text-[#bbbfc5] text-[12px]"
+              style={{ lineHeight: "1" }}
+            >
+              <span>{time}</span>
+              <span>{date}</span>
+            </div>
+            <div className="px-4 py-1 whitespace-nowrap flex flex-row justify-center">
+              <span className="text-base text-[#ffffff] font-normal">
+                {bet.amount.toFixed(2)}
+              </span>
 
-                            {bet.amount > 0 && (
-                              <span
-                                className={`py-[2px] px-[6px] rounded-[11px] ${getTextColorClass(
-                                  Number(bet.amount)
-                                )} bg-[#00000080] text-[12px] ml-2 font-bold`}
-                              >
-                                {bet.amount}x
-                              </span>
-                            )}
-                          </div>
-                          <div className=" pl-4 pr-1 py-1 whitespace-nowrap text-right text-xs text-gray-300 flex-1">
-                            <span className="text-base text-[#ffffff] font-normal">
-                              {bet.cashOutMultiplier * bet.amount}
-                            </span>
-                          </div>
-
-                          <div className=" px-4 py-1 flex items-center justify-center gap-1">
-                            <ShieldCheck
-                              className=" text-green-500"
-                              size={16}
-                            />
-                            <MessageCircle size={16} stroke="#9ea0a3" />
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              ) : (
-                <p className="flex justify-center text-sm text-gray-400 text-center">
-                  No bets available
-                </p>
+              {bet.amount > 0 && (
+                <span
+                  className={`py-[2px] px-[6px] rounded-[11px] bg-[#00000080] text-[12px] ml-2 font-bold`}
+                >
+                  {bet.amount}x
+                </span>
               )}
+            </div>
+            <div className=" pl-4 pr-1 py-1 whitespace-nowrap text-right text-xs text-gray-300 flex-1">
+              <span className="text-base text-[#ffffff] font-normal">
+                {bet.cashOutMultiplier * bet.amount}
+              </span>
+            </div>
+
+            <div className=" px-4 py-1 flex items-center justify-center gap-1">
+              <ShieldCheck className=" text-green-500" size={16} />
+              <MessageCircle size={16} stroke="#9ea0a3" />
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  </div>
+) : (
+  <p className="flex justify-center text-sm text-gray-400 text-center">
+    No bets available
+  </p>
+)}
+
             </div>
           </ScrollArea>
         </TabsContent>
@@ -257,7 +261,7 @@ export default function Sidebar() {
                   HUGE WINS
                 </TabsTrigger>
                 <TabsTrigger
-                  value="biggest-wins"
+                  value="biggestWins"
                   className="text-white mx-1 data-[state=active]:bg-transparent data-[state=active]:text-white rounded-2xl text-xs data-[state=active]:border data-[state=active]:border-[#e11d48] py-1 px-1 hover:text-[#e11d48]"
                 >
                   BIGGEST WINS
@@ -300,70 +304,133 @@ export default function Sidebar() {
             </Tabs>
           </div>
           <div className="flex-grow overflow-y-auto hide-scrollbar">
-            <div className="py-2 min-h-full">
-              {Array.isArray(topBets) && topBets.length > 0  ? (
-                topBets.map((bet:any) => (
-                  <div
-                    key={bet.id}
-                    className="mb-4 bg-[#101112] rounded-lg shadow-lg"
-                  >
-                    <div className="flex items-center justify-between p-4 relative">
-                      <div className="flex flex-col items-center">
-                        <Avatar className="w-8 h-8">
-                          <AvatarImage src={bet.userImage} alt={bet.userName} />
-                          <AvatarFallback>
-                            {bet.userName.charAt(0).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <h3 className="text-sm font-bold text-white">
-                          {bet.userName}
-                        </h3>
-                      </div>
-                      <div className="grid grid-cols-3 gap-4">
-                        <div className="col-span-2">
-                          <p className="text-xs text-[#9ea0a3] text-center mb-1">
-                            Bet <Currency />:{" "}
-                            <span className="font-semibold text-white">
-                              {bet.betAmount.toFixed(2)}
-                            </span>
-                          </p>
-                          <p className="text-xs text-[#9ea0a3] text-center mb-1">
-                            Cashed Out:{" "}
-                            <span className="font-bold text-[#C017B4] bg-[#00000080] py-1 px-2 rounded-2xl">
-                              {bet.cashOutPoint.toFixed(2)}x
-                            </span>
-                          </p>
-                          <p className="text-xs text-[#9ea0a3] text-center">
-                            Win <Currency />:{" "}
-                            <span className="font-semibold">{bet.winAmount}</span>
-                          </p>
-                        </div>
-                      </div>
-                      <div className="text-green-500">
-                        <ShieldCheck className="h-4 w-4" />
-                      </div>
-                    </div>
-                    <div className="flex justify-between items-center bg-[#000000] px-1 py-1">
-                      <div className="text-xs text-gray-400 flex gap-4">
-                        <p>
-                          {bet.timestamp
-                            ? format(new Date(bet.timestamp), "dd MMM, yy")
-                            : "N/A"}
-                        </p>
-                        <p>
-                          Round: <span className="text-white">{bet.x}</span>
-                        </p>
-                      </div>
-                      <button className="text-xs border border-[#414148] bg-[#252528] rounded-3xl flex items-center justify-center px-1 gap-1">
-                        <Forward size={16} stroke="#9ea0a3" />{" "}
-                        <MessageCircle size={14} stroke="#9ea0a3" />
-                      </button>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className="text-sm text-gray-400">No top bets available</p>
-              )}
+            <div className="py-2 min-h-full" key={categoryTab}>
+            {loadingTopBets ? (
+  <p className="text-center text-sm text-gray-400">Loading...</p>
+) : Array.isArray(topBets) && topBets.length > 0 ? (
+  topBets.map((bet: any) => {
+    switch (categoryTab) {
+      case "multipliers":
+        console.log("multipliers");
+        return (
+          <div
+            key={bet.id || bet.crashPoint}
+            className="mb-4 bg-[#101112] rounded-lg shadow-lg"
+          >
+            <div className="flex items-center justify-between p-4 relative">
+              <div className="flex flex-col items-center">
+                <Avatar className="w-8 h-8">
+                  <AvatarFallback>M</AvatarFallback>
+                </Avatar>
+                <h3 className="text-sm font-bold text-white">Multiplier</h3>
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="col-span-2">
+                  <p className="text-xs text-[#9ea0a3] text-center mb-1">
+                    Crash Point:{" "}
+                    <span className="font-semibold text-white">
+                      {bet.crashPoint}x
+                    </span>
+                  </p>
+                  <p className="text-xs text-[#9ea0a3] text-center mb-1">
+                    Date:{" "}
+                    <span className="font-bold text-[#C017B4] bg-[#00000080] py-1 px-2 rounded-2xl">
+                      {bet.date
+                        ? format(new Date(bet.date), "dd MMM, yy")
+                        : "N/A"}
+                    </span>
+                  </p>
+                </div>
+              </div>
+              <div className="text-green-500">
+                <ShieldCheck className="h-4 w-4" />
+              </div>
+            </div>
+          </div>
+        );
+
+      case "hugeWins":
+      case "biggestWins":
+        return (
+          <div
+            key={bet.id}
+            className="mb-4 bg-[#101112] rounded-lg shadow-lg"
+          >
+            <div className="flex items-center justify-between p-4 relative">
+              <div className="flex flex-col items-center">
+                <Avatar className="w-8 h-8">
+                  {bet.userImage ? (
+                    <AvatarImage
+                      src={bet.userImage}
+                      alt={bet.userName || "User"}
+                    />
+                  ) : (
+                    <AvatarFallback>
+                      {bet.userName
+                        ? bet.userName.charAt(0).toUpperCase()
+                        : "U"}
+                    </AvatarFallback>
+                  )}
+                </Avatar>
+                <h3 className="text-sm font-bold text-white">
+                  {bet.userName || "Unknown User"}
+                </h3>
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="col-span-2">
+                  <p className="text-xs text-[#9ea0a3] text-center mb-1">
+                    Bet <Currency />:{" "}
+                    <span className="font-semibold text-white">
+                      {bet.betAmount?.toFixed(2) || "0.00"}
+                    </span>
+                  </p>
+                  <p className="text-xs text-[#9ea0a3] text-center mb-1">
+                    Cashed Out:{" "}
+                    <span className="font-bold text-[#C017B4] bg-[#00000080] py-1 px-2 rounded-2xl">
+                      {bet.cashOutPoint?.toFixed(2) || "0.00"}x
+                    </span>
+                  </p>
+                  <p className="text-xs text-[#9ea0a3] text-center">
+                    Win <Currency />:{" "}
+                    <span className="font-semibold">
+                      {bet.winAmount || "0.00"}
+                    </span>
+                  </p>
+                </div>
+              </div>
+              <div className="text-green-500">
+                <ShieldCheck className="h-4 w-4" />
+              </div>
+            </div>
+            <div className="flex justify-between items-center bg-[#000000] px-1 py-1">
+              <div className="text-xs text-gray-400 flex gap-4">
+                <p>
+                  {bet.date
+                    ? format(new Date(bet.date), "dd MMM, yy")
+                    : "N/A"}
+                </p>
+                <p>
+                  Round: <span className="text-white">{bet.x || "N/A"}</span>
+                </p>
+              </div>
+              <button className="text-xs border border-[#414148] bg-[#252528] rounded-3xl flex items-center justify-center px-1 gap-1">
+                <Forward size={16} stroke="#9ea0a3" />{" "}
+                <MessageCircle size={14} stroke="#9ea0a3" />
+              </button>
+            </div>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  })
+) : (
+  <p className="text-sm text-gray-400">No top bets available</p>
+)}
+
+
+
             </div>
           </div>
         </TabsContent>

@@ -42,6 +42,8 @@ interface AviatorState {
   topBets: Bet[];
 
   bet_id: string | null;
+  loadingMyBets: boolean;
+  loadingTopBets: boolean;
 }
 
 const initialState: AviatorState = {
@@ -60,6 +62,8 @@ const initialState: AviatorState = {
   myBets: [],
   topBets: [],
   bet_id: null,
+  loadingMyBets: false,
+  loadingTopBets: false,
 };
 
 
@@ -238,7 +242,7 @@ export const fetchTopBets = createAsyncThunk(
       );
 
       if (response.data.status) {
-        return response.data.data; // Assuming the API returns the top bets in `data`
+        return response.data.data;
       } else {
         return rejectWithValue(response.data.message);
       }
@@ -260,7 +264,7 @@ export const fetchBetsByUser = createAsyncThunk(
       });
 
       if (response.data.status && response.data.data) {
-        return response.data.data; // Assuming the API returns the user's bets in `data`
+        return response.data.data;
       } else if (!response.data.status && response.data.message === "No bets found") {
         return []; // No bets found for this user
       } else {
@@ -275,6 +279,7 @@ export const fetchBetsByUser = createAsyncThunk(
   }
 );
 
+
 const aviatorSlice = createSlice({
   name: "aviator",
   initialState,
@@ -282,7 +287,9 @@ const aviatorSlice = createSlice({
     setPendingBet: (state, action: PayloadAction<SetPendingBetPayload>) => {
       state.pendingBet = action.payload;
     },
-
+    clearTopBets: (state) => {
+      state.topBets = [];
+    },
     clearPendingBet: (state) => {
       state.pendingBet = null;
     },
@@ -407,35 +414,38 @@ const aviatorSlice = createSlice({
           (action.payload as string) || "An error occurred while fetching crash points.";
       })
 
-      // Hanlde fetchUserBets
       .addCase(fetchBetsByUser.pending, (state) => {
+        state.loadingMyBets = true;
         state.error = null;
       })
       .addCase(fetchBetsByUser.fulfilled, (state, action) => {
         state.myBets = action.payload;
+        state.loadingMyBets = false;
         state.error = null;
       })
       .addCase(fetchBetsByUser.rejected, (state, action) => {
+        state.loadingMyBets = false;
         state.error = action.payload as string;
       })
 
-      // Handle fetchTopBets
       .addCase(fetchTopBets.pending, (state) => {
+        state.loadingTopBets = true;
         state.error = null;
       })
       .addCase(fetchTopBets.fulfilled, (state, action) => {
-        const bets = Array.isArray(action.payload) ? action.payload : [];
-        state.topBets = bets;
+        state.topBets = Array.isArray(action.payload) ? action.payload : [];
+        state.loadingTopBets = false;
         state.error = null;
       })
-
       .addCase(fetchTopBets.rejected, (state, action) => {
+        state.loadingTopBets = false;
         state.error = action.payload as string;
-      });
+      })
   },
 });
 
 export const {
+  clearTopBets,
   setPendingBet,
   clearPendingBet,
   setConnectionStatus,
