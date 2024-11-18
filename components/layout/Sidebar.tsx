@@ -301,7 +301,7 @@ export default function Sidebar() {
           </div>
           <div className="flex-grow overflow-y-auto hide-scrollbar">
             <div className="py-2 min-h-full">
-              {/* {topBets.length > 0 ? (
+              {topBets.length > 0 ? (
                 topBets.map((bet:any) => (
                   <div
                     key={bet.id}
@@ -363,7 +363,7 @@ export default function Sidebar() {
                 ))
               ) : (
                 <p className="text-sm text-gray-400">No top bets available</p>
-              )} */}
+              )}
             </div>
           </div>
         </TabsContent>
