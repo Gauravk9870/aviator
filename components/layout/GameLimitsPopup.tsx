@@ -44,6 +44,8 @@ const GameLimitsPopup: React.FC<GameLimitsPopupProps> = ({ onClose }) => {
     };
     if (token) {
       fetchGameLimits(token);
+    } else {
+      console.error("Token not found");
     }
   }, [token]);
 
