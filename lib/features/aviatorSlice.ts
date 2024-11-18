@@ -75,7 +75,6 @@ export const placeBet = createAsyncThunk(
     {
       userId,
       amount,
-      socket,
       sectionId,
     }: {
       userId: string;
