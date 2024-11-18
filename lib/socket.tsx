@@ -41,7 +41,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
   const dispatch = useAppDispatch();
   const [socket, setSocket] = useState<WebSocket | null>(null);
   const { playWelcome, playStarted, playCrashed, stopAll } = useAudio();
-  const token = useAppSelector((state) => state.aviator.token);
+  const token = useAppSelector((state) => state.aviator.token ?? "");
 
   useEffect(() => {
     const ws = new WebSocket(`${config.ws}`);
@@ -51,16 +51,15 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
       dispatch(setConnectionStatus(true));
       ws.send(JSON.stringify({ type: "SUBSCRIBE", gameType: "aviator" }));
       playWelcome();
-      if (token) {
-        dispatch(fetchCrashPoints({ token }))
-          .unwrap()
-          .then((crashPoints) => {
-            console.log("Fetched Crash Points:", crashPoints);
-          })
-          .catch((error) => {
-            console.error("Error fetching crash points:", error);
-          });
-      }
+
+      dispatch(fetchCrashPoints({ token }))
+        .unwrap()
+        .then((crashPoints) => {
+          console.log("Fetched Crash Points:", crashPoints);
+        })
+        .catch((error) => {
+          console.error("Error fetching crash points:", error);
+        });
     };
 
     ws.onmessage = (event) => {
@@ -137,7 +136,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     return () => {
       ws.close();
     };
-  }, []);
+  }, [dispatch, playCrashed, playStarted, playWelcome, stopAll, token]);
 
   return (
     <SocketContext.Provider value={{ socket }}>
