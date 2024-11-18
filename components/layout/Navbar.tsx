@@ -37,6 +37,7 @@ import {
 } from "@/lib/features/menuSlice";
 import Currency from "./Currency";
 import { useAudio } from "@/lib/audioContext";
+import { fetchBalance } from "@/lib/features/currencySlice";
 
 const useMenu = () => {
   const dispatch = useAppDispatch();
@@ -125,7 +126,10 @@ export default function Navbar() {
   const [showHomeButton, setShowHomeButton] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const dispatch = useAppDispatch();
-  const { balance } = useAppSelector((state) => state.currency);
+  const { balance, error } = useAppSelector((state) => state.currency);
+  useEffect(() => {
+    dispatch(fetchBalance("8376944575")); 
+  }, [dispatch]);
 
   useEffect(() => {
     const savedAvatar = localStorage.getItem("selectedAvatar");

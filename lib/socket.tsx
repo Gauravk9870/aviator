@@ -5,26 +5,21 @@ import { config } from "@/lib/config";
 import { useAppDispatch } from "@/lib/hooks";
 import {
   fetchCrashPoints,
-  placeBet,
-  resetGame,
   setConnectionStatus,
   setCurrentMultiplier,
   setGameCrashed,
   setGameStarted,
   setSessionId,
   updateBet,
+  setBetId
 } from "@/lib/features/aviatorSlice";
 import { useAudio } from "@/lib/audioContext";
+import { setBalance } from "./features/currencySlice";
 
-interface PendingBet {
-  userId: string;
-  amount: number;
-  sectionId: string;
-}
+
 
 interface SocketContextType {
   socket: WebSocket | null;
-  setPendingBet: React.Dispatch<React.SetStateAction<PendingBet | null>>;
 }
 
 const SocketContext = createContext<SocketContextType | undefined>(undefined);
@@ -47,7 +42,6 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const dispatch = useAppDispatch();
   const [socket, setSocket] = useState<WebSocket | null>(null);
-  const [pendingBet, setPendingBet] = useState<PendingBet | null>(null);
   const { playWelcome, playStarted, playCrashed, stopAll } = useAudio();
 
   useEffect(() => {
@@ -81,54 +75,45 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
           }
           break;
 
-        case "MULTIPLIER":
-          if (
-            typeof data.currentMultiplier === "string" &&
-            !isNaN(parseFloat(data.currentMultiplier))
-          ) {
-            dispatch(setCurrentMultiplier(parseFloat(data.currentMultiplier)));
-            sendMessageToIframe({
-              type: "multiplier",
-              data: data.currentMultiplier,
-            });
-            resetGame();
-          }
-          break;
-        case "STARTED":
-          console.log("Game Started");
-          dispatch(setGameStarted());
-          sendMessageToIframe({ type: "Start", data: data.currentValue });
-          playStarted();
-          if (pendingBet) {
-            dispatch(placeBet({ ...pendingBet, socket: ws }));
-            setGameStarted();
-            setPendingBet(null);
-          }
-          break;
+          case "STARTED":
+            sendMessageToIframe({ type: "Start", data: data.currentValue });
+            playStarted();
+            break;
+            case "MULTIPLIER":
+                if (typeof data.currentMultiplier === 'string' && !isNaN(parseFloat(data.currentMultiplier))) {
+                    dispatch(setCurrentMultiplier(parseFloat(data.currentMultiplier)));
+                    sendMessageToIframe({ type: "multiplier", data: data.currentMultiplier });
+                    
+                }
+                break;
 
-        case "SESSION_ID":
-          dispatch(setSessionId(data.sessionId));
-          dispatch(resetGame());
-          if (pendingBet) {
-            dispatch(placeBet({ ...pendingBet, socket: ws }));
-            setPendingBet(null);
-          }
-          break;
+          case "SESSION_ID":
+            dispatch(setSessionId(data.sessionId));
+            dispatch(setGameStarted());
+          
+            break;
 
         case "TIMES":
           console.log("TIMES:", data.resultShowTime);
           break;
 
-        case "CRASHED":
-          dispatch(setGameCrashed(data.finalMultiplier));
-          playCrashed();
-          sendMessageToIframe({ type: "Crashed", data: data.finalMultiplier });
-          break;
+          case "CRASHED":
+            dispatch(setGameCrashed(data.finalMultiplier));
+         
+            playCrashed();
+            sendMessageToIframe({ type: "Crashed", data: data.finalMultiplier });
+            break;
 
-        case "BETS":
-          dispatch(updateBet(data.newBet));
-          break;
-
+          case"BETS":
+            dispatch(updateBet(data.newBet));
+            dispatch(setBetId(data.newBet._id))
+            break;
+            case "CASHED_OUT_BETS":
+              console.log("CASHED_OUT_BETS:", data);
+              if (data.userBalance !== undefined) {
+                dispatch(setBalance(data.userBalance)); 
+              }
+              break;
         default:
           console.log("Unhandled message type:", data);
           break;
@@ -148,15 +133,8 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     };
   }, []);
 
-  useEffect(() => {
-    if (pendingBet && socket && socket.readyState === WebSocket.OPEN) {
-      dispatch(placeBet({ ...pendingBet, socket }));
-      setPendingBet(null);
-    }
-  }, [pendingBet, socket, dispatch]);
-
   return (
-    <SocketContext.Provider value={{ socket, setPendingBet }}>
+    <SocketContext.Provider value={{ socket }}>
       {children}
     </SocketContext.Provider>
   );

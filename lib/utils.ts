@@ -46,6 +46,15 @@ export type Bet = {
   x: number;
   timestamp: string;
 };
+export type TopBet = {
+  betAmount: number;
+  cashOutPoint: number;
+  date: string;
+  sessionCrashPoint: number;
+  userImage: string;
+  userName: string;
+  winAmount: number;
+};
 
 export const bets: Bet[] = [
   {
