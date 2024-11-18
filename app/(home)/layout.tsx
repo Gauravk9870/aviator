@@ -18,9 +18,9 @@ export default async function RootLayout({
     <AudioProvider>
       <StoreProvider>
         <SocketProvider>
-          <Navbar />
-          <TokenHandler />
           <Suspense fallback={null}>
+            <Navbar />
+            <TokenHandler />
             <CurrencyHandler />
           </Suspense>
           <div className="flex flex-1 overflow-hidden p-1 flex-col-reverse lg:flex-row hide-scrollbar">
