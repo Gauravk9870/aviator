@@ -35,17 +35,17 @@ export default function Sidebar() {
   const loadingTopBets = useAppSelector(
     (state: RootState) => state.aviator.loadingTopBets
   );
-  const token = useAppSelector((state) => state.aviator.token);
-  const user = useAppSelector((state) => state.aviator.user);
+  const token = useAppSelector((state) => state.aviator.token ?? "");
+  const user = useAppSelector((state) => state.aviator.user ?? "");
 
   const handleTabChange = (tab: string) => {
     dispatch(setActiveTab(tab));
   };
 
   useEffect(() => {
-    if (activeTab === "my-bets" && token && user) {
+    if (activeTab === "my-bets") {
       dispatch(fetchBetsByUser({ userId: user, token }));
-    } else if (activeTab === "top" && token) {
+    } else if (activeTab === "top") {
       dispatch(clearTopBets());
       dispatch(fetchTopBets({ category: categoryTab, filter: timeTab, token }));
     }

@@ -26,7 +26,7 @@ const GameLimitsPopup: React.FC<GameLimitsPopupProps> = ({ onClose }) => {
     null
   );
   const [loading, setLoading] = useState<boolean>(true);
-  const token = useAppSelector((state) => state.aviator.token);
+  const token = useAppSelector((state) => state.aviator.token ?? "");
 
   useEffect(() => {
     const fetchGameLimits = async (token: string) => {
@@ -42,11 +42,7 @@ const GameLimitsPopup: React.FC<GameLimitsPopupProps> = ({ onClose }) => {
         setLoading(false);
       }
     };
-    if (token) {
-      fetchGameLimits(token);
-    } else {
-      console.error("Token not found");
-    }
+    fetchGameLimits(token);
   }, [token]);
 
   return (
