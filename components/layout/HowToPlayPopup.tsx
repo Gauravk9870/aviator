@@ -25,7 +25,7 @@ const HowToPlayPopup: React.FC<HowToPlayPopupProps> = ({ onClose }) => {
     null
   );
   const [loading, setLoading] = useState<boolean>(true);
-  const token = useAppSelector((state) => state.aviator.token);
+  const token = useAppSelector((state) => state.aviator.token ?? "");
 
   useEffect(() => {
     const fetchHowToPlayData = async (token: string) => {
@@ -39,11 +39,7 @@ const HowToPlayPopup: React.FC<HowToPlayPopupProps> = ({ onClose }) => {
       }
     };
 
-    if (token) {
-      fetchHowToPlayData(token);
-    } else {
-      console.error("Token not found");
-    }
+    fetchHowToPlayData(token);
   }, [token]);
 
   return (

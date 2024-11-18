@@ -27,7 +27,7 @@ const GameRulesPopup: React.FC<GameRulesPopupProps> = ({ onClose }) => {
     null
   );
   const [loading, setLoading] = useState<boolean>(true);
-  const token = useAppSelector((state) => state.aviator.token);
+  const token = useAppSelector((state) => state.aviator.token ?? "");
 
   useEffect(() => {
     const fetchGameRules = async (token: string) => {
@@ -42,11 +42,7 @@ const GameRulesPopup: React.FC<GameRulesPopupProps> = ({ onClose }) => {
       }
     };
 
-    if (token) {
-      fetchGameRules(token);
-    } else {
-      console.error("Token not found");
-    }
+    fetchGameRules(token);
   }, [token]);
 
   return (
