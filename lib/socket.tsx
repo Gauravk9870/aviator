@@ -12,6 +12,9 @@ import {
   setSessionId,
   updateBet,
   setBetId,
+  placeBet,
+  clearPendingBet,
+  setMultipliersStarted,
 } from "@/lib/features/aviatorSlice";
 import { useAudio } from "@/lib/audioContext";
 import { setBalance } from "./features/currencySlice";
@@ -42,6 +45,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
   const [socket, setSocket] = useState<WebSocket | null>(null);
   const { playWelcome, playStarted, playCrashed, stopAll } = useAudio();
   const token = useAppSelector((state) => state.aviator.token ?? "");
+  const pendingBet = useAppSelector((state) => state.aviator.pendingBet);
 
   useEffect(() => {
     const ws = new WebSocket(`${config.ws}`);
@@ -76,14 +80,17 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
           break;
 
         case "STARTED":
-          sendMessageToIframe({ type: "Start", data: data.currentValue });
           playStarted();
+          sendMessageToIframe({ type: "Start", data: data.currentValue });
+          dispatch(setGameStarted());
           break;
+
         case "MULTIPLIER":
           if (
             typeof data.currentMultiplier === "string" &&
             !isNaN(parseFloat(data.currentMultiplier))
           ) {
+            dispatch(setMultipliersStarted());
             dispatch(setCurrentMultiplier(parseFloat(data.currentMultiplier)));
             sendMessageToIframe({
               type: "multiplier",

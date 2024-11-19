@@ -9,81 +9,227 @@ import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import {
   placeBet,
   cashOut,
-  setPendingBet,
-  clearPendingBet,
+  clearPendingBetBySection,
+  removeActiveBetBySection,
+  removePendingBetBySection,
 } from "@/lib/features/aviatorSlice";
 import { useSocket } from "@/lib/socket";
 
 interface BetSectionProps {
-  gameStatus: "waiting" | "started" | "crashed";
-  isBetting: boolean;
-  handleBet: () => void;
-  handleCashOut: () => void;
-  handleCancel: () => void;
   betAmount: number;
   setBetAmount: React.Dispatch<React.SetStateAction<number>>;
   currentMultiplier: number;
+  sectionId: string;
 }
 
 const BetSection: React.FC<BetSectionProps> = ({
-  gameStatus,
-  isBetting,
-  handleBet,
-  handleCashOut,
-  handleCancel,
   betAmount,
   setBetAmount,
   currentMultiplier,
+  sectionId,
 }) => {
+  const [isBetPlaced, setIsBetPlaced] = useState<boolean>(false);
+
+  const dispatch = useAppDispatch();
+  const token = useAppSelector((state) => state.aviator.token ?? "");
+  const user = useAppSelector((state) => state.aviator.user ?? "");
+  const error = useAppSelector((state) => state.aviator.error);
+  const activeBet = useAppSelector(
+    (state) => state.aviator.activeBetsBySection[sectionId]
+  );
+  const gameStatus = useAppSelector((state) => state.aviator.gameStatus);
+  const pendingBetsBySection = useAppSelector(
+    (state) => state.aviator.pendingBetsBySection
+  );
+  const multipliersStarted = useAppSelector(
+    (state) => state.aviator.multipliersStarted
+  );
+
+  const errorMessage = error || null; // Directly derive errorMessage from Redux state
+
   const handleIncrement = () => setBetAmount((prev) => prev + 1);
   const handleDecrement = () =>
     setBetAmount((prev) => (prev > 1 ? prev - 1 : 1));
 
-  const buttonClass = isBetting
+  const buttonClass = isBetPlaced
     ? "bg-[#141516] text-[#ffffff80] cursor-not-allowed opacity-50"
     : "bg-[#141516] text-white";
 
+  const placeBetHandler = async () => {
+    setIsBetPlaced(true);
+    try {
+      const result = await dispatch(
+        placeBet({
+          userId: user,
+          amount: betAmount,
+          sectionId: sectionId,
+          token: token,
+        })
+      ).unwrap();
+      console.log("Bet placed successfully:", result);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsBetPlaced(false);
+    }
+  };
+
+  const cancelBetHandler = async (betId: string) => {
+    try {
+      console.log("Bet canceled successfully");
+      dispatch(removeActiveBetBySection(sectionId));
+      dispatch(removePendingBetBySection(sectionId));
+    } catch (error) {
+      console.error("Error canceling bet:", error);
+    }
+  };
+
+  const cancelPendingBetHandler = (sectionId: string) => {
+    dispatch(clearPendingBetBySection(sectionId)); // Remove the pending bet from Redux
+  };
+
+  const cashoutHandler = async () => {
+    if (activeBet) {
+      try {
+        const result = await dispatch(
+          cashOut({
+            betId: activeBet._id,
+            userId: activeBet.userId,
+            currentMultiplier,
+            sessionId: activeBet.sessionId,
+            sectionId: sectionId, // Assuming "1" is the section ID
+            token,
+          })
+        ).unwrap();
+        console.log("Cash-out successful:", result);
+      } catch (error) {
+        console.error("Error during cash-out:", error);
+      }
+    }
+  };
+
   const renderButton = () => {
-    if (gameStatus === "waiting" && isBetting) {
+    if (pendingBetsBySection[sectionId]) {
+      // Show cancel button and error message for pending bets
       return (
-        <>
-          <span className="mb-1 text-sm text-[#777c7e]">
-            Waiting for the next round
+        <div className="flex flex-col items-center">
+          <span className="mt-2 text-sm text-gray-400">
+            {errorMessage || "Bet is pending. Please wait for the next game."}
           </span>
           <button
-            className="w-[160px] flex items-center justify-center rounded-2xl border shadow-inner bg-red-600 h-14"
-            onClick={handleCancel}
+            className="w-[160px] flex items-center justify-center rounded-2xl border shadow-inner bg-[#ff0000] h-20"
+            onClick={() => cancelPendingBetHandler(sectionId)}
           >
             <span className="text-lg font-normal uppercase text-shadow text-white">
               Cancel
             </span>
           </button>
-        </>
-      );
-    } else if (gameStatus === "started" && isBetting) {
-      return (
-        <button
-          className="w-[160px] flex items-center justify-center rounded-2xl border border-[#ffbd71] shadow-inner bg-[#d07206] h-16 text-white text-center"
-          onClick={handleCashOut}
-        >
-          <span className="text-lg font-normal uppercase">
-            Cash Out <br /> {currentMultiplier}x
-          </span>
-        </button>
-      );
-    } else {
-      return (
-        <button
-          className={`w-[160px] flex items-center justify-center rounded-2xl border shadow-inner bg-[#28a909] h-20`}
-          onClick={handleBet}
-        >
-          <span className="text-lg font-normal uppercase text-shadow text-white">
-            Bet
-          </span>
-        </button>
+        </div>
       );
     }
+
+    if (activeBet && !activeBet.cashedOut) {
+      // If the game is not started yet
+      if (gameStatus !== "started") {
+        return (
+          <div className="flex flex-col items-center">
+            <span className="mt-2 text-sm text-gray-400">
+              Wait for the next round
+            </span>
+            <button
+              className={`w-[160px] flex items-center justify-center rounded-2xl border shadow-inner bg-[#ff0000] h-20`}
+              onClick={() => cancelBetHandler(activeBet._id)}
+            >
+              <span className="text-lg font-normal uppercase text-shadow text-white">
+                Cancel
+              </span>
+            </button>
+          </div>
+        );
+      }
+
+      // If the game is started but multiplier has not started
+      if (gameStatus === "started" && !multipliersStarted) {
+        return (
+          <button
+            className={`w-[160px] flex items-center justify-center rounded-2xl border shadow-inner bg-[#ff0000] h-20`}
+            onClick={() => cancelBetHandler(activeBet._id)}
+          >
+            <span className="text-lg font-normal uppercase text-shadow text-white">
+              Cancel
+            </span>
+          </button>
+        );
+      }
+
+      // If the game is started and multiplier has started
+      if (multipliersStarted) {
+        return (
+          <button
+            className={`w-[160px] flex items-center justify-center rounded-2xl border shadow-inner bg-[#28a909] h-20`}
+            onClick={cashoutHandler}
+          >
+            <span className="text-lg font-normal uppercase text-shadow text-white">
+              Cash Out
+            </span>
+          </button>
+        );
+      }
+    }
+
+    // Default bet button
+    return (
+      <button
+        className={`w-[160px] flex items-center justify-center rounded-2xl border shadow-inner bg-[#28a909] h-20`}
+        onClick={placeBetHandler}
+        disabled={isBetPlaced}
+      >
+        <span className="text-lg font-normal uppercase text-shadow text-white">
+          Bet
+        </span>
+      </button>
+    );
   };
+
+  useEffect(() => {
+    if (gameStatus === "started" && !multipliersStarted) {
+      console.log("Preparing to place pending bets for the next round...");
+
+      Object.keys(pendingBetsBySection).forEach((sectionId) => {
+        const pendingBet = pendingBetsBySection[sectionId];
+        if (pendingBet) {
+          console.log("Trying to place pending bet:", pendingBet.amount);
+          dispatch(
+            placeBet({
+              userId: pendingBet.userId,
+              amount: pendingBet.amount,
+              sectionId,
+              token: pendingBet.token,
+            })
+          )
+            .unwrap()
+            .then(() => {
+              dispatch(clearPendingBetBySection(sectionId)); // Clear on success
+              console.log("Pending bet placed successfully.");
+            })
+            .catch((error) => {
+              // Log or handle error
+              console.error(
+                `Failed to place pending bet for section ${sectionId}:`,
+                error
+              );
+              if (error && typeof error === "object" && "message" in error) {
+                // setErrorMessage(error.message); // Set error message for UI
+                console.log(error.message);
+              } else {
+                // setErrorMessage("An unexpected error occurred.");
+                console.error("An unexpected error occurred.");
+              }
+            });
+        }
+      });
+    }
+  }, [gameStatus, multipliersStarted, pendingBetsBySection, dispatch, token]);
 
   return (
     <div className={`flex flex-col gap-2 w-full mt-2 p-2 rounded-md`}>
@@ -93,7 +239,7 @@ const BetSection: React.FC<BetSectionProps> = ({
             <button
               className={`w-4 h-4 flex items-center justify-center border border-[#ffffff80] rounded-full focus:outline-none ${buttonClass}`}
               onClick={handleDecrement}
-              disabled={isBetting}
+              disabled={isBetPlaced}
             >
               <Minus size={16} stroke="#ffffff80" />
             </button>
@@ -101,7 +247,7 @@ const BetSection: React.FC<BetSectionProps> = ({
             <button
               className={`w-4 h-4 flex items-center justify-center border border-[#ffffff80] rounded-full focus:outline-none ${buttonClass}`}
               onClick={handleIncrement}
-              disabled={isBetting}
+              disabled={isBetPlaced}
             >
               <Plus size={16} stroke="#ffffff80" />
             </button>
@@ -112,7 +258,7 @@ const BetSection: React.FC<BetSectionProps> = ({
                 key={amount}
                 className={`text-sm focus:outline-none rounded-3xl ${buttonClass}`}
                 onClick={() => setBetAmount(amount)}
-                disabled={isBetting}
+                disabled={isBetPlaced}
               >
                 {amount}
               </button>
@@ -133,84 +279,79 @@ interface AutoSectionProps extends BetSectionProps {
   setAutoCashOutAmount: React.Dispatch<React.SetStateAction<number>>;
 }
 
-const AutoSection: React.FC<AutoSectionProps> = ({
-  gameStatus,
-  isBetting,
-  handleBet,
-  handleCashOut,
-  handleCancel,
-  betAmount,
-  setBetAmount,
-  autoCashOut,
-  setAutoCashOut,
-  autoCashOutAmount,
-  setAutoCashOutAmount,
-  currentMultiplier,
-}) => {
-  const [inputValue, setInputValue] = useState(autoCashOutAmount.toFixed(2));
+// const AutoSection: React.FC<AutoSectionProps> = ({
+//   gameStatus,
+//   isBetting,
+//   handleBet,
+//   handleCashOut,
+//   handleCancel,
+//   betAmount,
+//   setBetAmount,
+//   autoCashOut,
+//   setAutoCashOut,
+//   autoCashOutAmount,
+//   setAutoCashOutAmount,
+//   currentMultiplier,
+// }) => {
+//   const [inputValue, setInputValue] = useState(autoCashOutAmount.toFixed(2));
 
-  const handleClearAutoCashOut = () => {
-    setAutoCashOutAmount(0);
-    setInputValue("0.00");
-  };
+//   const handleClearAutoCashOut = () => {
+//     setAutoCashOutAmount(0);
+//     setInputValue("0.00");
+//   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value;
-    value = value.replace(/^0+(?=\d)/, "");
-    if (value === "") value = "0";
-    setInputValue(value);
-    const numValue = parseFloat(value);
-    if (!isNaN(numValue)) {
-      setAutoCashOutAmount(numValue);
-    }
-  };
+//   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+//     let value = e.target.value;
+//     value = value.replace(/^0+(?=\d)/, "");
+//     if (value === "") value = "0";
+//     setInputValue(value);
+//     const numValue = parseFloat(value);
+//     if (!isNaN(numValue)) {
+//       setAutoCashOutAmount(numValue);
+//     }
+//   };
 
-  return (
-    <div className="flex flex-col gap-2 w-full">
-      <BetSection
-        gameStatus={gameStatus}
-        isBetting={isBetting}
-        handleBet={handleBet}
-        handleCashOut={handleCashOut}
-        handleCancel={handleCancel}
-        betAmount={betAmount}
-        setBetAmount={setBetAmount}
-        currentMultiplier={currentMultiplier}
-      />
-      <div className="flex items-center gap-2">
-        <div className="flex-1 flex items-center justify-center rounded-3xl px-3 py-2 gap-2">
-          <div className="flex items-center gap-2">
-            <span className="text-[#9ea0a3] text-sm">Auto Cash Out</span>
-            <Switch
-              checked={autoCashOut}
-              onCheckedChange={setAutoCashOut}
-              className="border-2 border-gray-600 bg-transparent data-[state=checked]:border-[#60ae05] data-[state=checked]:bg-[#229607] data-[state=unchecked]:bg-transparent"
-            />
-          </div>
+//   return (
+//     <div className="flex flex-col gap-2 w-full">
+//       <BetSection
+//         betAmount={betAmount}
+//         setBetAmount={setBetAmount}
+//         currentMultiplier={currentMultiplier}
+//       />
+//       <div className="flex items-center gap-2">
+//         <div className="flex-1 flex items-center justify-center rounded-3xl px-3 py-2 gap-2">
+//           <div className="flex items-center gap-2">
+//             <span className="text-[#9ea0a3] text-sm">Auto Cash Out</span>
+//             <Switch
+//               checked={autoCashOut}
+//               onCheckedChange={setAutoCashOut}
+//               className="border-2 border-gray-600 bg-transparent data-[state=checked]:border-[#60ae05] data-[state=checked]:bg-[#229607] data-[state=unchecked]:bg-transparent"
+//             />
+//           </div>
 
-          <div className="relative">
-            <Input
-              type="text"
-              value={inputValue}
-              onChange={handleInputChange}
-              className="w-[5.7rem] text-white border-none text-right h-auto bg-[#000000b3] outline-none rounded-3xl pr-8 py-1 font-bold focus:border-none focus:outline-none"
-              disabled={!autoCashOut}
-              aria-label="Auto Cash Out Amount"
-            />
-            {autoCashOut && (
-              <button
-                onClick={handleClearAutoCashOut}
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-200"
-              >
-                <X size={16} />
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
+//           <div className="relative">
+//             <Input
+//               type="text"
+//               value={inputValue}
+//               onChange={handleInputChange}
+//               className="w-[5.7rem] text-white border-none text-right h-auto bg-[#000000b3] outline-none rounded-3xl pr-8 py-1 font-bold focus:border-none focus:outline-none"
+//               disabled={!autoCashOut}
+//               aria-label="Auto Cash Out Amount"
+//             />
+//             {autoCashOut && (
+//               <button
+//                 onClick={handleClearAutoCashOut}
+//                 className="absolute right-2 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-200"
+//               >
+//                 <X size={16} />
+//               </button>
+//             )}
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
 
 interface BetControlSectionProps {
   defaultTab?: string;
@@ -374,21 +515,14 @@ const BetControlSection: React.FC<BetControlSectionProps> = ({
         </TabsList>
         <TabsContent value="bet" className="w-full">
           <BetSection
-            gameStatus={gameStatus}
-            isBetting={isBetting}
-            handleBet={handleBet}
-            handleCashOut={handleCashOut}
-            handleCancel={handleCancel}
             betAmount={betAmount}
             setBetAmount={setBetAmount}
             currentMultiplier={currentMultiplier}
+            sectionId={sectionId}
           />
         </TabsContent>
         <TabsContent value="auto" className="w-full">
-          <AutoSection
-            gameStatus={gameStatus}
-            isBetting={isBetting}
-            handleBet={handleBet}
+          {/* <AutoSection
             handleCashOut={handleCashOut}
             handleCancel={handleCancel}
             betAmount={betAmount}
@@ -398,7 +532,7 @@ const BetControlSection: React.FC<BetControlSectionProps> = ({
             autoCashOutAmount={autoCashOutAmount}
             setAutoCashOutAmount={setAutoCashOutAmount}
             currentMultiplier={currentMultiplier}
-          />
+          /> */}
         </TabsContent>
       </Tabs>
     </div>
