@@ -11,7 +11,6 @@ import {
   removeActiveBetBySection,
   removePendingBetBySection,
 } from "@/lib/features/aviatorSlice";
-import { useSocket } from "@/lib/socket";
 import { Switch } from "../ui/switch";
 import { Input } from "../ui/input";
 
@@ -407,10 +406,14 @@ const BetControlSection: React.FC<BetControlSectionProps> = ({
   const { currentMultiplier } = useAppSelector((state) => state.aviator);
   const [betAmount, setBetAmount] = useState<number>(1.0);
   const activeBet = useAppSelector(
-    (state) => state.aviator.activeBetsBySection[sectionId]
+    (state) =>
+      state.aviator.activeBetsBySection[sectionId] ||
+      state.aviator.activeBetsBySection[`${sectionId}_auto`]
   );
   const pendingBet = useAppSelector(
-    (state) => state.aviator.pendingBetsBySection[sectionId]
+    (state) =>
+      state.aviator.pendingBetsBySection[sectionId] ||
+      state.aviator.pendingBetsBySection[`${sectionId}_auto`]
   );
   const [isAutoCashOut, setIsAutoCashOut] = useState<boolean>(false);
   const [autoCashOutAmount, setAutoCashOutAmount] = useState(2);

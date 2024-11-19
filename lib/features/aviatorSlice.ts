@@ -4,20 +4,6 @@ import { config } from "../config";
 import showCashoutNotification from "@/components/layout/Notification";
 
 
-type SetPendingBetPayload = {
-  userId: string;
-  amount: number;
-  sectionId: string;
-};
-
-interface PendingBet {
-  userId: string;
-  amount: number;
-  sectionId: string;
-  token: string;
-}
-
-
 interface Bet {
   userId: string
   amount: number
@@ -67,9 +53,6 @@ interface AviatorState {
   finalMultiplier: number | null
   multiplierHistory: number[]
   bets: Bet[]
-  isBetting: string | null
-  autoCashOut: boolean
-  autoCashOutAmount: number
   error: string | null
   myBets: Bet[];
   topBets: Bet[];
@@ -94,9 +77,6 @@ const initialState: AviatorState = {
   finalMultiplier: null,
   multiplierHistory: [],
   bets: [],
-  isBetting: null,
-  autoCashOut: false,
-  autoCashOutAmount: 2,
   error: null,
   myBets: [],
   topBets: [],
@@ -382,9 +362,7 @@ const aviatorSlice = createSlice({
     setConnectionStatus: (state, action: PayloadAction<boolean>) => {
       state.isConnected = action.payload;
     },
-    setBetPlaced: (state, action: PayloadAction<string | null>) => {
-      state.isBetting = action.payload
-    },
+
 
     setSessionId: (state, action: PayloadAction<string>) => {
       state.sessionId = action.payload;
@@ -394,10 +372,7 @@ const aviatorSlice = createSlice({
       state.currentMultiplier = action.payload;
     },
 
-    resetGame: (state) => {
-      state.currentMultiplier = 1;
-      state.finalMultiplier = null;
-    },
+
     setBets: (state, action: PayloadAction<Bet[]>) => {
       state.bets = action.payload;
     },
@@ -414,15 +389,7 @@ const aviatorSlice = createSlice({
     setBetId: (state, action: PayloadAction<string | null>) => {
       state.bet_id = action.payload;
     },
-    setAutoCashOut: (
-      state,
-      action: PayloadAction<{ enabled: boolean; amount: number; sectionId: string }>
-    ) => {
-      if (state.isBetting === action.payload.sectionId) {
-        state.autoCashOut = action.payload.enabled
-        state.autoCashOutAmount = action.payload.amount
-      }
-    },
+
     setError: (state, action: PayloadAction<string | null>) => {
       state.error = action.payload;
       state.gameStatus = "waiting"
@@ -430,6 +397,7 @@ const aviatorSlice = createSlice({
   },
   extraReducers(builder) {
     builder
+      // PLACE BET
       .addCase(placeBet.pending, (state) => {
         state.error = null;
       })
@@ -473,7 +441,7 @@ const aviatorSlice = createSlice({
         }
       })
 
-      // OLD
+      // CASHOUT
       .addCase(cashOut.pending, (state) => {
         state.error = null;
       })
@@ -488,13 +456,12 @@ const aviatorSlice = createSlice({
         showCashoutNotification(action.meta.arg.currentMultiplier, payout);
         state.error = null;
       })
-    builder.addCase(resetGame, (state) => {
-      state.bet_id = null;
-    })
       .addCase(cashOut.rejected, (state, action) => {
         state.error =
           (action.payload as string) || "An error occurred during cash out";
       })
+
+      // FETCH USER BETS
       .addCase(fetchUserBets.pending, (state) => {
         state.error = null;
       })
@@ -505,6 +472,8 @@ const aviatorSlice = createSlice({
       .addCase(fetchUserBets.rejected, (state, action) => {
         state.error = action.payload as string;
       })
+
+      // FETCH CRASH POINTS
       .addCase(fetchCrashPoints.pending, (state) => {
         state.error = null;
       })
@@ -517,6 +486,7 @@ const aviatorSlice = createSlice({
           (action.payload as string) || "An error occurred while fetching crash points.";
       })
 
+      // FETCH BETS BY USER
       .addCase(fetchBetsByUser.pending, (state) => {
         state.loadingMyBets = true;
         state.error = null;
@@ -531,6 +501,7 @@ const aviatorSlice = createSlice({
         state.error = action.payload as string;
       })
 
+      // FETCH TOP BETS
       .addCase(fetchTopBets.pending, (state) => {
         state.loadingTopBets = true;
         state.error = null;
@@ -559,12 +530,9 @@ export const {
   setGameStarted,
   setCurrentMultiplier,
   setGameCrashed,
-  resetGame,
   setBets,
   updateBet,
-  setAutoCashOut,
   setError,
-  setBetPlaced,
   setBetId,
   setMultipliersStarted,
   resetMultipliersStarted,
