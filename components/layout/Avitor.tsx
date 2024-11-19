@@ -16,7 +16,6 @@ export default function Avitor({ setIsLoading }: AvitorProps) {
 
   const handleLoad = () => {
     setIsLoading(false);
-    
   };
 
   const toggleMenu = useCallback(

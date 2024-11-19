@@ -12,6 +12,7 @@ import {
   setSessionId,
   updateBet,
   setBetId,
+  setMultipliersStarted,
 } from "@/lib/features/aviatorSlice";
 import { useAudio } from "@/lib/audioContext";
 import { setBalance } from "./features/currencySlice";
@@ -76,14 +77,17 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
           break;
 
         case "STARTED":
-          sendMessageToIframe({ type: "Start", data: data.currentValue });
           playStarted();
+          sendMessageToIframe({ type: "Start", data: data.currentValue });
+          dispatch(setGameStarted());
           break;
+
         case "MULTIPLIER":
           if (
             typeof data.currentMultiplier === "string" &&
             !isNaN(parseFloat(data.currentMultiplier))
           ) {
+            dispatch(setMultipliersStarted());
             dispatch(setCurrentMultiplier(parseFloat(data.currentMultiplier)));
             sendMessageToIframe({
               type: "multiplier",

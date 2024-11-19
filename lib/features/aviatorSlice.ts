@@ -4,12 +4,6 @@ import { config } from "../config";
 import showCashoutNotification from "@/components/layout/Notification";
 
 
-type SetPendingBetPayload = {
-  userId: string;
-  amount: number;
-  sectionId: string;
-};
-
 interface Bet {
   userId: string
   amount: number
@@ -25,20 +19,40 @@ interface Bet {
   date: string
 }
 
+
+
 interface AviatorState {
   user: string | null;
   token: string | null;
-  pendingBet: SetPendingBetPayload | null;
+
+  currentMultiplier: number
+  gameStatus: "waiting" | "started" | "crashed"
+  multipliersStarted: boolean;
+  activeBetsBySection: {
+    [sectionId: string]: {
+      userId: string;
+      amount: number;
+      sessionId: string;
+      cashedOut: boolean;
+      cashOutMultiplier: number;
+      _id: string;
+    };
+  };
+  pendingBetsBySection: {
+    [sectionId: string]: {
+      userId: string;
+      amount: number;
+      token: string;
+    };
+  };
+
+
+
   isConnected: boolean
   sessionId: string | null
-  gameStatus: "waiting" | "started" | "crashed"
-  currentMultiplier: number
   finalMultiplier: number | null
   multiplierHistory: number[]
   bets: Bet[]
-  isBetting: string | null
-  autoCashOut: boolean
-  autoCashOutAmount: number
   error: string | null
   myBets: Bet[];
   topBets: Bet[];
@@ -51,17 +65,18 @@ interface AviatorState {
 const initialState: AviatorState = {
   user: null,
   token: null,
-  pendingBet: null,
+
+  currentMultiplier: 1,
+  gameStatus: "waiting",
+  multipliersStarted: false,
+  activeBetsBySection: {}, // Initialize empty mapping
+  pendingBetsBySection: {},
+
   isConnected: false,
   sessionId: null,
-  gameStatus: "waiting",
-  currentMultiplier: 1,
   finalMultiplier: null,
   multiplierHistory: [],
   bets: [],
-  isBetting: null,
-  autoCashOut: false,
-  autoCashOutAmount: 2,
   error: null,
   myBets: [],
   topBets: [],
@@ -84,7 +99,6 @@ export const placeBet = createAsyncThunk(
     }: {
       userId: string;
       amount: number;
-      socket?: WebSocket | null;
       sectionId: string
       token: string;
     },
@@ -125,16 +139,12 @@ export const cashOut = createAsyncThunk(
       betId,
       userId,
       currentMultiplier,
-      socket,
-      sessionId,
       sectionId,
       token,
     }: {
       betId: string
       userId: string;
       currentMultiplier: number;
-      socket: WebSocket;
-      sessionId: string | null;
       sectionId: string;
       token: string;
     },
@@ -152,20 +162,6 @@ export const cashOut = createAsyncThunk(
 
       if (response.data.status) {
         const payout = response.data.payout;
-        if (socket && socket.readyState === WebSocket.OPEN) {
-          socket.send(
-            JSON.stringify({
-              type: "CASHED_OUT_BETS",
-              data: {
-                userId,
-                amount: payout,
-                sessionId,
-                cashedOut: true,
-                cashOutMultiplier: currentMultiplier,
-              },
-            })
-          );
-        }
 
         return { payout, sectionId };
       } else {
@@ -295,51 +291,86 @@ const aviatorSlice = createSlice({
   name: "aviator",
   initialState,
   reducers: {
+    setPendingBetBySection: (
+      state,
+      action: PayloadAction<{
+        sectionId: string;
+        userId: string;
+        amount: number;
+        token: string;
+      }>
+    ) => {
+      const { sectionId, userId, amount, token } = action.payload;
+      state.pendingBetsBySection[sectionId] = { userId, amount, token };
+    },
+    clearPendingBetBySection: (state, action: PayloadAction<string>) => {
+      const sectionId = action.payload;
+      delete state.pendingBetsBySection[sectionId];
+    },
+
+    setGameStarted: (state) => {
+      state.gameStatus = "started";
+      state.currentMultiplier = 1;
+      state.finalMultiplier = null;
+    },
+
+    setMultipliersStarted: (state) => {
+      state.multipliersStarted = true;
+    },
+    resetMultipliersStarted: (state) => {
+      state.multipliersStarted = false;
+    },
+
+    setWaiting: (state) => {
+      state.gameStatus = "waiting"
+      state.multipliersStarted = false;
+    },
+
+    setGameCrashed: (state, action: PayloadAction<number>) => {
+      state.gameStatus = "crashed";
+      state.finalMultiplier = action.payload;
+      state.multiplierHistory.push(action.payload);
+      state.multipliersStarted = false; // Reset multipliersStarted
+      state.activeBetsBySection = {}
+
+    },
+
+    removeActiveBetBySection: (state, action: PayloadAction<string>) => {
+      const sectionId = action.payload;
+      delete state.activeBetsBySection[sectionId];
+    },
+
+    removePendingBetBySection: (state, action: PayloadAction<string>) => {
+      const sectionId = action.payload;
+      delete state.pendingBetsBySection[sectionId];
+    },
+
+    //OLD
     setUser: (state, action: PayloadAction<string | null>) => {
       state.user = action.payload;
     },
     setToken: (state, action: PayloadAction<string | null>) => {
       state.token = action.payload;
     },
-    setPendingBet: (state, action: PayloadAction<SetPendingBetPayload>) => {
-      state.pendingBet = action.payload;
-    },
+
     clearTopBets: (state) => {
       state.topBets = [];
     },
-    clearPendingBet: (state) => {
-      state.pendingBet = null;
-    },
+
     setConnectionStatus: (state, action: PayloadAction<boolean>) => {
       state.isConnected = action.payload;
     },
-    setBetPlaced: (state, action: PayloadAction<string | null>) => {
-      state.isBetting = action.payload
-    },
-    setWaiting: (state) => {
-      state.gameStatus = "waiting"
-    },
+
+
     setSessionId: (state, action: PayloadAction<string>) => {
       state.sessionId = action.payload;
     },
-    setGameStarted: (state) => {
-      state.gameStatus = "started";
-      state.currentMultiplier = 1;
-      state.finalMultiplier = null;
-    },
+
     setCurrentMultiplier: (state, action: PayloadAction<number>) => {
       state.currentMultiplier = action.payload;
     },
-    setGameCrashed: (state, action: PayloadAction<number>) => {
-      state.gameStatus = "crashed";
-      state.finalMultiplier = action.payload;
-      state.multiplierHistory.push(action.payload);
-      state.isBetting = null;
-    },
-    resetGame: (state) => {
-      state.currentMultiplier = 1;
-      state.finalMultiplier = null;
-    },
+
+
     setBets: (state, action: PayloadAction<Bet[]>) => {
       state.bets = action.payload;
     },
@@ -356,15 +387,7 @@ const aviatorSlice = createSlice({
     setBetId: (state, action: PayloadAction<string | null>) => {
       state.bet_id = action.payload;
     },
-    setAutoCashOut: (
-      state,
-      action: PayloadAction<{ enabled: boolean; amount: number; sectionId: string }>
-    ) => {
-      if (state.isBetting === action.payload.sectionId) {
-        state.autoCashOut = action.payload.enabled
-        state.autoCashOutAmount = action.payload.amount
-      }
-    },
+
     setError: (state, action: PayloadAction<string | null>) => {
       state.error = action.payload;
       state.gameStatus = "waiting"
@@ -372,43 +395,71 @@ const aviatorSlice = createSlice({
   },
   extraReducers(builder) {
     builder
+      // PLACE BET
       .addCase(placeBet.pending, (state) => {
         state.error = null;
       })
-    builder.addCase(placeBet.fulfilled, (state, action) => {
-      state.bets.push(action.payload.bet);
-      state.isBetting = action.payload.sectionId;
-      state.bet_id = action.payload.bet._id;
-      state.error = null;
-    })
+      .addCase(placeBet.fulfilled, (state, action) => {
+        const { bet, sectionId } = action.payload;
+
+        // Add the active bet to the corresponding section
+        state.activeBetsBySection[sectionId] = {
+          userId: bet.userId,
+          amount: bet.amount,
+          sessionId: bet.sessionId,
+          cashedOut: bet.cashedOut,
+          cashOutMultiplier: bet.cashOutMultiplier,
+          _id: bet._id,
+        };
+
+        console.log("Bet Added to active bet")
+        console.log(`${sectionId} : ${bet}`)
+
+        // Add bet to the bets array
+        state.bets.push(action.payload.bet);
+        state.error = null;
+      })
 
       .addCase(placeBet.rejected, (state, action) => {
-        state.error = action.payload as string;
+        const { sectionId, userId, amount, token } = action.meta.arg;
+
+        // Check if the error is "Please wait for the next game."
+        if (
+          action.payload &&
+          typeof action.payload === "object" &&
+          "error" in action.payload &&
+          action.payload.error === "Please wait for the next game."
+        ) {
+          // Store the pending bet for the section
+          state.pendingBetsBySection[sectionId] = { userId, amount, token };
+          state.error = "Bet is pending. Please wait for the next game."; // Set specific error message
+          console.warn("Bet is held, will retry when the game starts.");
+        } else {
+          state.error = action.payload as string;
+        }
       })
+
+      // CASHOUT
       .addCase(cashOut.pending, (state) => {
         state.error = null;
       })
       .addCase(cashOut.fulfilled, (state, action) => {
-        state.isBetting = null;
-        const betIndex = state.bets.findIndex(
-          (bet) => bet.userId === action.meta.arg.userId
-        );
-        if (betIndex !== -1) {
-          const bet = state.bets[betIndex];
-          bet.cashedOut = true;
-          bet.cashOutMultiplier = action.meta.arg.currentMultiplier;
-          state.bet_id = null;
-          showCashoutNotification(bet.cashOutMultiplier, action.payload.payout)
+        const { sectionId, payout } = action.payload;
+
+        // Reset the active bet for the specific section
+        if (state.activeBetsBySection[sectionId]) {
+          delete state.activeBetsBySection[sectionId];
         }
+
+        showCashoutNotification(action.meta.arg.currentMultiplier, payout);
         state.error = null;
       })
-    builder.addCase(resetGame, (state) => {
-      state.bet_id = null;
-    })
       .addCase(cashOut.rejected, (state, action) => {
         state.error =
           (action.payload as string) || "An error occurred during cash out";
       })
+
+      // FETCH USER BETS
       .addCase(fetchUserBets.pending, (state) => {
         state.error = null;
       })
@@ -419,6 +470,8 @@ const aviatorSlice = createSlice({
       .addCase(fetchUserBets.rejected, (state, action) => {
         state.error = action.payload as string;
       })
+
+      // FETCH CRASH POINTS
       .addCase(fetchCrashPoints.pending, (state) => {
         state.error = null;
       })
@@ -431,6 +484,7 @@ const aviatorSlice = createSlice({
           (action.payload as string) || "An error occurred while fetching crash points.";
       })
 
+      // FETCH BETS BY USER
       .addCase(fetchBetsByUser.pending, (state) => {
         state.loadingMyBets = true;
         state.error = null;
@@ -445,6 +499,7 @@ const aviatorSlice = createSlice({
         state.error = action.payload as string;
       })
 
+      // FETCH TOP BETS
       .addCase(fetchTopBets.pending, (state) => {
         state.loadingTopBets = true;
         state.error = null;
@@ -465,21 +520,22 @@ export const {
   setUser,
   setToken,
   clearTopBets,
-  setPendingBet,
-  clearPendingBet,
+  setPendingBetBySection,
+  clearPendingBetBySection,
   setConnectionStatus,
   setSessionId,
   setWaiting,
   setGameStarted,
   setCurrentMultiplier,
   setGameCrashed,
-  resetGame,
   setBets,
   updateBet,
-  setAutoCashOut,
   setError,
-  setBetPlaced,
-  setBetId
+  setBetId,
+  setMultipliersStarted,
+  resetMultipliersStarted,
+  removeActiveBetBySection,
+  removePendingBetBySection,
 } = aviatorSlice.actions;
 
 export default aviatorSlice.reducer;
