@@ -44,8 +44,6 @@ const BetSection: React.FC<BetSectionProps> = ({
     (state) => state.aviator.multipliersStarted
   );
 
-  const errorMessage = error || null; // Directly derive errorMessage from Redux state
-
   const handleIncrement = () => setBetAmount((prev) => prev + 1);
   const handleDecrement = () =>
     setBetAmount((prev) => (prev > 1 ? prev - 1 : 1));
@@ -73,7 +71,7 @@ const BetSection: React.FC<BetSectionProps> = ({
     }
   };
 
-  const cancelBetHandler = async (betId: string) => {
+  const cancelBetHandler = async () => {
     try {
       console.log("Bet canceled successfully");
       dispatch(removeActiveBetBySection(sectionId));
@@ -95,7 +93,6 @@ const BetSection: React.FC<BetSectionProps> = ({
             betId: activeBet._id,
             userId: activeBet.userId,
             currentMultiplier,
-            sessionId: activeBet.sessionId,
             sectionId: sectionId, // Assuming "1" is the section ID
             token,
           })
@@ -137,7 +134,7 @@ const BetSection: React.FC<BetSectionProps> = ({
             </span>
             <button
               className="w-[160px] flex items-center justify-center rounded-2xl border shadow-inner bg-red-600 h-14"
-              onClick={() => cancelBetHandler(activeBet._id)}
+              onClick={() => cancelBetHandler()}
             >
               <span className="text-lg font-normal uppercase text-shadow text-white">
                 Cancel
@@ -152,7 +149,7 @@ const BetSection: React.FC<BetSectionProps> = ({
         return (
           <button
             className="w-[160px] flex items-center justify-center rounded-2xl border shadow-inner bg-red-600 h-20"
-            onClick={() => cancelBetHandler(activeBet._id)}
+            onClick={() => cancelBetHandler()}
           >
             <span className="text-lg font-normal uppercase text-shadow text-white">
               Cancel
@@ -329,7 +326,6 @@ const AutoSection: React.FC<AutoSectionProps> = ({
           betId: activeBet._id,
           userId: activeBet.userId,
           currentMultiplier,
-          sessionId: activeBet.sessionId,
           sectionId,
           token: token,
         })

@@ -139,14 +139,12 @@ export const cashOut = createAsyncThunk(
       betId,
       userId,
       currentMultiplier,
-      sessionId,
       sectionId,
       token,
     }: {
       betId: string
       userId: string;
       currentMultiplier: number;
-      sessionId: string | null;
       sectionId: string;
       token: string;
     },
