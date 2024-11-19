@@ -397,27 +397,30 @@ const AutoSection: React.FC<AutoSectionProps> = ({
 
 interface BetControlSectionProps {
   defaultTab?: string;
-  userId: string;
   sectionId: string;
 }
 
 const BetControlSection: React.FC<BetControlSectionProps> = ({
   defaultTab = "bet",
-  userId,
   sectionId,
 }) => {
-  const dispatch = useAppDispatch();
-  const { currentMultiplier, gameStatus, sessionId, bet_id, token } =
-    useAppSelector((state) => state.aviator);
+  const { currentMultiplier } = useAppSelector((state) => state.aviator);
   const [betAmount, setBetAmount] = useState<number>(1.0);
-  const [isBetting, setIsBetting] = useState(false);
+  const activeBet = useAppSelector(
+    (state) => state.aviator.activeBetsBySection[sectionId]
+  );
+  const pendingBet = useAppSelector(
+    (state) => state.aviator.pendingBetsBySection[sectionId]
+  );
   const [isAutoCashOut, setIsAutoCashOut] = useState<boolean>(false);
   const [autoCashOutAmount, setAutoCashOutAmount] = useState(2);
 
   return (
     <div
       className={`flex-1 px-4 lg:px-10 py-4 rounded-md bg-[#222222] ${
-        isBetting ? "border-2 border-red-500" : "border-2 border-transparent"
+        activeBet || pendingBet
+          ? "border-2 border-red-500"
+          : "border-2 border-transparent"
       }`}
     >
       <Tabs
@@ -463,23 +466,11 @@ const BetControlSection: React.FC<BetControlSectionProps> = ({
   );
 };
 
-interface BetControlProps {
-  userId: string;
-}
-
-const BetControl: React.FC<BetControlProps> = ({ userId }) => {
+const BetControl: React.FC = () => {
   return (
     <div className="flex flex-col lg:flex-row justify-end gap-2 pt-2 pb-2 lg:pb-0">
-      <BetControlSection
-        defaultTab="bet"
-        userId={userId}
-        sectionId="section1"
-      />
-      <BetControlSection
-        defaultTab="bet"
-        userId={userId}
-        sectionId="section2"
-      />
+      <BetControlSection defaultTab="bet" sectionId="section1" />
+      <BetControlSection defaultTab="bet" sectionId="section2" />
     </div>
   );
 };
