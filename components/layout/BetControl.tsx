@@ -2,8 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import { Minus, Plus, X } from "lucide-react";
-import { Switch } from "@/components/ui/switch";
-import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import {
@@ -112,19 +110,19 @@ const BetSection: React.FC<BetSectionProps> = ({
     if (pendingBetsBySection[sectionId]) {
       // Show cancel button and error message for pending bets
       return (
-        <div className="flex flex-col items-center">
-          <span className="mt-2 text-sm text-gray-400">
-            {errorMessage || "Bet is pending. Please wait for the next game."}
+        <>
+          <span className="mb-1 text-sm text-[#777c7e]">
+            Waiting for the next round
           </span>
           <button
-            className="w-[160px] flex items-center justify-center rounded-2xl border shadow-inner bg-[#ff0000] h-20"
+            className="w-[160px] flex items-center justify-center rounded-2xl border shadow-inner bg-red-600 h-14"
             onClick={() => cancelPendingBetHandler(sectionId)}
           >
             <span className="text-lg font-normal uppercase text-shadow text-white">
               Cancel
             </span>
           </button>
-        </div>
+        </>
       );
     }
 
@@ -132,19 +130,19 @@ const BetSection: React.FC<BetSectionProps> = ({
       // If the game is not started yet
       if (gameStatus !== "started") {
         return (
-          <div className="flex flex-col items-center">
-            <span className="mt-2 text-sm text-gray-400">
-              Wait for the next round
+          <>
+            <span className="mb-1 text-sm text-[#777c7e]">
+              Waiting for the next round
             </span>
             <button
-              className={`w-[160px] flex items-center justify-center rounded-2xl border shadow-inner bg-[#ff0000] h-20`}
+              className="w-[160px] flex items-center justify-center rounded-2xl border shadow-inner bg-red-600 h-14"
               onClick={() => cancelBetHandler(activeBet._id)}
             >
               <span className="text-lg font-normal uppercase text-shadow text-white">
                 Cancel
               </span>
             </button>
-          </div>
+          </>
         );
       }
 
@@ -152,7 +150,7 @@ const BetSection: React.FC<BetSectionProps> = ({
       if (gameStatus === "started" && !multipliersStarted) {
         return (
           <button
-            className={`w-[160px] flex items-center justify-center rounded-2xl border shadow-inner bg-[#ff0000] h-20`}
+            className="w-[160px] flex items-center justify-center rounded-2xl border shadow-inner bg-red-600 h-20"
             onClick={() => cancelBetHandler(activeBet._id)}
           >
             <span className="text-lg font-normal uppercase text-shadow text-white">
@@ -166,11 +164,11 @@ const BetSection: React.FC<BetSectionProps> = ({
       if (multipliersStarted) {
         return (
           <button
-            className={`w-[160px] flex items-center justify-center rounded-2xl border shadow-inner bg-[#28a909] h-20`}
+            className="w-[160px] flex items-center justify-center rounded-2xl border border-[#ffbd71] shadow-inner bg-[#d07206] h-20 text-white text-center"
             onClick={cashoutHandler}
           >
-            <span className="text-lg font-normal uppercase text-shadow text-white">
-              Cash Out
+            <span className="text-lg font-normal uppercase">
+              Cash Out <br /> {currentMultiplier}x
             </span>
           </button>
         );
@@ -365,86 +363,13 @@ const BetControlSection: React.FC<BetControlSectionProps> = ({
   sectionId,
 }) => {
   const dispatch = useAppDispatch();
-  const {
-    currentMultiplier,
-    gameStatus,
-    sessionId,
-    bet_id,
-    pendingBet,
-    token,
-  } = useAppSelector((state) => state.aviator);
+  const { currentMultiplier, gameStatus, sessionId, bet_id, token } =
+    useAppSelector((state) => state.aviator);
   const [betAmount, setBetAmount] = useState<number>(1.0);
   const [isBetting, setIsBetting] = useState(false);
   const [autoCashOut, setAutoCashOut] = useState(false);
   const [autoCashOutAmount, setAutoCashOutAmount] = useState(2);
   const { socket } = useSocket();
-
-  const handleBet = () => {
-    console.log("clickede");
-    console.log(gameStatus);
-    if (gameStatus === "waiting" && !isBetting) {
-      dispatch(setPendingBet({ userId, amount: betAmount, sectionId }));
-      setIsBetting(true);
-      console.log("Bet is pending until the game starts.");
-    } else if (gameStatus === "started" && !isBetting && !pendingBet && token) {
-      dispatch(
-        placeBet({ userId, amount: betAmount, socket, sectionId, token })
-      );
-      setIsBetting(true);
-    }
-  };
-
-  const handleCashOut = () => {
-    if (isBetting && socket) {
-      if (bet_id && token) {
-        dispatch(
-          cashOut({
-            betId: bet_id,
-            userId,
-            currentMultiplier,
-            socket,
-            sessionId,
-            sectionId,
-            token,
-          })
-        );
-        setIsBetting(false);
-        clearPendingBet();
-      } else {
-        console.error("No bet_id found in Redux!");
-      }
-    }
-  };
-
-  const handleCancel = () => {
-    if (isBetting) {
-      setIsBetting(false);
-      clearPendingBet();
-    }
-  };
-
-  useEffect(() => {
-    if (gameStatus === "started" && isBetting && pendingBet && token) {
-      const { userId, amount, sectionId } = pendingBet;
-      console.log("Placing pending bet:", pendingBet);
-
-      dispatch(placeBet({ userId, amount, socket, sectionId, token }));
-      dispatch(clearPendingBet());
-    }
-  }, [gameStatus, isBetting, pendingBet, dispatch, socket, token]);
-
-  useEffect(() => {
-    if (gameStatus === "crashed" && isBetting) {
-      if (!pendingBet) {
-        console.log("Clearing state on crash with no pending bet.");
-        dispatch(clearPendingBet());
-      }
-    }
-  }, [gameStatus, pendingBet, dispatch, isBetting]);
-
-  useEffect(() => {
-    console.log("isBetting:", isBetting, "gameStatus:", gameStatus);
-  }, [isBetting, gameStatus]);
 
   useEffect(() => {
     if (
@@ -461,14 +386,12 @@ const BetControlSection: React.FC<BetControlSectionProps> = ({
               betId: bet_id,
               userId,
               currentMultiplier,
-              socket,
               sessionId,
               sectionId,
               token,
             })
           );
           setIsBetting(false);
-          clearPendingBet();
         } else {
           console.error("No bet_id found in Redux!");
         }

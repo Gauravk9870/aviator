@@ -12,8 +12,6 @@ import {
   setSessionId,
   updateBet,
   setBetId,
-  placeBet,
-  clearPendingBet,
   setMultipliersStarted,
 } from "@/lib/features/aviatorSlice";
 import { useAudio } from "@/lib/audioContext";
@@ -45,7 +43,6 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
   const [socket, setSocket] = useState<WebSocket | null>(null);
   const { playWelcome, playStarted, playCrashed, stopAll } = useAudio();
   const token = useAppSelector((state) => state.aviator.token ?? "");
-  const pendingBet = useAppSelector((state) => state.aviator.pendingBet);
 
   useEffect(() => {
     const ws = new WebSocket(`${config.ws}`);
