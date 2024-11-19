@@ -12,6 +12,8 @@ import {
   removePendingBetBySection,
 } from "@/lib/features/aviatorSlice";
 import { useSocket } from "@/lib/socket";
+import { Switch } from "../ui/switch";
+import { Input } from "../ui/input";
 
 interface BetSectionProps {
   betAmount: number;
@@ -271,85 +273,127 @@ const BetSection: React.FC<BetSectionProps> = ({
 };
 
 interface AutoSectionProps extends BetSectionProps {
-  autoCashOut: boolean;
-  setAutoCashOut: React.Dispatch<React.SetStateAction<boolean>>;
+  isAutoCashOut: boolean;
+  setIsAutoCashOut: React.Dispatch<React.SetStateAction<boolean>>;
   autoCashOutAmount: number;
   setAutoCashOutAmount: React.Dispatch<React.SetStateAction<number>>;
 }
 
-// const AutoSection: React.FC<AutoSectionProps> = ({
-//   gameStatus,
-//   isBetting,
-//   handleBet,
-//   handleCashOut,
-//   handleCancel,
-//   betAmount,
-//   setBetAmount,
-//   autoCashOut,
-//   setAutoCashOut,
-//   autoCashOutAmount,
-//   setAutoCashOutAmount,
-//   currentMultiplier,
-// }) => {
-//   const [inputValue, setInputValue] = useState(autoCashOutAmount.toFixed(2));
+const AutoSection: React.FC<AutoSectionProps> = ({
+  betAmount,
+  setBetAmount,
+  currentMultiplier,
+  sectionId,
+  isAutoCashOut,
+  setIsAutoCashOut,
+  autoCashOutAmount,
+  setAutoCashOutAmount,
+}) => {
+  const [inputValue, setInputValue] = useState(autoCashOutAmount.toFixed(2));
+  const dispatch = useAppDispatch();
+  const activeBet = useAppSelector(
+    (state) => state.aviator.activeBetsBySection[sectionId]
+  );
+  const token = useAppSelector((state) => state.aviator.token ?? "");
 
-//   const handleClearAutoCashOut = () => {
-//     setAutoCashOutAmount(0);
-//     setInputValue("0.00");
-//   };
+  const handleClearAutoCashOut = () => {
+    setAutoCashOutAmount(0);
+    setInputValue("0.00");
+  };
 
-//   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-//     let value = e.target.value;
-//     value = value.replace(/^0+(?=\d)/, "");
-//     if (value === "") value = "0";
-//     setInputValue(value);
-//     const numValue = parseFloat(value);
-//     if (!isNaN(numValue)) {
-//       setAutoCashOutAmount(numValue);
-//     }
-//   };
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value;
+    value = value.replace(/^0+(?=\d)/, "");
+    if (value === "") value = "0";
+    setInputValue(value);
+    const numValue = parseFloat(value);
+    if (!isNaN(numValue)) {
+      setAutoCashOutAmount(numValue);
+    }
+  };
 
-//   return (
-//     <div className="flex flex-col gap-2 w-full">
-//       <BetSection
-//         betAmount={betAmount}
-//         setBetAmount={setBetAmount}
-//         currentMultiplier={currentMultiplier}
-//       />
-//       <div className="flex items-center gap-2">
-//         <div className="flex-1 flex items-center justify-center rounded-3xl px-3 py-2 gap-2">
-//           <div className="flex items-center gap-2">
-//             <span className="text-[#9ea0a3] text-sm">Auto Cash Out</span>
-//             <Switch
-//               checked={autoCashOut}
-//               onCheckedChange={setAutoCashOut}
-//               className="border-2 border-gray-600 bg-transparent data-[state=checked]:border-[#60ae05] data-[state=checked]:bg-[#229607] data-[state=unchecked]:bg-transparent"
-//             />
-//           </div>
+  useEffect(() => {
+    // Automatically cash out when conditions are met
+    console.log("isAutoCashout : ", isAutoCashOut);
+    console.log("activeBet : ", activeBet);
+    console.log("currentMultiplier : ", currentMultiplier);
+    console.log("autoCashoutAmount : ", autoCashOutAmount);
+    if (
+      isAutoCashOut &&
+      activeBet &&
+      !activeBet.cashedOut &&
+      currentMultiplier >= autoCashOutAmount
+    ) {
+      console.log(`Auto cashout triggered at multiplier ${currentMultiplier}`);
+      dispatch(
+        cashOut({
+          betId: activeBet._id,
+          userId: activeBet.userId,
+          currentMultiplier,
+          sessionId: activeBet.sessionId,
+          sectionId,
+          token: token,
+        })
+      )
+        .unwrap()
+        .then(() => {
+          console.log("Auto cashout successful!");
+        })
+        .catch((error) => {
+          console.error("Error during auto cashout:", error);
+        });
+    }
+  }, [
+    isAutoCashOut,
+    currentMultiplier,
+    autoCashOutAmount,
+    activeBet,
+    dispatch,
+    sectionId,
+  ]);
 
-//           <div className="relative">
-//             <Input
-//               type="text"
-//               value={inputValue}
-//               onChange={handleInputChange}
-//               className="w-[5.7rem] text-white border-none text-right h-auto bg-[#000000b3] outline-none rounded-3xl pr-8 py-1 font-bold focus:border-none focus:outline-none"
-//               disabled={!autoCashOut}
-//               aria-label="Auto Cash Out Amount"
-//             />
-//             {autoCashOut && (
-//               <button
-//                 onClick={handleClearAutoCashOut}
-//                 className="absolute right-2 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-200"
-//               >
-//                 <X size={16} />
-//               </button>
-//             )}
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
+  return (
+    <div className="flex flex-col gap-2 w-full">
+      <BetSection
+        betAmount={betAmount}
+        setBetAmount={setBetAmount}
+        currentMultiplier={currentMultiplier}
+        sectionId={`${sectionId}`}
+      />
+      <div className="flex items-center gap-2">
+        <div className="flex-1 flex items-center justify-center rounded-3xl px-3 py-2 gap-2">
+          <div className="flex items-center gap-2">
+            <span className="text-[#9ea0a3] text-sm">Auto Cash Out</span>
+            <Switch
+              checked={isAutoCashOut}
+              onCheckedChange={setIsAutoCashOut}
+              className="border-2 border-gray-600 bg-transparent data-[state=checked]:border-[#60ae05] data-[state=checked]:bg-[#229607] data-[state=unchecked]:bg-transparent"
+            />
+          </div>
+
+          <div className="relative">
+            <Input
+              type="text"
+              value={inputValue}
+              onChange={handleInputChange}
+              className="w-[5.7rem] text-white border-none text-right h-auto bg-[#000000b3] outline-none rounded-3xl pr-8 py-1 font-bold focus:border-none focus:outline-none"
+              disabled={!isAutoCashOut}
+              aria-label="Auto Cash Out Amount"
+            />
+            {isAutoCashOut && (
+              <button
+                onClick={handleClearAutoCashOut}
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-200"
+              >
+                <X size={16} />
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 interface BetControlSectionProps {
   defaultTab?: string;
@@ -367,50 +411,8 @@ const BetControlSection: React.FC<BetControlSectionProps> = ({
     useAppSelector((state) => state.aviator);
   const [betAmount, setBetAmount] = useState<number>(1.0);
   const [isBetting, setIsBetting] = useState(false);
-  const [autoCashOut, setAutoCashOut] = useState(false);
+  const [isAutoCashOut, setIsAutoCashOut] = useState<boolean>(false);
   const [autoCashOutAmount, setAutoCashOutAmount] = useState(2);
-  const { socket } = useSocket();
-
-  useEffect(() => {
-    if (
-      autoCashOut &&
-      isBetting &&
-      gameStatus === "started" &&
-      currentMultiplier >= autoCashOutAmount &&
-      socket
-    ) {
-      if (isBetting && socket) {
-        if (bet_id && token) {
-          dispatch(
-            cashOut({
-              betId: bet_id,
-              userId,
-              currentMultiplier,
-              sessionId,
-              sectionId,
-              token,
-            })
-          );
-          setIsBetting(false);
-        } else {
-          console.error("No bet_id found in Redux!");
-        }
-      }
-    }
-  }, [
-    autoCashOut,
-    autoCashOutAmount,
-    currentMultiplier,
-    dispatch,
-    userId,
-    isBetting,
-    gameStatus,
-    socket,
-    sessionId,
-    sectionId,
-    bet_id,
-    token,
-  ]);
 
   return (
     <div
@@ -445,17 +447,16 @@ const BetControlSection: React.FC<BetControlSectionProps> = ({
           />
         </TabsContent>
         <TabsContent value="auto" className="w-full">
-          {/* <AutoSection
-            handleCashOut={handleCashOut}
-            handleCancel={handleCancel}
+          <AutoSection
             betAmount={betAmount}
             setBetAmount={setBetAmount}
-            autoCashOut={autoCashOut}
-            setAutoCashOut={setAutoCashOut}
+            currentMultiplier={currentMultiplier}
+            sectionId={`${sectionId}_auto`}
+            isAutoCashOut={isAutoCashOut}
+            setIsAutoCashOut={setIsAutoCashOut}
             autoCashOutAmount={autoCashOutAmount}
             setAutoCashOutAmount={setAutoCashOutAmount}
-            currentMultiplier={currentMultiplier}
-          /> */}
+          />
         </TabsContent>
       </Tabs>
     </div>
