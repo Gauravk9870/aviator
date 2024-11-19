@@ -32,7 +32,6 @@ const BetSection: React.FC<BetSectionProps> = ({
   const dispatch = useAppDispatch();
   const token = useAppSelector((state) => state.aviator.token ?? "");
   const user = useAppSelector((state) => state.aviator.user ?? "");
-  const error = useAppSelector((state) => state.aviator.error);
   const activeBet = useAppSelector(
     (state) => state.aviator.activeBetsBySection[sectionId]
   );
