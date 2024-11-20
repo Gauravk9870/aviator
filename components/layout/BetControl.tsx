@@ -35,6 +35,9 @@ const BetSection: React.FC<BetSectionProps> = ({
   const activeBet = useAppSelector(
     (state) => state.aviator.activeBetsBySection[sectionId]
   );
+  const pendingBet = useAppSelector(
+    (state) => state.aviator.pendingBetsBySection[sectionId]
+  );
   const gameStatus = useAppSelector((state) => state.aviator.gameStatus);
   const pendingBetsBySection = useAppSelector(
     (state) => state.aviator.pendingBetsBySection
@@ -222,7 +225,7 @@ const BetSection: React.FC<BetSectionProps> = ({
     }
   }, [gameStatus, multipliersStarted, pendingBetsBySection, dispatch, token]);
 
-  const isDisabled = Boolean(activeBet || pendingBetsBySection);
+  const isDisabled = Boolean(activeBet || pendingBet);
 
   const buttonClass = isDisabled
     ? "bg-[#141516] text-[#ffffff80] cursor-not-allowed opacity-50"
