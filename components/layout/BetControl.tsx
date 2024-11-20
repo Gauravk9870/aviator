@@ -47,10 +47,6 @@ const BetSection: React.FC<BetSectionProps> = ({
   const handleDecrement = () =>
     setBetAmount((prev) => (prev > 1 ? prev - 1 : 1));
 
-  const buttonClass = isBetPlaced
-    ? "bg-[#141516] text-[#ffffff80] cursor-not-allowed opacity-50"
-    : "bg-[#141516] text-white";
-
   const placeBetHandler = async () => {
     setIsBetPlaced(true);
     try {
@@ -226,6 +222,12 @@ const BetSection: React.FC<BetSectionProps> = ({
     }
   }, [gameStatus, multipliersStarted, pendingBetsBySection, dispatch, token]);
 
+  const isDisabled = Boolean(activeBet || pendingBetsBySection);
+
+  const buttonClass = isDisabled
+    ? "bg-[#141516] text-[#ffffff80] cursor-not-allowed opacity-50"
+    : "bg-[#141516] text-white";
+
   return (
     <div className={`flex flex-col gap-2 w-full mt-2 p-2 rounded-md`}>
       <div className="flex gap-1 items-center relative">
@@ -234,7 +236,7 @@ const BetSection: React.FC<BetSectionProps> = ({
             <button
               className={`w-4 h-4 flex items-center justify-center border border-[#ffffff80] rounded-full focus:outline-none ${buttonClass}`}
               onClick={handleDecrement}
-              disabled={isBetPlaced}
+              disabled={isDisabled}
             >
               <Minus size={16} stroke="#ffffff80" />
             </button>
@@ -242,7 +244,7 @@ const BetSection: React.FC<BetSectionProps> = ({
             <button
               className={`w-4 h-4 flex items-center justify-center border border-[#ffffff80] rounded-full focus:outline-none ${buttonClass}`}
               onClick={handleIncrement}
-              disabled={isBetPlaced}
+              disabled={isDisabled}
             >
               <Plus size={16} stroke="#ffffff80" />
             </button>
@@ -253,7 +255,7 @@ const BetSection: React.FC<BetSectionProps> = ({
                 key={amount}
                 className={`text-sm focus:outline-none rounded-3xl ${buttonClass}`}
                 onClick={() => setBetAmount(amount)}
-                disabled={isBetPlaced}
+                disabled={isDisabled}
               >
                 {amount}
               </button>
