@@ -289,6 +289,9 @@ const AutoSection: React.FC<AutoSectionProps> = ({
   const activeBet = useAppSelector(
     (state) => state.aviator.activeBetsBySection[sectionId]
   );
+  const pendingBet = useAppSelector(
+    (state) => state.aviator.pendingBetsBySection[sectionId]
+  );
   const token = useAppSelector((state) => state.aviator.token ?? "");
 
   const handleClearAutoCashOut = () => {
@@ -347,6 +350,8 @@ const AutoSection: React.FC<AutoSectionProps> = ({
     token,
   ]);
 
+  const isSwitchDisabled = Boolean(activeBet || pendingBet);
+
   return (
     <div className="flex flex-col gap-2 w-full">
       <BetSection
@@ -363,6 +368,7 @@ const AutoSection: React.FC<AutoSectionProps> = ({
               checked={isAutoCashOut}
               onCheckedChange={setIsAutoCashOut}
               className="border-2 border-gray-600 bg-transparent data-[state=checked]:border-[#60ae05] data-[state=checked]:bg-[#229607] data-[state=unchecked]:bg-transparent"
+              disabled={isSwitchDisabled}
             />
           </div>
 
@@ -372,10 +378,10 @@ const AutoSection: React.FC<AutoSectionProps> = ({
               value={inputValue}
               onChange={handleInputChange}
               className="w-[5.7rem] text-white border-none text-right h-auto bg-[#000000b3] outline-none rounded-3xl pr-8 py-1 font-bold focus:border-none focus:outline-none"
-              disabled={!isAutoCashOut}
+              disabled={!isAutoCashOut || isSwitchDisabled}
               aria-label="Auto Cash Out Amount"
             />
-            {isAutoCashOut && (
+            {isAutoCashOut && !isSwitchDisabled && (
               <button
                 onClick={handleClearAutoCashOut}
                 className="absolute right-2 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-200"
