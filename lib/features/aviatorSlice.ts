@@ -161,7 +161,7 @@ export const cashOut = createAsyncThunk(
       );
 
       if (response.data.status) {
-        const payout = response.data.payout;
+        const payout = response.data.data.payout;
 
         return { payout, sectionId };
       } else {
