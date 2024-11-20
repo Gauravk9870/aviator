@@ -362,7 +362,6 @@ const AutoSection: React.FC<AutoSectionProps> = ({
             <Switch
               checked={isAutoCashOut}
               onCheckedChange={setIsAutoCashOut}
-              disabled={activeBet?true:false}
               className="border-2 border-gray-600 bg-transparent data-[state=checked]:border-[#60ae05] data-[state=checked]:bg-[#229607] data-[state=unchecked]:bg-transparent"
               disabled={isSwitchDisabled}
             />

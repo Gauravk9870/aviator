@@ -1,5 +1,4 @@
 "use client";
-import { useEffect } from "react";
 import BetControl from "@/components/layout/BetControl";
 import Avitor from "@/components/layout/Avitor";
 import { useAppSelector, useAppDispatch } from "@/lib/hooks";
