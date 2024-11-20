@@ -10,7 +10,7 @@ interface AvitorProps {
 
 export default function Avitor({ setIsLoading }: AvitorProps) {
   const dispatch = useAppDispatch();
-  const { isOpen, isTransitioning } = useAppSelector((state) => state.menu);
+  const { isTransitioning } = useAppSelector((state) => state.menu);
   const handleLoad = () => {
     setIsLoading(true);
   };

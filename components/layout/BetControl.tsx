@@ -224,7 +224,7 @@ const BetSection: React.FC<BetSectionProps> = ({
         }
       });
     }
-  }, [gameStatus, multipliersStarted, pendingBetsBySection, dispatch, token]);
+  }, [gameStatus, multipliersStarted, pendingBetsBySection, dispatch, token,isBetPlaced]);
 
   return (
     <div className={`flex flex-col gap-2 w-full mt-2 p-2 rounded-md`}>
@@ -340,6 +340,7 @@ const AutoSection: React.FC<AutoSectionProps> = ({
     dispatch,
     sectionId,
     token,
+    
   ]);
 
   return (
