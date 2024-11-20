@@ -54,7 +54,7 @@ const BetSection: React.FC<BetSectionProps> = ({
   const placeBetHandler = async () => {
     setIsBetPlaced(true);
     try {
-     await dispatch(
+      await dispatch(
         placeBet({
           userId: user,
           amount: betAmount,
@@ -80,18 +80,18 @@ const BetSection: React.FC<BetSectionProps> = ({
   };
 
   const cancelPendingBetHandler = (sectionId: string) => {
-    dispatch(clearPendingBetBySection(sectionId)); 
+    dispatch(clearPendingBetBySection(sectionId));
   };
 
   const cashoutHandler = async () => {
     if (activeBet) {
       try {
-  await dispatch(
+        await dispatch(
           cashOut({
             betId: activeBet._id,
             userId: activeBet.userId,
             currentMultiplier,
-            sectionId: sectionId, 
+            sectionId: sectionId,
             token,
           })
         ).unwrap();
@@ -192,7 +192,7 @@ const BetSection: React.FC<BetSectionProps> = ({
         const pendingBet = pendingBetsBySection[sectionId];
         if (pendingBet) {
           console.log("Trying to place pending bet:", pendingBet.amount);
-          setIsBetPlaced(true)
+          setIsBetPlaced(true);
           dispatch(
             placeBet({
               userId: pendingBet.userId,
@@ -457,11 +457,10 @@ const BetControlSection: React.FC<BetControlSectionProps> = ({
         </TabsContent>
         <TabsContent value="auto" className="w-full">
           <AutoSection
-          
             betAmount={betAmount}
             setBetAmount={setBetAmount}
             currentMultiplier={currentMultiplier}
-            sectionId={`${sectionId}_auto`}
+            sectionId={`${sectionId}`}
             isAutoCashOut={isAutoCashOut}
             setIsAutoCashOut={setIsAutoCashOut}
             autoCashOutAmount={autoCashOutAmount}
