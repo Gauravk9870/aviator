@@ -1,41 +1,27 @@
-// Avitor.tsx
 "use client";
 
 import { closeMenu, setTransitioning } from "@/lib/features/menuSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { useCallback } from "react";
 
-// Define the prop types for Avitor
 interface AvitorProps {
-  setIsLoading: (isLoading: boolean) => void;
+  setIsLoading: (status: boolean) => void;
 }
 
 export default function Avitor({ setIsLoading }: AvitorProps) {
   const dispatch = useAppDispatch();
   const { isOpen, isTransitioning } = useAppSelector((state) => state.menu);
-
   const handleLoad = () => {
-    setIsLoading(false);
+    setIsLoading(true);
   };
 
-  const toggleMenu = useCallback(
-    (event: React.MouseEvent) => {
-      event.preventDefault();
-      event.stopPropagation();
-      
+  const toggleMenu = useCallback(() => {
+    if (isTransitioning) return;
+    dispatch(setTransitioning(true));
+    dispatch(closeMenu()); 
+    dispatch(setTransitioning(false));
+  }, [dispatch, isTransitioning]);
 
-      if (isTransitioning) return;
-
-      dispatch(setTransitioning(true));
-
-      if (isOpen) {
-        dispatch(closeMenu());
-      }
-
-      setTransitioning(false);
-    },
-    [dispatch, isOpen, isTransitioning]
-  );
   return (
     <div className="h-[200px] w-full relative border border-[#6666664b] rounded-2xl lg:h-full">
       <iframe

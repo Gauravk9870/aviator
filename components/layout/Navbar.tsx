@@ -173,7 +173,7 @@ export default function Navbar() {
 
   const handleMyBetHistory = () => {
     dispatch(setActiveTab("my-bets"));
-    
+    console.log("Active tab set to 'my-bets'");
   };
 
   const handleHomeClick = useCallback(

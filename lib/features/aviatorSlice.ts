@@ -122,7 +122,7 @@ export const placeBet = createAsyncThunk(
 
         return { bet, sectionId };
       } else {
-        
+        console.log(response.data.error)
         return rejectWithValue(response.data.error);
 
 
@@ -319,7 +319,6 @@ export const fetchActiveSessionBets = createAsyncThunk<
   }
 );
 
-
 const aviatorSlice = createSlice({
   name: "aviator",
   initialState,
@@ -363,7 +362,7 @@ const aviatorSlice = createSlice({
       state.gameStatus = "crashed";
       state.finalMultiplier = action.payload;
       state.multiplierHistory.push(action.payload);
-      state.multipliersStarted = false; // Reset multipliersStarted
+      state.multipliersStarted = false;
       state.activeBetsBySection = {}
 
     },
@@ -445,8 +444,8 @@ const aviatorSlice = createSlice({
           _id: bet._id,
         };
 
-        
-        
+        console.log("Bet Added to active bet")
+        console.log(`${sectionId} : ${bet}`)
 
         // Add bet to the bets array
         state.bets.push(action.payload.bet);

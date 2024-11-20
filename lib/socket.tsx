@@ -4,6 +4,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { config } from "@/lib/config";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import {
+  fetchCrashPoints,
   setConnectionStatus,
   setCurrentMultiplier,
   setGameCrashed,
@@ -52,26 +53,24 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
       ws.send(JSON.stringify({ type: "SUBSCRIBE", gameType: "aviator" }));
       playWelcome();
 
-      // dispatch(fetchCrashPoints({ token }))
-      //   .unwrap()
-      //   .then((crashPoints) => {
-          
-      //   })
-      //   .catch((error) => {
-      //     console.error("Error fetching crash points:", error);
-      //   });
+      dispatch(fetchCrashPoints({ token }))
+        .unwrap()
+        .then(() => {
+          // 
+        })
+        .catch((error) => {
+          console.error("Error fetching crash points:", error);
+        });
     };
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      // 
 
       switch (data.type) {
         case undefined:
           if (data.message == "Welcome to Aviator!") {
             
           } else {
-            // 
           }
           break;
 
@@ -117,7 +116,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
           dispatch(setBetId(data.newBet._id));
           break;
         case "CASHED_OUT_BETS":
-          
+
           if (data.userBalance !== undefined) {
             dispatch(setBalance(data.userBalance));
           }

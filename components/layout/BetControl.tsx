@@ -65,7 +65,7 @@ const BetSection: React.FC<BetSectionProps> = ({
     } catch (error) {
       console.error(error);
     } finally {
-      setIsBetPlaced(false);
+      // setIsBetPlaced(false);
     }
   };
 
@@ -80,7 +80,7 @@ const BetSection: React.FC<BetSectionProps> = ({
   };
 
   const cancelPendingBetHandler = (sectionId: string) => {
-    dispatch(clearPendingBetBySection(sectionId)); // Remove the pending bet from Redux
+    dispatch(clearPendingBetBySection(sectionId)); 
   };
 
   const cashoutHandler = async () => {
@@ -95,6 +95,7 @@ const BetSection: React.FC<BetSectionProps> = ({
             token,
           })
         ).unwrap();
+        setIsBetPlaced(false);
       } catch (error) {
         console.error("Error during cash-out:", error);
       }
@@ -187,11 +188,11 @@ const BetSection: React.FC<BetSectionProps> = ({
   useEffect(() => {
     if (gameStatus === "started" && !multipliersStarted) {
       console.log("Preparing to place pending bets for the next round...");
-
       Object.keys(pendingBetsBySection).forEach((sectionId) => {
         const pendingBet = pendingBetsBySection[sectionId];
         if (pendingBet) {
           console.log("Trying to place pending bet:", pendingBet.amount);
+          setIsBetPlaced(true)
           dispatch(
             placeBet({
               userId: pendingBet.userId,
@@ -205,6 +206,7 @@ const BetSection: React.FC<BetSectionProps> = ({
               dispatch(clearPendingBetBySection(sectionId)); // Clear on success
               console.log("Pending bet placed successfully.");
             })
+
             .catch((error) => {
               // Log or handle error
               console.error(
@@ -306,11 +308,6 @@ const AutoSection: React.FC<AutoSectionProps> = ({
   };
 
   useEffect(() => {
-    // Automatically cash out when conditions are met
-    console.log("isAutoCashout : ", isAutoCashOut);
-    console.log("activeBet : ", activeBet);
-    console.log("currentMultiplier : ", currentMultiplier);
-    console.log("autoCashoutAmount : ", autoCashOutAmount);
     if (
       isAutoCashOut &&
       activeBet &&
@@ -360,6 +357,7 @@ const AutoSection: React.FC<AutoSectionProps> = ({
             <Switch
               checked={isAutoCashOut}
               onCheckedChange={setIsAutoCashOut}
+              disabled={activeBet?true:false}
               className="border-2 border-gray-600 bg-transparent data-[state=checked]:border-[#60ae05] data-[state=checked]:bg-[#229607] data-[state=unchecked]:bg-transparent"
             />
           </div>
@@ -454,6 +452,7 @@ const BetControlSection: React.FC<BetControlSectionProps> = ({
         </TabsContent>
         <TabsContent value="auto" className="w-full">
           <AutoSection
+          
             betAmount={betAmount}
             setBetAmount={setBetAmount}
             currentMultiplier={currentMultiplier}
