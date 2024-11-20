@@ -165,7 +165,7 @@ const BetSection: React.FC<BetSectionProps> = ({
             onClick={cashoutHandler}
           >
             <span className="text-lg font-normal uppercase">
-              Cash Out <br /> {currentMultiplier}x
+              Cash Out <br /> {(currentMultiplier * betAmount).toFixed(2)} USD
             </span>
           </button>
         );
@@ -344,6 +344,7 @@ const AutoSection: React.FC<AutoSectionProps> = ({
     activeBet,
     dispatch,
     sectionId,
+    token,
   ]);
 
   return (
@@ -412,12 +413,18 @@ const BetControlSection: React.FC<BetControlSectionProps> = ({
   );
   const [isAutoCashOut, setIsAutoCashOut] = useState<boolean>(false);
   const [autoCashOutAmount, setAutoCashOutAmount] = useState(2);
+  const multipliersStarted = useAppSelector(
+    (state) => state.aviator.multipliersStarted
+  );
+  const gameStatus = useAppSelector((state) => state.aviator.gameStatus);
 
   return (
     <div
       className={`flex-1 px-4 lg:px-10 py-4 rounded-md bg-[#222222] ${
         activeBet || pendingBet
-          ? "border-2 border-red-500"
+          ? multipliersStarted && gameStatus === "started"
+            ? "border-2 border-[#d07206]"
+            : "border-2 border-red-500"
           : "border-2 border-transparent"
       }`}
     >
