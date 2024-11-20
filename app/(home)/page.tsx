@@ -6,12 +6,11 @@ import Avitor from "@/components/layout/Avitor";
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  // Set up a fallback to remove the loading screen after 10 seconds
+// 
   useEffect(() => {
     const timeout = setTimeout(() => {
       setIsLoading(false);
-    }, 1000); // 10 seconds
+    }, 1000); 
 
     return () => clearTimeout(timeout);
   }, []);
@@ -21,9 +20,9 @@ export default function Home() {
       {isLoading && (
         <div className="fixed inset-0 flex flex-col items-center justify-center bg-[#0e0e0e] text-white z-50">
           <img
-            src="./logo.png" // Replace with your logo path
+            src="./logo.png" 
             alt="Logo"
-            className="w-24 h-24 mb-4" // Adjust size as needed
+            className="w-24 h-24 mb-4"
           />
           <p>Loading...</p>
         </div>

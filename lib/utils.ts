@@ -57,6 +57,18 @@ export type TopBet = {
   winAmount?: number;
   x?: string;
 };
+export type ActiveSessionBet = {
+  _id: string;
+  userId: string;
+  amount: number;
+  sessionId: string;
+  cashedOut: boolean;
+  cashOutMultiplier: number;
+  userName: string;
+  userImage: string;
+  createdAt: string;
+  __v: number;
+};
 
 export const bets: Bet[] = [
   {

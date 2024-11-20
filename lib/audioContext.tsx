@@ -146,7 +146,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const setSoundEnabledWithLog = (enabled: boolean) => {
-    console.log("Sound toggled:", enabled ? "Enabled" : "Disabled");
+    
     setSoundEnabled(enabled);
 
     if (!enabled) {
@@ -157,7 +157,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const setMusicEnabledWithLog = (enabled: boolean) => {
-    console.log("Music toggled:", enabled ? "Enabled" : "Disabled");
+    
     setMusicEnabled(enabled);
     if (enabled) {
       setIsMusicPlaying(true); // Resume playing if enabled

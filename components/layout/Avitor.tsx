@@ -22,7 +22,7 @@ export default function Avitor({ setIsLoading }: AvitorProps) {
     (event: React.MouseEvent) => {
       event.preventDefault();
       event.stopPropagation();
-      console.log("Toggling menu");
+      
 
       if (isTransitioning) return;
 

@@ -54,7 +54,7 @@ const BetSection: React.FC<BetSectionProps> = ({
   const placeBetHandler = async () => {
     setIsBetPlaced(true);
     try {
-      const result = await dispatch(
+     await dispatch(
         placeBet({
           userId: user,
           amount: betAmount,
@@ -62,7 +62,6 @@ const BetSection: React.FC<BetSectionProps> = ({
           token: token,
         })
       ).unwrap();
-      console.log("Bet placed successfully:", result);
     } catch (error) {
       console.error(error);
     } finally {
@@ -87,16 +86,15 @@ const BetSection: React.FC<BetSectionProps> = ({
   const cashoutHandler = async () => {
     if (activeBet) {
       try {
-        const result = await dispatch(
+  await dispatch(
           cashOut({
             betId: activeBet._id,
             userId: activeBet.userId,
             currentMultiplier,
-            sectionId: sectionId, // Assuming "1" is the section ID
+            sectionId: sectionId, 
             token,
           })
         ).unwrap();
-        console.log("Cash-out successful:", result);
       } catch (error) {
         console.error("Error during cash-out:", error);
       }

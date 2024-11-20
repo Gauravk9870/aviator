@@ -2,6 +2,7 @@ import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
 import axios, { AxiosError } from "axios";
 import { config } from "../config";
 import showCashoutNotification from "@/components/layout/Notification";
+import { ActiveSessionBet } from "../utils";
 
 
 interface Bet {
@@ -44,6 +45,7 @@ interface AviatorState {
       amount: number;
       token: string;
     };
+
   };
 
 
@@ -60,6 +62,7 @@ interface AviatorState {
   bet_id: string | null;
   loadingMyBets: boolean;
   loadingTopBets: boolean;
+  activeSessionBets: ActiveSessionBet[]
 }
 
 const initialState: AviatorState = {
@@ -69,7 +72,7 @@ const initialState: AviatorState = {
   currentMultiplier: 1,
   gameStatus: "waiting",
   multipliersStarted: false,
-  activeBetsBySection: {}, // Initialize empty mapping
+  activeBetsBySection: {},
   pendingBetsBySection: {},
 
   isConnected: false,
@@ -83,6 +86,7 @@ const initialState: AviatorState = {
   bet_id: null,
   loadingMyBets: false,
   loadingTopBets: false,
+  activeSessionBets: []
 };
 
 
@@ -118,7 +122,7 @@ export const placeBet = createAsyncThunk(
 
         return { bet, sectionId };
       } else {
-        console.log(response.data.error)
+        
         return rejectWithValue(response.data.error);
 
 
@@ -286,6 +290,35 @@ export const fetchBetsByUser = createAsyncThunk(
   }
 );
 
+export const fetchActiveSessionBets = createAsyncThunk<
+  ActiveSessionBet[],
+  { token: string },
+  { rejectValue: string }
+>(
+  "aviator/fetchActiveSessionBets",
+  async ({ token }, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(
+        `${config.server}/api/aviator/getActiveSessionBets`,
+        {
+          headers: { Authorization: token },
+        }
+      );
+
+      if (response.data.status) {
+        return response.data.data as ActiveSessionBet[];
+      } else {
+        return rejectWithValue(response.data.message);
+      }
+    } catch (error) {
+      if (error instanceof AxiosError && error.response) {
+        return rejectWithValue(error.response.data);
+      }
+      return rejectWithValue("An error occurred while fetching active session bets.");
+    }
+  }
+);
+
 
 const aviatorSlice = createSlice({
   name: "aviator",
@@ -412,8 +445,8 @@ const aviatorSlice = createSlice({
           _id: bet._id,
         };
 
-        console.log("Bet Added to active bet")
-        console.log(`${sectionId} : ${bet}`)
+        
+        
 
         // Add bet to the bets array
         state.bets.push(action.payload.bet);
@@ -513,6 +546,17 @@ const aviatorSlice = createSlice({
         state.loadingTopBets = false;
         state.error = action.payload as string;
       })
+      //FETCH ActiveSessionBets BETS
+      .addCase(fetchActiveSessionBets.pending, (state) => {
+        state.error = null;
+      })
+      .addCase(fetchActiveSessionBets.fulfilled, (state, action) => {
+        state.activeSessionBets = action.payload;
+        state.error = null;
+      })
+      .addCase(fetchActiveSessionBets.rejected, (state, action) => {
+        state.error = action.payload as string;
+      });
   },
 });
 
