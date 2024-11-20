@@ -1,35 +1,33 @@
-// Home.tsx
 "use client";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import BetControl from "@/components/layout/BetControl";
 import Avitor from "@/components/layout/Avitor";
+import { useAppSelector, useAppDispatch } from "@/lib/hooks";
+import { setConnectionStatus } from "@/lib/features/aviatorSlice";
+import { RootState } from "@/lib/store";
 
 export default function Home() {
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const isConnected = useAppSelector((state: RootState) => state.aviator.isConnected);
+  const dispatch = useAppDispatch();
 
-  // Set up a fallback to remove the loading screen after 10 seconds
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000); // 10 seconds
-
-    return () => clearTimeout(timeout);
-  }, []);
+  const handleLoadingState = (status: boolean) => {
+    dispatch(setConnectionStatus(status)); 
+  };
 
   return (
     <main className="lg:h-[calc(100vh-85.5px)] flex flex-col bg-[#0e0e0e] justify-between lg:p-2 relative">
-      {isLoading && (
+      {!isConnected && (
         <div className="fixed inset-0 flex flex-col items-center justify-center bg-[#0e0e0e] text-white z-50">
           <img
-            src="./logo.png" // Replace with your logo path
+            src="/logo.png" // Use proper asset path
             alt="Logo"
-            className="w-24 h-24 mb-4" // Adjust size as needed
+            className="w-24 h-24 mb-4"
           />
-          <p>Loading...</p>
+          <p>Connecting...</p>
         </div>
       )}
-      <Avitor setIsLoading={setIsLoading} />
-      <BetControl  />
+      <Avitor setIsLoading={handleLoadingState} />
+      <BetControl />
     </main>
   );
 }

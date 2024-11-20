@@ -122,7 +122,7 @@ const ChangeAvatarPopup: React.FC<ChangeAvatarPopupProps> = ({
     try {
       const response = await updateAvatar(userEmail, avatarUrl, token);
       if (response && response.status) {
-        console.log("Avatar updated successfully");
+        
         onAvatarSelect(avatarUrl, onClose);
       } else {
         console.error(

@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format, isValid } from "date-fns";
 import { Forward, ShieldCheck, MessageCircle } from "lucide-react";
 import { getTextColorClass } from "../ui/MulticolorText";
-import { bets, TopBet } from "@/lib/utils";
+import {  TopBet } from "@/lib/utils";
 import { setActiveTab } from "@/lib/features/tabsSlice";
 import { RootState } from "@/lib/store";
 import Currency from "./Currency";
@@ -16,6 +16,7 @@ import {
   fetchBetsByUser,
   fetchTopBets,
   clearTopBets,
+  fetchActiveSessionBets,
 } from "@/lib/features/aviatorSlice";
 
 export default function Sidebar() {
@@ -28,6 +29,7 @@ export default function Sidebar() {
   const activeTab = useAppSelector((state) => state.tabs.activeTab);
   const myBets = useAppSelector((state: RootState) => state.aviator.myBets);
   const topBets = useAppSelector((state: RootState) => state.aviator.topBets);
+  const allBets=useAppSelector((state:RootState)=>state.aviator.activeSessionBets)
   const error = useAppSelector((state: RootState) => state.aviator.error);
   const loadingMyBets = useAppSelector(
     (state: RootState) => state.aviator.loadingMyBets
@@ -48,6 +50,8 @@ export default function Sidebar() {
     } else if (activeTab === "top") {
       dispatch(clearTopBets());
       dispatch(fetchTopBets({ category: categoryTab, filter: timeTab, token }));
+    }else if(activeTab === "all-bets"){
+      dispatch(fetchActiveSessionBets({token}))
     }
   }, [activeTab, categoryTab, timeTab, dispatch, token, user]);
 
@@ -85,86 +89,73 @@ export default function Sidebar() {
           </TabsTrigger>
         </TabsList>
         <TabsContent
-          value="all-bets"
-          className="flex flex-col h-auto overflow-hidden p-0 m-0 hide-scrollbar w-full"
-        >
-          <div className="flex items-center justify-between border-b-2 border-[#141516] bg-[#1b1c1d] z-10">
-            <div className="px-2 py-1">
-              <h2 className="text-sm font-medium">ALL BETS</h2>
-              <p className="text-sm text-zinc-400">351</p>
+  value="all-bets"
+  className="flex flex-col h-auto overflow-hidden p-0 hide-scrollbar w-full"
+>
+  <div className="flex items-center justify-between border-b-2 border-[#141516] bg-[#1b1c1d] z-10">
+    <div className="px-2 py-1">
+      <h2 className="text-sm font-medium">ALL BETS</h2>
+      <p className="text-sm text-zinc-400">{allBets?.length || 0}</p>
+    </div>
+  </div>
+  <div>
+  {loadingMyBets ? (
+    <p className="text-center text-sm text-gray-400">Loading...</p>
+  ) :  Array.isArray(allBets)&&allBets?.length > 0 ? (
+    <div>
+      <div className="flex justify-between text-[11px] font-medium text-gray-500 tracking-wider">
+      </div>
+      <div className="bg-[#1b1c1d]">
+        { Array.isArray(allBets)&&allBets.map((bet) => (
+          <div
+            key={bet._id}
+            className={`flex justify-between rounded-lg ${
+              bet.cashOutMultiplier > 0
+                ? "border border-[#427f00] bg-[#123405]"
+                : "bg-[#141516]"
+            } mb-0.5`}
+          >
+            <div className="flex items-center px-0.5 flex-1">
+              <Avatar className="w-[30px] h-[30px]">
+                <AvatarImage src={bet.userImage} alt={bet.userName} />
+                <AvatarFallback>
+                  {bet.userName?.charAt(0).toUpperCase() || "U"}
+                </AvatarFallback>
+              </Avatar>
+              <p className="ml-2 text-[#9ea0a3] text-[13px]">
+                {bet.userName || "Unknown"}
+              </p>
+            </div>
+            <div className="px-4 py-1 whitespace-nowrap text-left flex-1">
+              <span className="text-base text-[#ffffff] font-normal">
+                {bet.amount}
+              </span>
+              {bet.cashOutMultiplier > 0 && (
+                <span
+                  className={`py-[2px] px-[6px] rounded-[11px] ${getTextColorClass(
+                    Number(bet.cashOutMultiplier)
+                  )} bg-[#00000080] text-[12px] ml-2 font-bold`}
+                >
+                  {bet.cashOutMultiplier}x
+                </span>
+              )}
+            </div>
+            <div className="px-4 py-1 whitespace-nowrap text-right text-xs text-gray-300 flex-1">
+              <span className="text-base text-[#ffffff] font-normal">
+                {(bet.amount * bet.cashOutMultiplier)}
+              </span>
             </div>
           </div>
-
-          <div className="flex-grow overflow-auto hide-scrollbar">
-            {bets.length > 0 ? (
-              <div>
-                <div className="flex justify-between text-[11px] font-medium text-gray-500 tracking-wider">
-                  <div className="px-4 py-1 flex-1">
-                    <span>User</span>
-                  </div>
-                  <div className="px-4 py-1 flex-1 text-left">
-                    <span>
-                      Bet <Currency /> X
-                    </span>
-                  </div>
-                  <div className="px-4 py-1 flex-1 text-right">
-                    <span>
-                      Cash out <Currency />
-                    </span>
-                  </div>
-                </div>
-                <div className="bg-[#1b1c1d]">
-                  {bets.map((bet) => (
-                    <div
-                      key={bet.id}
-                      className={`flex justify-between rounded-lg ${
-                        bet.x > 0
-                          ? "border border-[#427f00] bg-[#123405]"
-                          : "bg-[#141516]"
-                      } mb-0.5`}
-                    >
-                      <div className="flex items-center px-0.5 flex-1">
-                        <Avatar className="w-[30px] h-[30px]">
-                          <AvatarImage src={bet.avatar} alt={bet.user} />
-                          <AvatarFallback>
-                            {bet.user.charAt(0).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <p className="ml-2 text-[#9ea0a3] text-[13px]">
-                          {bet.user}
-                        </p>
-                      </div>
-                      <div className="px-4 py-1 whitespace-nowrap text-left flex-1">
-                        <span className="text-base text-[#ffffff] font-normal">
-                          {bet.amount.toFixed(2)}
-                        </span>
-                        {bet.x > 0 && (
-                          <span
-                            className={`py-[2px] px-[6px] rounded-[11px] ${getTextColorClass(
-                              Number(bet.x)
-                            )} bg-[#00000080] text-[12px] ml-2 font-bold`}
-                          >
-                            {bet.x}x
-                          </span>
-                        )}
-                      </div>
-                      <div className="px-4 py-1 whitespace-nowrap text-right text-xs text-gray-300 flex-1">
-                        <span className="text-base text-[#ffffff] font-normal">
-                          {bet.cashedOut.toFixed(2)}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <p className="text-sm text-gray-400 text-center">
-                No bets available
-              </p>
-            )}
-          </div>
-        </TabsContent>
-
+        ))}
+      </div>
+    </div>
+  ) : (
+    <p className="text-sm text-gray-400 text-center">
+      No bets found for this session
+    </p>
+  )}
+</div>
+</TabsContent>
         <TabsContent
           value="my-bets"
           className="flex-grow overflow-auto p-0 hide-scrollbar w-full"
@@ -323,7 +314,7 @@ export default function Sidebar() {
                 topBets.map((bet: TopBet) => {
                   switch (categoryTab) {
                     case "multipliers":
-                      console.log("multipliers");
+                      
                       return (
                         <div
                           key={bet.id || bet.crashPoint}

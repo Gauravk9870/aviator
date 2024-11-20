@@ -48,15 +48,15 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     const ws = new WebSocket(`${config.ws}`);
 
     ws.onopen = () => {
-      console.log("Connected to Aviator WebSocket");
+      
       dispatch(setConnectionStatus(true));
       ws.send(JSON.stringify({ type: "SUBSCRIBE", gameType: "aviator" }));
       playWelcome();
 
       dispatch(fetchCrashPoints({ token }))
         .unwrap()
-        .then((crashPoints) => {
-          console.log("Fetched Crash Points:", crashPoints);
+        .then(() => {
+          // 
         })
         .catch((error) => {
           console.error("Error fetching crash points:", error);
@@ -65,14 +65,12 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      // console.log("Received message from Aviator WebSocket:", data);
 
       switch (data.type) {
         case undefined:
           if (data.message == "Welcome to Aviator!") {
-            console.log(data.message);
+            
           } else {
-            // console.log("Unhandled message type:", data);
           }
           break;
 
@@ -103,7 +101,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
           break;
 
         case "TIMES":
-          console.log("TIMES:", data.resultShowTime);
+          
           break;
 
         case "CRASHED":
@@ -118,19 +116,19 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
           dispatch(setBetId(data.newBet._id));
           break;
         case "CASHED_OUT_BETS":
-          console.log("CASHED_OUT_BETS:", data);
+
           if (data.userBalance !== undefined) {
             dispatch(setBalance(data.userBalance));
           }
           break;
         default:
-          console.log("Unhandled message type:", data);
+          
           break;
       }
     };
 
     ws.onclose = () => {
-      console.log("Disconnected from Aviator WebSocket");
+      
       dispatch(setConnectionStatus(false));
       stopAll();
     };
