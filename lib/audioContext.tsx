@@ -15,10 +15,10 @@ interface AudioContextType {
   stopAll: () => void;
   setVolume: (volume: number) => void;
   volume: number;
-  setSoundEnabled: (enabled: boolean) => void;
-  setMusicEnabled: (enabled: boolean) => void;
-  soundEnabled: boolean;
-  musicEnabled: boolean;
+  isMusicPlaying: boolean;
+  setIsMusicPlaying: (playing: boolean) => void;
+  isSoundEnabled: boolean;
+  setIsSoundEnabled: (enable: boolean) => void;
 }
 
 const AudioContextValue = createContext<AudioContextType | undefined>(
@@ -37,28 +37,37 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [volume, setVolume] = useState(1.0);
-  const [soundEnabled, setSoundEnabled] = useState(true);
-  const [musicEnabled, setMusicEnabled] = useState(true);
-  const [isMusicPlaying, setIsMusicPlaying] = useState(false); // Track if music is playing
-  const [playingOnHide, setPlayingOnHide] = useState(false); // Track if music was playing before visibility change
+  const [isMusicPlaying, setIsMusicPlaying] = useState(true);
+  const [isSoundEnabled, setIsSoundEnabled] = useState(true);
+  const [playingOnHide, setPlayingOnHide] = useState(false);
+
+  const isSoundEnabledRef = useRef(isSoundEnabled);
 
   const welcomeRef = useRef<HTMLAudioElement | null>(null);
   const startedRef = useRef<HTMLAudioElement | null>(null);
   const crashedRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    // Initialize audio elements
     welcomeRef.current = new Audio("/background.ogg");
-    welcomeRef.current.loop = true; // Enable looping for background music
-
+    welcomeRef.current.loop = true;
     startedRef.current = new Audio("/game-start.ogg");
     crashedRef.current = new Audio("/plane-crash.ogg");
+
+    // Preload audio
+    const preloadAudio = (audio: HTMLAudioElement) => {
+      audio.load();
+      audio.volume = volume;
+    };
+
+    [welcomeRef, startedRef, crashedRef].forEach((ref) => {
+      if (ref.current) preloadAudio(ref.current);
+    });
 
     return () => {
       [welcomeRef, startedRef, crashedRef].forEach((ref) => {
         if (ref.current) {
           ref.current.pause();
-          ref.current.currentTime = 0;
+          ref.current.src = "";
         }
       });
     };
@@ -67,35 +76,29 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     // Update volume across all audio elements when it changes
     [welcomeRef, startedRef, crashedRef].forEach((ref) => {
-      if (ref.current) {
-        ref.current.volume = volume;
-      }
+      if (ref.current) ref.current.volume = volume;
     });
   }, [volume]);
 
   useEffect(() => {
-    // Handle background music play/pause based on `musicEnabled` and `isMusicPlaying`
-    if (musicEnabled) {
-      if (isMusicPlaying) {
-        welcomeRef.current?.play();
-      }
-    } else {
-      welcomeRef.current?.pause();
+    // Handle background music play/pause based on `isMusicPlaying`
+    if (isMusicPlaying && welcomeRef.current) {
+      welcomeRef.current
+        .play()
+        .catch((error) => console.error("Error playing welcome audio:", error));
+    } else if (welcomeRef.current) {
+      welcomeRef.current.pause();
     }
-  }, [musicEnabled, isMusicPlaying]);
+  }, [isMusicPlaying]);
 
   useEffect(() => {
     // Handle visibility change
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        // Pause audio and track if it was playing before hiding
-        setPlayingOnHide(!welcomeRef.current?.paused);
+        setPlayingOnHide(isMusicPlaying);
         welcomeRef.current?.pause();
-      } else {
-        // Resume playing if it was playing before hiding
-        if (playingOnHide && musicEnabled) {
-          welcomeRef.current?.play();
-        }
+      } else if (playingOnHide) {
+        setIsMusicPlaying(true);
       }
     };
 
@@ -103,16 +106,24 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [playingOnHide, musicEnabled]);
+  }, [isMusicPlaying, playingOnHide]);
 
   const playAudio = async (audioRef: React.RefObject<HTMLAudioElement>) => {
-    if (audioRef.current) {
+    if (audioRef.current && audioRef.current.readyState >= 2) {
       audioRef.current.currentTime = 0;
       try {
         await audioRef.current.play();
       } catch (error) {
-        console.error("Error playing audio:", error);
+        if (error instanceof Error) {
+          if (error.name === "AbortError") {
+            console.log("Audio playback was aborted");
+          } else {
+            console.error("Error playing audio:", error);
+          }
+        }
       }
+    } else {
+      console.warn("Audio not ready to play");
     }
   };
 
@@ -123,46 +134,66 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const playWelcome = () => {
-    if (musicEnabled && welcomeRef.current) {
-      setIsMusicPlaying(true);
-      playAudio(welcomeRef);
+  const playWelcome = async () => {
+    console.log("PLAY WELCOME: isMusicPlaying:", isMusicPlaying);
+    if (isMusicPlaying && welcomeRef.current) {
+      try {
+        await playAudio(welcomeRef);
+        setIsMusicPlaying(true);
+      } catch (error) {
+        console.error("Error in playWelcome:", error);
+      }
     }
   };
 
-  const playStarted = () => {
-    if (soundEnabled && startedRef.current) {
-      // Ensure sound only plays if enabled
-      playAudio(startedRef);
-    }
-  };
+  const playStarted = async () => {
+    console.log("PLAY STARTED: isSoundEnabled:", isSoundEnabledRef.current);
+    if (isSoundEnabledRef.current && startedRef.current) {
+      // Lower the volume of other audio elements
+      [welcomeRef, crashedRef].forEach((ref) => {
+        if (ref.current) {
+          ref.current.volume = volume * 0.3; // Reduce to 30% of the current volume
+        }
+      });
 
-  const playCrashed = () => {
-    if (soundEnabled && crashedRef.current) {
-      // Ensure sound only plays if enabled
-      stopAudio(startedRef); // Stop any playing sounds
-      playAudio(crashedRef);
-    }
-  };
+      // Set playStarted audio to full volume
+      if (startedRef.current) {
+        startedRef.current.volume = volume; // Max volume
+      }
 
-  const setSoundEnabledWithLog = (enabled: boolean) => {
-    
-    setSoundEnabled(enabled);
+      try {
+        await playAudio(startedRef);
 
-    if (!enabled) {
-      // Stop any active sounds if sound is disabled
-      stopAudio(startedRef);
-      stopAudio(crashedRef);
-    }
-  };
-
-  const setMusicEnabledWithLog = (enabled: boolean) => {
-    
-    setMusicEnabled(enabled);
-    if (enabled) {
-      setIsMusicPlaying(true); // Resume playing if enabled
+        // Restore volumes of other audios after the playStarted audio ends
+        startedRef.current.onended = () => {
+          [welcomeRef, crashedRef].forEach((ref) => {
+            if (ref.current) {
+              ref.current.volume = volume; // Restore to the original volume
+            }
+          });
+        };
+      } catch (error) {
+        console.error("Error in playStarted:", error);
+      }
     } else {
-      setIsMusicPlaying(false); // Pause the music if disabled
+      console.log(
+        "Sound is disabled or audio not ready. Not playing started sound."
+      );
+    }
+  };
+
+  const playCrashed = async () => {
+    console.log("PLAY CRASHED: isSoundEnabled:", isSoundEnabledRef.current);
+    if (isSoundEnabledRef.current && crashedRef.current) {
+      try {
+        await playAudio(crashedRef);
+      } catch (error) {
+        console.error("Error in playCrashed:", error);
+      }
+    } else {
+      console.log(
+        "Sound is disabled or audio not ready. Not playing crashed sound."
+      );
     }
   };
 
@@ -173,16 +204,20 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
         playStarted,
         playCrashed,
         stopAll: () => {
-          // Ensure both sound and music stop when stopAll is called
           [welcomeRef, startedRef, crashedRef].forEach(stopAudio);
           setIsMusicPlaying(false);
         },
         setVolume,
         volume,
-        setSoundEnabled: setSoundEnabledWithLog,
-        setMusicEnabled: setMusicEnabledWithLog,
-        soundEnabled,
-        musicEnabled,
+        isMusicPlaying,
+        setIsMusicPlaying,
+        isSoundEnabled,
+        setIsSoundEnabled: (enabled: boolean) => {
+          setIsSoundEnabled(enabled);
+          console.log("Sound enabled changed to:", enabled);
+          // Immediately update the ref to ensure synchronous access
+          isSoundEnabledRef.current = enabled;
+        },
       }}
     >
       {children}

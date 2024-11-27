@@ -41,14 +41,14 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const dispatch = useAppDispatch();
   const [socket, setSocket] = useState<WebSocket | null>(null);
-  const { playWelcome, playStarted, playCrashed, stopAll } = useAudio();
+  const { playWelcome, playStarted, playCrashed, stopAll, isSoundEnabled } =
+    useAudio();
   const token = useAppSelector((state) => state.aviator.token ?? "");
 
   useEffect(() => {
     const ws = new WebSocket(`${config.ws}`);
 
     ws.onopen = () => {
-      
       dispatch(setConnectionStatus(true));
       ws.send(JSON.stringify({ type: "SUBSCRIBE", gameType: "aviator" }));
       playWelcome();
@@ -56,7 +56,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
       dispatch(fetchCrashPoints({ token }))
         .unwrap()
         .then(() => {
-          // 
+          //
         })
         .catch((error) => {
           console.error("Error fetching crash points:", error);
@@ -69,15 +69,26 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
       switch (data.type) {
         case undefined:
           if (data.message == "Welcome to Aviator!") {
-            
           } else {
           }
           break;
 
         case "STARTED":
-          playStarted();
+          if (isSoundEnabled) {
+            playStarted();
+          }
           sendMessageToIframe({ type: "Start", data: data.currentValue });
           dispatch(setGameStarted());
+          console.log("PLANE STARTED");
+          break;
+
+        case "CRASHED":
+          if (isSoundEnabled) {
+            playCrashed();
+          }
+          dispatch(setGameCrashed(data.finalMultiplier));
+          sendMessageToIframe({ type: "Crashed", data: data.finalMultiplier });
+          console.log("PLANE CRASHED");
           break;
 
         case "MULTIPLIER":
@@ -101,14 +112,6 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
           break;
 
         case "TIMES":
-          
-          break;
-
-        case "CRASHED":
-          dispatch(setGameCrashed(data.finalMultiplier));
-
-          playCrashed();
-          sendMessageToIframe({ type: "Crashed", data: data.finalMultiplier });
           break;
 
         case "BETS":
@@ -116,19 +119,16 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
           dispatch(setBetId(data.newBet._id));
           break;
         case "CASHED_OUT_BETS":
-
           if (data.userBalance !== undefined) {
             dispatch(setBalance(data.userBalance));
           }
           break;
         default:
-          
           break;
       }
     };
 
     ws.onclose = () => {
-      
       dispatch(setConnectionStatus(false));
       stopAll();
     };
