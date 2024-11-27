@@ -116,8 +116,12 @@ const useMenu = () => {
 export default function Navbar() {
   const { isOpen, toggleMenu, menuRef, triggerRef, handleCloseMenu } =
     useMenu();
-  const { soundEnabled, musicEnabled, setSoundEnabled, setMusicEnabled } =
-    useAudio();
+  const {
+    isMusicPlaying,
+    setIsMusicPlaying,
+    isSoundEnabled,
+    setIsSoundEnabled,
+  } = useAudio();
 
   const [showHowToPlay, setShowHowToPlay] = useState(false);
   const [showGameRules, setShowGameRules] = useState(false);
@@ -191,18 +195,18 @@ export default function Navbar() {
       icon: <Volume2 size={18} />,
       label: "Sound",
       toggle: true,
-      state: soundEnabled,
+      state: isSoundEnabled,
       setState: (checked: boolean) => {
-        setSoundEnabled(checked);
+        setIsSoundEnabled(checked);
       },
     },
     {
       icon: <Music size={18} />,
       label: "Music",
       toggle: true,
-      state: musicEnabled,
+      state: isMusicPlaying,
       setState: (checked: boolean) => {
-        setMusicEnabled(checked);
+        setIsMusicPlaying(checked);
       },
       isLastToggle: true,
     },
