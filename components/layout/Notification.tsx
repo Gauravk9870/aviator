@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { X, Star } from "lucide-react";
 import toast from "react-hot-toast";
+import { useAudio } from "@/lib/audioContext";
 
 const Notification = ({
   multiplier,
@@ -13,6 +14,22 @@ const Notification = ({
   onClose: () => void;
 }) => {
   const [isExiting, setIsExiting] = useState(false);
+  const { playCashout } = useAudio();
+
+  // Separate useEffect for playing cashout audio on entry
+  useEffect(() => {
+    let isMounted = true;
+
+    (async () => {
+      if (isMounted) {
+        await playCashout();
+      }
+    })();
+
+    return () => {
+      isMounted = false; // Avoid playing audio if component unmounts early
+    };
+  }, [playCashout]);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsExiting(true), 2300); // Trigger exit after visible state
