@@ -18,7 +18,7 @@ export default function Avitor({ setIsLoading }: AvitorProps) {
   const toggleMenu = useCallback(() => {
     if (isTransitioning) return;
     dispatch(setTransitioning(true));
-    dispatch(closeMenu()); 
+    dispatch(closeMenu());
     dispatch(setTransitioning(false));
   }, [dispatch, isTransitioning]);
 

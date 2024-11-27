@@ -35,6 +35,9 @@ const BetSection: React.FC<BetSectionProps> = ({
   const activeBet = useAppSelector(
     (state) => state.aviator.activeBetsBySection[sectionId]
   );
+  const pendingBet = useAppSelector(
+    (state) => state.aviator.pendingBetsBySection[sectionId]
+  );
   const gameStatus = useAppSelector((state) => state.aviator.gameStatus);
   const pendingBetsBySection = useAppSelector(
     (state) => state.aviator.pendingBetsBySection
@@ -47,14 +50,10 @@ const BetSection: React.FC<BetSectionProps> = ({
   const handleDecrement = () =>
     setBetAmount((prev) => (prev > 1 ? prev - 1 : 1));
 
-  const buttonClass = isBetPlaced
-    ? "bg-[#141516] text-[#ffffff80] cursor-not-allowed opacity-50"
-    : "bg-[#141516] text-white";
-
   const placeBetHandler = async () => {
     setIsBetPlaced(true);
     try {
-     await dispatch(
+      await dispatch(
         placeBet({
           userId: user,
           amount: betAmount,
@@ -80,18 +79,18 @@ const BetSection: React.FC<BetSectionProps> = ({
   };
 
   const cancelPendingBetHandler = (sectionId: string) => {
-    dispatch(clearPendingBetBySection(sectionId)); 
+    dispatch(clearPendingBetBySection(sectionId));
   };
 
   const cashoutHandler = async () => {
     if (activeBet) {
       try {
-  await dispatch(
+        await dispatch(
           cashOut({
             betId: activeBet._id,
             userId: activeBet.userId,
             currentMultiplier,
-            sectionId: sectionId, 
+            sectionId: sectionId,
             token,
           })
         ).unwrap();
@@ -192,7 +191,7 @@ const BetSection: React.FC<BetSectionProps> = ({
         const pendingBet = pendingBetsBySection[sectionId];
         if (pendingBet) {
           console.log("Trying to place pending bet:", pendingBet.amount);
-          setIsBetPlaced(true)
+          setIsBetPlaced(true);
           dispatch(
             placeBet({
               userId: pendingBet.userId,
@@ -226,6 +225,12 @@ const BetSection: React.FC<BetSectionProps> = ({
     }
   }, [gameStatus, multipliersStarted, pendingBetsBySection, dispatch, token,isBetPlaced]);
 
+  const isDisabled = Boolean(activeBet || pendingBet);
+
+  const buttonClass = isDisabled
+    ? "bg-[#141516] text-[#ffffff80] cursor-not-allowed opacity-50"
+    : "bg-[#141516] text-white";
+
   return (
     <div className={`flex flex-col gap-2 w-full mt-2 p-2 rounded-md`}>
       <div className="flex gap-1 items-center relative">
@@ -234,7 +239,7 @@ const BetSection: React.FC<BetSectionProps> = ({
             <button
               className={`w-4 h-4 flex items-center justify-center border border-[#ffffff80] rounded-full focus:outline-none ${buttonClass}`}
               onClick={handleDecrement}
-              disabled={isBetPlaced}
+              disabled={isDisabled}
             >
               <Minus size={16} stroke="#ffffff80" />
             </button>
@@ -242,7 +247,7 @@ const BetSection: React.FC<BetSectionProps> = ({
             <button
               className={`w-4 h-4 flex items-center justify-center border border-[#ffffff80] rounded-full focus:outline-none ${buttonClass}`}
               onClick={handleIncrement}
-              disabled={isBetPlaced}
+              disabled={isDisabled}
             >
               <Plus size={16} stroke="#ffffff80" />
             </button>
@@ -253,7 +258,7 @@ const BetSection: React.FC<BetSectionProps> = ({
                 key={amount}
                 className={`text-sm focus:outline-none rounded-3xl ${buttonClass}`}
                 onClick={() => setBetAmount(amount)}
-                disabled={isBetPlaced}
+                disabled={isDisabled}
               >
                 {amount}
               </button>
@@ -288,6 +293,9 @@ const AutoSection: React.FC<AutoSectionProps> = ({
   const dispatch = useAppDispatch();
   const activeBet = useAppSelector(
     (state) => state.aviator.activeBetsBySection[sectionId]
+  );
+  const pendingBet = useAppSelector(
+    (state) => state.aviator.pendingBetsBySection[sectionId]
   );
   const token = useAppSelector((state) => state.aviator.token ?? "");
 
@@ -343,6 +351,8 @@ const AutoSection: React.FC<AutoSectionProps> = ({
     
   ]);
 
+  const isSwitchDisabled = Boolean(activeBet || pendingBet);
+
   return (
     <div className="flex flex-col gap-2 w-full">
       <BetSection
@@ -358,8 +368,8 @@ const AutoSection: React.FC<AutoSectionProps> = ({
             <Switch
               checked={isAutoCashOut}
               onCheckedChange={setIsAutoCashOut}
-              disabled={activeBet?true:false}
               className="border-2 border-gray-600 bg-transparent data-[state=checked]:border-[#60ae05] data-[state=checked]:bg-[#229607] data-[state=unchecked]:bg-transparent"
+              disabled={isSwitchDisabled}
             />
           </div>
 
@@ -369,10 +379,10 @@ const AutoSection: React.FC<AutoSectionProps> = ({
               value={inputValue}
               onChange={handleInputChange}
               className="w-[5.7rem] text-white border-none text-right h-auto bg-[#000000b3] outline-none rounded-3xl pr-8 py-1 font-bold focus:border-none focus:outline-none"
-              disabled={!isAutoCashOut}
+              disabled={!isAutoCashOut || isSwitchDisabled}
               aria-label="Auto Cash Out Amount"
             />
-            {isAutoCashOut && (
+            {isAutoCashOut && !isSwitchDisabled && (
               <button
                 onClick={handleClearAutoCashOut}
                 className="absolute right-2 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-200"
@@ -453,11 +463,10 @@ const BetControlSection: React.FC<BetControlSectionProps> = ({
         </TabsContent>
         <TabsContent value="auto" className="w-full">
           <AutoSection
-          
             betAmount={betAmount}
             setBetAmount={setBetAmount}
             currentMultiplier={currentMultiplier}
-            sectionId={`${sectionId}_auto`}
+            sectionId={`${sectionId}`}
             isAutoCashOut={isAutoCashOut}
             setIsAutoCashOut={setIsAutoCashOut}
             autoCashOutAmount={autoCashOutAmount}

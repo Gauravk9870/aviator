@@ -50,7 +50,7 @@ const Notification = ({
         <div className="w-full h-full rounded-[5rem] text-white flex flex-col items-center justify-center leading-5 bg-[#28a909] font-black py-1">
           <span>Win USD</span>
           <span className="text-white font-black text-2xl leading-5">
-            {amount}
+            {amount.toFixed(2)}
           </span>
         </div>
         <Star
