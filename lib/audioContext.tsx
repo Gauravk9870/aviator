@@ -12,6 +12,7 @@ interface AudioContextType {
   playWelcome: () => void;
   playStarted: () => void;
   playCrashed: () => void;
+  playCashout: () => void;
   stopAll: () => void;
   setVolume: (volume: number) => void;
   volume: number;
@@ -46,12 +47,14 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
   const welcomeRef = useRef<HTMLAudioElement | null>(null);
   const startedRef = useRef<HTMLAudioElement | null>(null);
   const crashedRef = useRef<HTMLAudioElement | null>(null);
+  const cashoutRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     welcomeRef.current = new Audio("/background.ogg");
     welcomeRef.current.loop = true;
     startedRef.current = new Audio("/game-start.ogg");
     crashedRef.current = new Audio("/plane-crash.ogg");
+    cashoutRef.current = new Audio("/cashout.ogg");
 
     // Preload audio
     const preloadAudio = (audio: HTMLAudioElement) => {
@@ -64,7 +67,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
     });
 
     return () => {
-      [welcomeRef, startedRef, crashedRef].forEach((ref) => {
+      [welcomeRef, startedRef, crashedRef, cashoutRef].forEach((ref) => {
         if (ref.current) {
           ref.current.pause();
           ref.current.src = "";
@@ -75,7 +78,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     // Update volume across all audio elements when it changes
-    [welcomeRef, startedRef, crashedRef].forEach((ref) => {
+    [welcomeRef, startedRef, crashedRef, cashoutRef].forEach((ref) => {
       if (ref.current) ref.current.volume = volume;
     });
   }, [volume]);
@@ -197,12 +200,49 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  const playCashout = async () => {
+    console.log("PLAY Cashout: isSoundEnabled:", isSoundEnabledRef.current);
+    if (isSoundEnabledRef.current && cashoutRef.current) {
+      // Lower the volume of other audio elements
+      [welcomeRef, crashedRef, startedRef].forEach((ref) => {
+        if (ref.current) {
+          ref.current.volume = volume * 0.3; // Reduce to 30% of the current volume
+        }
+      });
+
+      // Set playStarted audio to full volume
+      if (cashoutRef.current) {
+        cashoutRef.current.volume = volume; // Max volume
+      }
+
+      try {
+        await playAudio(cashoutRef);
+
+        // Restore volumes of other audios after the playStarted audio ends
+        cashoutRef.current.onended = () => {
+          [welcomeRef, crashedRef, startedRef].forEach((ref) => {
+            if (ref.current) {
+              ref.current.volume = volume; // Restore to the original volume
+            }
+          });
+        };
+      } catch (error) {
+        console.error("Error in playCashout:", error);
+      }
+    } else {
+      console.log(
+        "Sound is disabled or audio not ready. Not playing cashout sound."
+      );
+    }
+  };
+
   return (
     <AudioContextValue.Provider
       value={{
         playWelcome,
         playStarted,
         playCrashed,
+        playCashout,
         stopAll: () => {
           [welcomeRef, startedRef, crashedRef].forEach(stopAudio);
           setIsMusicPlaying(false);
