@@ -94,9 +94,9 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     // Only initialize the WebSocket once
     if (!socketRef.current) {
       const ws = new WebSocket(`${config.ws}`);
-console.log('WS:',ws.onopen)
+
       ws.onopen = () => {
-      
+        dispatch(setConnectionStatus(true));
         ws.send(JSON.stringify({ type: "SUBSCRIBE", gameType: "aviator" }));
         playWelcome();
 
