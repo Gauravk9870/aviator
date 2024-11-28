@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format, isValid } from "date-fns";
 import { Forward, ShieldCheck, MessageCircle } from "lucide-react";
 import { getTextColorClass } from "../ui/MulticolorText";
-import {  MyBet, TopBet } from "@/lib/utils";
+import {  TopBet } from "@/lib/utils";
 import { setActiveTab } from "@/lib/features/tabsSlice";
 import { RootState } from "@/lib/store";
 import Currency from "./Currency";
@@ -29,8 +29,7 @@ export default function Sidebar() {
   const activeTab = useAppSelector((state) => state.tabs.activeTab);
   const myBets = useAppSelector((state: RootState) => state.aviator.myBets);
   const topBets = useAppSelector((state: RootState) => state.aviator.topBets);
-  const allBets=useAppSelector((state:RootState)=>state.aviator.activeSessionBets ||[])
-  console.log(allBets)
+  const allBets=useAppSelector((state:RootState)=>state.aviator.activeSessionBets)
   const error = useAppSelector((state: RootState) => state.aviator.error);
   const loadingMyBets = useAppSelector(
     (state: RootState) => state.aviator.loadingMyBets
@@ -66,10 +65,8 @@ export default function Sidebar() {
   };
 
   return (
-<div className="lg:w-96 text-white flex flex-col justify-between bg-[#1b1c1d] rounded-xl p-1 lg:m-0 h-screen max-h-screen">
-
-
-<Tabs
+    <div className="lg:w-96 text-white flex flex-col justify-between bg-[#1b1c1d] rounded-xl p-1 lg:m-0">
+      <Tabs
         defaultValue="all-bets"
         value={activeTab}
         onValueChange={handleTabChange}
@@ -99,7 +96,6 @@ export default function Sidebar() {
   value="all-bets"
   className="flex flex-col h-auto overflow-hidden p-0 hide-scrollbar w-full"
 >
-
   
   <div className="flex items-center justify-between border-b-2 border-[#141516] bg-[#1b1c1d] z-10">
     <div className="px-2 py-1">
@@ -124,7 +120,6 @@ export default function Sidebar() {
             </div>
             <div className="  px-4 py-2  text-right"></div>
           </div>  
-          {/* {error && <p className="text-red-500">{error}</p>}   */}
   {loadingMyBets ? (
     <p className="text-center text-sm text-gray-400">Loading...</p>
   ) :  Array.isArray(allBets)&&allBets?.length > 0 ? (
@@ -207,10 +202,10 @@ export default function Sidebar() {
               {error && <p className="text-red-500">{error}</p>}
               {loadingMyBets ? (
                 <p className="text-center text-sm text-gray-400">Loading...</p>
-              ) :Array.isArray(myBets)&& myBets.length > 0 ? (
+              ) : myBets.length > 0 ? (
                 <div className="">
                   <div className="bg-[#1b1c1d]">
-                    {myBets.map((bet:MyBet) => {
+                    {myBets.map((bet) => {
                       const date = new Date(bet.createdAt).toLocaleDateString();
                       const time = new Date(bet.createdAt).toLocaleTimeString();
                       return (
@@ -238,7 +233,7 @@ export default function Sidebar() {
                               <span
                                 className={`py-[2px] px-[6px] rounded-[11px] bg-[#00000080] text-[12px] ml-2 font-bold`}
                               >
-                                {bet.cashOutMultiplier}x
+                                {bet.amount}x
                               </span>
                             )}
                           </div>
@@ -484,10 +479,9 @@ export default function Sidebar() {
         </span>
         <span className="flex items-center gap-1">
           Powered by
-          <img src={`${poweredByLogo}` ||"logo.png"} alt="Logo" className="w-5 h-5" />
+          <img src={`${poweredByLogo}`} alt="Logo" className="w-5 h-5" />
         </span>
       </div>
     </div>
-
   );
 }
