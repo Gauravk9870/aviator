@@ -21,16 +21,22 @@ import {
   setMultipliersStarted,
   setToken,
   setUser,
+  setEmail,
+  verifyToken,
+  fetchGameLogo,
 } from "@/lib/features/aviatorSlice";
 import { useAudio } from "@/lib/audioContext";
 import { setBalance } from "./features/currencySlice";
 import { useSearchParams } from "next/navigation";
 import MissingUrlPrams from "@/components/layout/MissingUrlPrams";
-
+import jwt, { JwtPayload } from "jsonwebtoken"; //
 interface SocketContextType {
   socket: WebSocket | null;
 }
 
+interface DecodedToken extends JwtPayload {
+  email: string; 
+}
 const SocketContext = createContext<SocketContextType | undefined>(undefined);
 
 export const useSocket = (): SocketContextType => {
@@ -60,12 +66,13 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
   const [isInitializing, setIsInitializing] = useState(true); // Track initialization state
   const isConnected = useAppSelector((state) => state.aviator.isConnected);
   const gameLogo = useAppSelector((state) => state.aviator.gameLogo);
-
+const verified =useAppSelector((state) => state.aviator.verified);
   useEffect(() => {
-
-    const tokenFromUrl = searchParams.get("token");
+    const tokenFromUrl = searchParams.get("token") as string;
     const userFromUrl = searchParams.get("user");
-
+    const decodedToken = jwt.decode(tokenFromUrl) as DecodedToken;
+    const userEmail = decodedToken?.userEmail;
+;
     if (tokenFromUrl) {
       dispatch(setToken(tokenFromUrl));
     }
@@ -73,7 +80,9 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     if (userFromUrl) {
       dispatch(setUser(userFromUrl));
     }
-
+    if (userEmail) {
+      dispatch(setEmail(userEmail));
+    }
     // Mark initialization as complete after setting token and user
     setIsInitializing(false);
   }, [searchParams, dispatch]);
@@ -193,16 +202,9 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
 
   if (isInitializing) {
     // Render a loading state while waiting for initialization
-    return <div>Loading...</div>;
+    // return <div>Loading...</div>;
   }
-if(!isConnected){
-  return (
-    <div className="fixed inset-0 flex flex-col items-center justify-center bg-[#0e0e0e] text-white z-50">
-      <img src={gameLogo || ""} alt="Logo" className="w-24 h-24" />
-      <p>Connecting...</p>
-    </div>
-  );
-}
+
   if (!user) {
     stopAll();
     return (

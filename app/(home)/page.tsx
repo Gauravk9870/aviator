@@ -29,7 +29,14 @@ export default function Home() {
     }
   }, [dispatch]);
 
-
+  if (!verified || !isConnected) {
+    return (
+      <div className="fixed inset-0 flex flex-col items-center justify-center bg-[#0e0e0e] text-white z-50">
+        <img src={gameLogo || ""} alt="Logo" className="w-24 h-24" />
+        <p>Connecting...</p>
+      </div>
+    );
+  }
 
   return (
     <main className="lg:h-[calc(100vh-85.5px)] flex flex-col bg-[#0e0e0e] justify-between lg:p-2 relative">
