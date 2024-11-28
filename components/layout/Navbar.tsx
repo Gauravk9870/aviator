@@ -38,7 +38,6 @@ import { RootState } from "@/lib/store";
 
 import Currency from "./Currency";
 import { useAudio } from "@/lib/audioContext";
-import { fetchBalance } from "@/lib/features/currencySlice";
 import { useRouter, useSearchParams } from "next/navigation";
 
 const useMenu = () => {
