@@ -58,6 +58,8 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
   const user = useAppSelector((state) => state.aviator.user ?? "");
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const [isInitializing, setIsInitializing] = useState(true); // Track initialization state
+  const isConnected = useAppSelector((state) => state.aviator.isConnected);
+  const gameLogo = useAppSelector((state) => state.aviator.gameLogo);
 
   useEffect(() => {
 
@@ -92,9 +94,9 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     // Only initialize the WebSocket once
     if (!socketRef.current) {
       const ws = new WebSocket(`${config.ws}`);
-
+console.log('WS:',ws.onopen)
       ws.onopen = () => {
-        dispatch(setConnectionStatus(true));
+      
         ws.send(JSON.stringify({ type: "SUBSCRIBE", gameType: "aviator" }));
         playWelcome();
 
@@ -193,7 +195,14 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     // Render a loading state while waiting for initialization
     return <div>Loading...</div>;
   }
-
+if(!isConnected){
+  return (
+    <div className="fixed inset-0 flex flex-col items-center justify-center bg-[#0e0e0e] text-white z-50">
+      <img src={gameLogo || ""} alt="Logo" className="w-24 h-24" />
+      <p>Connecting...</p>
+    </div>
+  );
+}
   if (!user) {
     stopAll();
     return (

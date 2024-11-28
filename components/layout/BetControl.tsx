@@ -219,7 +219,7 @@ const BetSection: React.FC<BetSectionProps> = ({
         }
       });
     }
-  }, [gameStatus, multipliersStarted, pendingBetsBySection, dispatch, token,isBetPlaced]);
+  }, [gameStatus, multipliersStarted, pendingBetsBySection, dispatch, token]);
 
   const isDisabled = Boolean(activeBet || pendingBet);
 
