@@ -252,7 +252,7 @@ const isConnected = useAppSelector((state: RootState) => state.aviator.isConnect
         <div className="flex items-center gap-4">
         <span className="text-sm  italic flex items-center gap-2">
             {gameLogo && (
-              <img src={gameLogo} alt="Logo" className="h-8 w-auto" />
+              <img src={gameLogo} alt="Logo" className="h-12 w-auto" />
             )}
           
           </span>
