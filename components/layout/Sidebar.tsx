@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format, isValid } from "date-fns";
 import { Forward, ShieldCheck, MessageCircle } from "lucide-react";
 import { getTextColorClass } from "../ui/MulticolorText";
-import {  MyBet, TopBet } from "@/lib/utils";
+import { MyBet, TopBet } from "@/lib/utils";
 import { setActiveTab } from "@/lib/features/tabsSlice";
 import { RootState } from "@/lib/store";
 import Currency from "./Currency";
@@ -29,7 +29,9 @@ export default function Sidebar() {
   const activeTab = useAppSelector((state) => state.tabs.activeTab);
   const myBets = useAppSelector((state: RootState) => state.aviator.myBets);
   const topBets = useAppSelector((state: RootState) => state.aviator.topBets);
-  const allBets=useAppSelector((state:RootState)=>state.aviator.activeSessionBets)
+  const allBets = useAppSelector(
+    (state: RootState) => state.aviator.activeSessionBets
+  );
   const error = useAppSelector((state: RootState) => state.aviator.error);
   const loadingMyBets = useAppSelector(
     (state: RootState) => state.aviator.loadingMyBets
@@ -37,27 +39,31 @@ export default function Sidebar() {
   const loadingTopBets = useAppSelector(
     (state: RootState) => state.aviator.loadingTopBets
   );
-  const isConnected = useAppSelector((state: RootState) => state.aviator.isConnected);
+  const isConnected = useAppSelector(
+    (state: RootState) => state.aviator.isConnected
+  );
 
   const token = useAppSelector((state) => state.aviator.token ?? "");
   const user = useAppSelector((state) => state.aviator.user ?? "");
-  const poweredByLogo = useAppSelector((state: RootState) => state.aviator.poweredByLogo);
+  const poweredByLogo = useAppSelector(
+    (state: RootState) => state.aviator.poweredByLogo
+  );
 
   const handleTabChange = (tab: string) => {
     dispatch(setActiveTab(tab));
   };
 
   useEffect(() => {
-    if(!isConnected)return
+    if (!isConnected) return;
     if (activeTab === "my-bets") {
       dispatch(fetchBetsByUser({ userId: user, token }));
     } else if (activeTab === "top") {
       dispatch(clearTopBets());
       dispatch(fetchTopBets({ category: categoryTab, filter: timeTab, token }));
-    }else if(activeTab === "all-bets"){
-      dispatch(fetchActiveSessionBets({token}))
+    } else if (activeTab === "all-bets") {
+      dispatch(fetchActiveSessionBets({ token }));
     }
-  }, [activeTab, categoryTab, timeTab, dispatch, token, user,isConnected]);
+  }, [activeTab, categoryTab, timeTab, dispatch, token, user, isConnected]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -93,90 +99,92 @@ export default function Sidebar() {
           </TabsTrigger>
         </TabsList>
         <TabsContent
-  value="all-bets"
-  className="flex flex-col h-auto overflow-hidden p-0 hide-scrollbar w-full"
->
-  
-  <div className="flex items-center justify-between border-b-2 border-[#141516] bg-[#1b1c1d] z-10">
-    <div className="px-2 py-1">
-      <h2 className="text-sm font-medium">ALL BETS</h2>
-      <p className="text-sm text-zinc-400">{allBets?.length || 0}</p>
-    </div>
-  </div>
-  <div>
-  <div className="flex justify-between  text-[11px] font-medium text-gray-500  tracking-wider">
-            <div className="  px-4 py-2 flex-1">
-              <span>Date</span>
-            </div>
-            <div className="  px-4 py-2 flex-1 text-left">
-              <span className="">
-                Bet <Currency /> X
-              </span>
-            </div>
-            <div className="  px-4 py-2 flex-1 text-right">
-              <span>
-                Cash out <Currency />
-              </span>
-            </div>
-            <div className="  px-4 py-2  text-right"></div>
-          </div>  
-  {loadingMyBets ? (
-    <p className="text-center text-sm text-gray-400">Loading...</p>
-  ) :  Array.isArray(allBets)&&allBets?.length > 0 ? (
-    <div>
-      <div className="flex justify-between text-[11px] font-medium text-gray-500 tracking-wider">
-      </div>
-      <div className="bg-[#1b1c1d]">
-        { Array.isArray(allBets)&&allBets.map((bet) => (
-          <div
-            key={bet._id}
-            className={`flex justify-between rounded-lg ${
-              bet.cashOutMultiplier > 0
-                ? "border border-[#427f00] bg-[#123405]"
-                : "bg-[#141516]"
-            } mb-0.5`}
-          >
-            <div className="flex items-center px-0.5 flex-1">
-              <Avatar className="w-[30px] h-[30px]">
-                <AvatarImage src={bet.userImage} alt={bet.userName} />
-                <AvatarFallback>
-                  {bet.userName?.charAt(0).toUpperCase() || "U"}
-                </AvatarFallback>
-              </Avatar>
-              <p className="ml-2 text-[#9ea0a3] text-[13px]">
-                {bet.userName || "Unknown"}
-              </p>
-            </div>
-            <div className="px-4 py-1 whitespace-nowrap text-left flex-1">
-              <span className="text-base text-[#ffffff] font-normal">
-                {bet.amount}
-              </span>
-              {bet.cashOutMultiplier > 0 && (
-                <span
-                  className={`py-[2px] px-[6px] rounded-[11px] ${getTextColorClass(
-                    Number(bet.cashOutMultiplier)
-                  )} bg-[#00000080] text-[12px] ml-2 font-bold`}
-                >
-                  {bet.cashOutMultiplier}x
-                </span>
-              )}
-            </div>
-            <div className="px-4 py-1 whitespace-nowrap text-right text-xs text-gray-300 flex-1">
-              <span className="text-base text-[#ffffff] font-normal">
-                {(bet.amount * bet.cashOutMultiplier)}
-              </span>
+          value="all-bets"
+          className="flex flex-col h-auto overflow-hidden p-0 hide-scrollbar w-full"
+        >
+          <div className="flex items-center justify-between border-b-2 border-[#141516] bg-[#1b1c1d] z-10">
+            <div className="px-2 py-1">
+              <h2 className="text-sm font-medium">ALL BETS</h2>
+              <p className="text-sm text-zinc-400">{allBets?.length || 0}</p>
             </div>
           </div>
-        ))}
-      </div>
-    </div>
-  ) : (
-    <p className="text-sm text-gray-400 text-center">
-      No bets found for this session
-    </p>
-  )}
-</div>
-</TabsContent>
+          <div>
+            <div className="flex justify-between  text-[11px] font-medium text-gray-500  tracking-wider">
+              <div className="  px-4 py-2 flex-1">
+                <span>Date</span>
+              </div>
+              <div className="  px-4 py-2 flex-1 text-left">
+                <span className="">
+                  Bet <Currency /> X
+                </span>
+              </div>
+              <div className="  px-4 py-2 flex-1 text-right">
+                <span>
+                  Cash out <Currency />
+                </span>
+              </div>
+              <div className="  px-4 py-2  text-right"></div>
+            </div>
+            {loadingMyBets ? (
+              <p className="text-center text-sm text-gray-400">Loading...</p>
+            ) : Array.isArray(allBets) && allBets?.length > 0 ? (
+              <div>
+                <div className="flex justify-between text-[11px] font-medium text-gray-500 tracking-wider"></div>
+                <div className="bg-[#1b1c1d]">
+                  {Array.isArray(allBets) &&
+                    allBets.map((bet) => (
+                      <div
+                        key={bet._id}
+                        className={`flex justify-between rounded-lg ${
+                          bet.cashOutMultiplier > 0
+                            ? "border border-[#427f00] bg-[#123405]"
+                            : "bg-[#141516]"
+                        } mb-0.5`}
+                      >
+                        <div className="flex items-center px-0.5 flex-1">
+                          <Avatar className="w-[30px] h-[30px]">
+                            <AvatarImage
+                              src={bet.userImage}
+                              alt={bet.userName}
+                            />
+                            <AvatarFallback>
+                              {bet.userName?.charAt(0).toUpperCase() || "U"}
+                            </AvatarFallback>
+                          </Avatar>
+                          <p className="ml-2 text-[#9ea0a3] text-[13px]">
+                            {bet.userName || "Unknown"}
+                          </p>
+                        </div>
+                        <div className="px-4 py-1 whitespace-nowrap text-left flex-1">
+                          <span className="text-base text-[#ffffff] font-normal">
+                            {bet.amount}
+                          </span>
+                          {bet.cashOutMultiplier > 0 && (
+                            <span
+                              className={`py-[2px] px-[6px] rounded-[11px] ${getTextColorClass(
+                                Number(bet.cashOutMultiplier)
+                              )} bg-[#00000080] text-[12px] ml-2 font-bold`}
+                            >
+                              {bet.cashOutMultiplier}x
+                            </span>
+                          )}
+                        </div>
+                        <div className="px-4 py-1 whitespace-nowrap text-right text-xs text-gray-300 flex-1">
+                          <span className="text-base text-[#ffffff] font-normal">
+                            {bet.amount * bet.cashOutMultiplier}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm text-gray-400 text-center">
+                No bets found for this session
+              </p>
+            )}
+          </div>
+        </TabsContent>
         <TabsContent
           value="my-bets"
           className="flex-grow overflow-auto p-0 hide-scrollbar w-full"
@@ -205,7 +213,7 @@ export default function Sidebar() {
               ) : myBets.length > 0 ? (
                 <div className="">
                   <div className="bg-[#1b1c1d]">
-                    {myBets.map((bet:MyBet) => {
+                    {myBets.map((bet: MyBet) => {
                       const date = new Date(bet.createdAt).toLocaleDateString();
                       const time = new Date(bet.createdAt).toLocaleTimeString();
                       return (
@@ -335,7 +343,6 @@ export default function Sidebar() {
                 topBets.map((bet: TopBet) => {
                   switch (categoryTab) {
                     case "multipliers":
-                      
                       return (
                         <div
                           key={bet.id || bet.crashPoint}

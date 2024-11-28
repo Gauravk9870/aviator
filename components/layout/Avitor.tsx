@@ -4,16 +4,9 @@ import { closeMenu, setTransitioning } from "@/lib/features/menuSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { useCallback } from "react";
 
-interface AvitorProps {
-  setIsLoading: (status: boolean) => void;
-}
-
-export default function Avitor({ setIsLoading }: AvitorProps) {
+export default function Avitor() {
   const dispatch = useAppDispatch();
   const { isTransitioning } = useAppSelector((state) => state.menu);
-  const handleLoad = () => {
-    setIsLoading(true);
-  };
 
   const toggleMenu = useCallback(() => {
     if (isTransitioning) return;
@@ -28,7 +21,6 @@ export default function Avitor({ setIsLoading }: AvitorProps) {
         id="iframeID"
         src="https://elaborate-monstera-c8852a.netlify.app/"
         className="h-full w-full rounded-2xl"
-        onLoad={handleLoad}
         style={{
           overflow: "hidden",
         }}

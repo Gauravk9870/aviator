@@ -22,12 +22,15 @@ import {
   setToken,
   setUser,
   setEmail,
+  verifyToken,
+  fetchGameLogo,
 } from "@/lib/features/aviatorSlice";
 import { useAudio } from "@/lib/audioContext";
 import { setBalance } from "./features/currencySlice";
 import { useSearchParams } from "next/navigation";
 import MissingUrlPrams from "@/components/layout/MissingUrlPrams";
 import jwt, { JwtPayload } from "jsonwebtoken"; //
+import SocketDisconnected from "@/components/layout/SocketDisconnected";
 interface SocketContextType {
   socket: WebSocket | null;
 }
@@ -44,168 +47,220 @@ export const useSocket = (): SocketContextType => {
   }
   return context;
 };
+
 const sendMessageToIframe = (data: { type: string; data: string | number }) => {
   const iframe = document.getElementById("iframeID") as HTMLIFrameElement;
   if (iframe && iframe.contentWindow) {
     iframe.contentWindow.postMessage(data, "*");
   }
 };
+
 export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const dispatch = useAppDispatch();
-  const socketRef = useRef<WebSocket | null>(null); // Use ref to persist WebSocket instance
+  const socketRef = useRef<WebSocket | null>(null);
+  const reconnectAttempts = useRef(0);
+  const reconnectTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const { playWelcome, playStarted, playCrashed, stopAll, isSoundEnabled } =
     useAudio();
   const searchParams = useSearchParams();
   const token = useAppSelector((state) => state.aviator.token ?? "");
-  const user = useAppSelector((state) => state.aviator.user ?? "");
-  const [connectionError, setConnectionError] = useState<string | null>(null);
-  const [isInitializing, setIsInitializing] = useState(true); // Track initialization state
+  const gameLogo = useAppSelector((state) => state.aviator.gameLogo ?? "");
+
+  const [status, setStatus] = useState<
+    | "missing_params"
+    | "verifying"
+    | "fetching_logo"
+    | "connecting"
+    | "connected"
+    | "disconnected"
+  >("verifying");
+
+  const initializeSocket = (token: string) => {
+    console.log("Initializing WebSocket...");
+    const ws = new WebSocket(`${config.ws}`);
+
+    ws.onopen = () => {
+      console.log("WebSocket connected.");
+      reconnectAttempts.current = 0; // Reset attempts on successful connection
+      setStatus("connected");
+      dispatch(setConnectionStatus(true));
+      ws.send(JSON.stringify({ type: "SUBSCRIBE", gameType: "aviator" }));
+      if (status === "connected") {
+        playWelcome();
+      }
+
+      dispatch(fetchCrashPoints({ token: token }))
+        .unwrap()
+        .catch((error) => {
+          console.error("Error fetching crash points:", error);
+        });
+    };
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      switch (data.type) {
+        case "STARTED":
+          if (isSoundEnabled) playStarted();
+          sendMessageToIframe({ type: "Start", data: data.currentValue });
+          dispatch(setGameStarted());
+          break;
+
+        case "CRASHED":
+          if (isSoundEnabled) playCrashed();
+          dispatch(setGameCrashed(data.finalMultiplier));
+          sendMessageToIframe({
+            type: "Crashed",
+            data: data.finalMultiplier,
+          });
+          break;
+
+        case "MULTIPLIER":
+          if (
+            typeof data.currentMultiplier === "string" &&
+            !isNaN(parseFloat(data.currentMultiplier))
+          ) {
+            dispatch(setMultipliersStarted());
+            dispatch(setCurrentMultiplier(parseFloat(data.currentMultiplier)));
+            sendMessageToIframe({
+              type: "multiplier",
+              data: data.currentMultiplier,
+            });
+          }
+          break;
+
+        case "SESSION_ID":
+          dispatch(setSessionId(data.sessionId));
+          dispatch(setGameStarted());
+          break;
+
+        case "BETS":
+          dispatch(updateBet(data.newBet));
+          dispatch(setBetId(data.newBet._id));
+          break;
+
+        case "CASHED_OUT_BETS":
+          if (data.userBalance !== undefined) {
+            dispatch(setBalance(data.userBalance));
+          }
+          break;
+
+        default:
+          break;
+      }
+    };
+
+    ws.onclose = () => {
+      console.log("WebSocket closed.");
+      dispatch(setConnectionStatus(false));
+      setStatus("disconnected");
+      stopAll();
+      attemptReconnection();
+    };
+
+    ws.onerror = (error) => {
+      console.error("WebSocket error:", error);
+      setStatus("disconnected");
+      attemptReconnection();
+    };
+
+    socketRef.current = ws;
+  };
+
+  const attemptReconnection = () => {
+    if (reconnectAttempts.current >= 5) {
+      console.error("Maximum reconnection attempts reached.");
+      return;
+    }
+
+    reconnectAttempts.current += 1;
+    const delay = Math.min(1000 * 2 ** reconnectAttempts.current, 30000);
+    console.log(`Reconnecting in ${delay / 1000} seconds...`);
+
+    reconnectTimer.current = setTimeout(() => {
+      initializeSocket(token);
+    }, delay);
+  };
 
   useEffect(() => {
     const tokenFromUrl = searchParams.get("token") as string;
     const userFromUrl = searchParams.get("user");
-    const decodedToken = jwt.decode(tokenFromUrl) as DecodedToken;
-    const userEmail = decodedToken?.userEmail;
-    if (tokenFromUrl) {
-      dispatch(setToken(tokenFromUrl));
+
+    if (!tokenFromUrl || !userFromUrl) {
+      stopAll();
+      setStatus("missing_params");
+      return;
     }
 
-    if (userFromUrl) {
-      dispatch(setUser(userFromUrl));
-    }
+    dispatch(setToken(tokenFromUrl));
+    dispatch(setUser(userFromUrl));
+
+    const decodedToken = jwt.decode(tokenFromUrl) as DecodedToken;
+    const userEmail = decodedToken?.userEmail;
+
     if (userEmail) {
       dispatch(setEmail(userEmail));
     }
-    // Mark initialization as complete after setting token and user
-    setIsInitializing(false);
+
+    setStatus("verifying");
+    dispatch(verifyToken(tokenFromUrl))
+      .unwrap()
+      .then(() => {
+        console.log("Token verified successfully");
+        setStatus("fetching_logo");
+        return dispatch(fetchGameLogo(tokenFromUrl)).unwrap();
+      })
+      .then(() => {
+        console.log("Game logo fetched and saved in Redux.");
+        setStatus("connecting");
+        initializeSocket(tokenFromUrl);
+      })
+      .catch((error) => {
+        console.error("Error during initialization:", error);
+        setStatus("disconnected");
+      });
   }, [searchParams, dispatch]);
 
   useEffect(() => {
-    if (isInitializing) return; // Wait until initialization is complete
-
-    if (!token || !user) {
-      // Disconnect existing socket if present
-      if (socketRef.current) {
-        socketRef.current.close();
-        socketRef.current = null;
-      }
-      stopAll(); // Stop all audio
-      return; // Exit early to prevent connection
-    }
-
-    // Only initialize the WebSocket once
-    if (!socketRef.current) {
-      const ws = new WebSocket(`${config.ws}`);
-
-      ws.onopen = () => {
-        dispatch(setConnectionStatus(true));
-        ws.send(JSON.stringify({ type: "SUBSCRIBE", gameType: "aviator" }));
-        playWelcome();
-
-        dispatch(fetchCrashPoints({ token }))
-          .unwrap()
-          .catch((error) => {
-            console.error("Error fetching crash points:", error);
-            setConnectionError("Failed to fetch crash points.");
-          });
-      };
-
-      ws.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-
-        switch (data.type) {
-          case "STARTED":
-            if (isSoundEnabled) playStarted();
-            sendMessageToIframe({ type: "Start", data: data.currentValue });
-            dispatch(setGameStarted());
-            break;
-
-          case "CRASHED":
-            if (isSoundEnabled) playCrashed();
-            dispatch(setGameCrashed(data.finalMultiplier));
-            sendMessageToIframe({
-              type: "Crashed",
-              data: data.finalMultiplier,
-            });
-            break;
-
-          case "MULTIPLIER":
-            if (
-              typeof data.currentMultiplier === "string" &&
-              !isNaN(parseFloat(data.currentMultiplier))
-            ) {
-              dispatch(setMultipliersStarted());
-              dispatch(
-                setCurrentMultiplier(parseFloat(data.currentMultiplier))
-              );
-              sendMessageToIframe({
-                type: "multiplier",
-                data: data.currentMultiplier,
-              });
-            }
-            break;
-
-          case "SESSION_ID":
-            dispatch(setSessionId(data.sessionId));
-            dispatch(setGameStarted());
-            break;
-
-          case "BETS":
-            dispatch(updateBet(data.newBet));
-            dispatch(setBetId(data.newBet._id));
-            break;
-
-          case "CASHED_OUT_BETS":
-            if (data.userBalance !== undefined) {
-              dispatch(setBalance(data.userBalance));
-            }
-            break;
-
-          default:
-            break;
-        }
-      };
-
-      ws.onclose = () => {
-        dispatch(setConnectionStatus(false));
-        stopAll();
-      };
-
-      socketRef.current = ws;
-    }
-
     return () => {
-      // Cleanup on unmount
       if (socketRef.current) {
         socketRef.current.close();
-        socketRef.current = null;
+      }
+      if (reconnectTimer.current) {
+        clearTimeout(reconnectTimer.current);
       }
     };
-  }, [token, user, isInitializing]);
+  }, []);
 
-  if (isInitializing) {
-    // Render a loading state while waiting for initialization
-    return <div>Connecting...</div>;
-  }
+  useEffect(() => {
+    console.log("CURRENT STATUS : ", status);
+  }, [status]);
 
-  if (!user) {
-    stopAll();
+  if (status === "missing_params") {
     return (
-      <MissingUrlPrams message="URL parameters are missing or invalid. Key: user | Value: null" />
+      <MissingUrlPrams message="URL parameters are missing or invalid. Please check token and user." />
     );
   }
 
-  if (!token) {
-    stopAll();
+  if (
+    status === "verifying" ||
+    status === "fetching_logo" ||
+    status === "connecting"
+  ) {
     return (
-      <MissingUrlPrams message="URL parameters are missing or invalid. Key: token | Value: null" />
+      <div className="fixed inset-0 flex flex-col items-center justify-center bg-[#0e0e0e] text-white z-50">
+        <img src={gameLogo || ""} alt="Logo" className="w-24 h-24" />
+        <p>Connecting...</p>
+      </div>
     );
   }
 
-  if (connectionError) {
-    return <div>Error: {connectionError}</div>;
+  if (status === "disconnected") {
+    return (
+      <SocketDisconnected message=" You have been disconnected. Check connection and refresh your browser, or go back to landing page " />
+    );
   }
 
   return (
