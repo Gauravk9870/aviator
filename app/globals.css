@@ -22,7 +22,7 @@ body {
 }
 
 .hide-scrollbar::-webkit-scrollbar-thumb {
-  background: #2c2d30; /* Scrollbar thumb color */
+  background: #979dac; /* Scrollbar thumb color */
   border-radius: 10px; /* Rounded edges */
 }
 
@@ -33,7 +33,7 @@ body {
 /* For Firefox */
 .hide-scrollbar {
   scrollbar-width: thin; /* Thin scrollbar */
-  scrollbar-color: #2c2d30 #141516; /* thumb color track color */
+  scrollbar-color:#666666 #141516; /* thumb color track color */
 }
 
 
