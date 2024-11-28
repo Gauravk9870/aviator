@@ -26,7 +26,7 @@ import {
   fetchGameLogo,
 } from "@/lib/features/aviatorSlice";
 import { useAudio } from "@/lib/audioContext";
-import { setBalance } from "./features/currencySlice";
+import { fetchBalance, setBalance } from "./features/currencySlice";
 import { useSearchParams } from "next/navigation";
 import MissingUrlPrams from "@/components/layout/MissingUrlPrams";
 import jwt, { JwtPayload } from "jsonwebtoken"; //
@@ -67,6 +67,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     useAudio();
   const searchParams = useSearchParams();
   const token = useAppSelector((state) => state.aviator.token ?? "");
+  const user = useAppSelector((state) => state.aviator.user ?? "");
   const gameLogo = useAppSelector((state) => state.aviator.gameLogo ?? "");
 
   const [status, setStatus] = useState<
@@ -78,7 +79,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     | "disconnected"
   >("verifying");
 
-  const initializeSocket = (token: string) => {
+  const initializeSocket = (token: string, userId: string) => {
     console.log("Initializing WebSocket...");
     const ws = new WebSocket(`${config.ws}`);
 
@@ -91,6 +92,12 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
       if (status === "connected") {
         playWelcome();
       }
+
+      dispatch(fetchBalance(user))
+        .unwrap()
+        .catch((error) => {
+          console.error("Error fetching balance , ", error);
+        });
 
       dispatch(fetchCrashPoints({ token: token }))
         .unwrap()
@@ -180,7 +187,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     console.log(`Reconnecting in ${delay / 1000} seconds...`);
 
     reconnectTimer.current = setTimeout(() => {
-      initializeSocket(token);
+      initializeSocket(token, user);
     }, delay);
   };
 
@@ -215,7 +222,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
       .then(() => {
         console.log("Game logo fetched and saved in Redux.");
         setStatus("connecting");
-        initializeSocket(tokenFromUrl);
+        initializeSocket(tokenFromUrl, userFromUrl);
       })
       .catch((error) => {
         console.error("Error during initialization:", error);
