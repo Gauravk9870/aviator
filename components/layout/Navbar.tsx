@@ -130,7 +130,7 @@ export default function Navbar() {
     useState(false);
   const [showGameLimits, setShowGameLimits] = useState(false);
   const [showChangeAvatar, setShowChangeAvatar] = useState(false);
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>('./av-1.png');
   const [returnURL, setReturnURL] = useState<string | null>(null);
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -250,9 +250,9 @@ const isConnected = useAppSelector((state: RootState) => state.aviator.isConnect
     <div className="flex flex-col bg-[#1b1c1d] p-1 text-white">
       <div className="flex justify-between">
         <div className="flex items-center gap-4">
-        <span className="text-2xl font-black text-red-600 italic flex items-center gap-2">
+        <span className="text-sm  italic flex items-center gap-2">
             {gameLogo && (
-              <img src={gameLogo} alt="Game Logo" className="h-8 w-auto" />
+              <img src={gameLogo} alt="Logo" className="h-8 w-auto" />
             )}
           
           </span>
@@ -297,8 +297,8 @@ const isConnected = useAppSelector((state: RootState) => state.aviator.isConnect
                       handleCloseMenu();
                     }}
                   >
-                    <div className="flex items-center justify-between p-2">
-                      <div className="flex items-center p-1">
+                    <div className="flex items-center justify-between p-2 ">
+                      <div className="flex items-center p-1 gap-2">
                         {avatarUrl ? (
                           <img
                             src={avatarUrl}
@@ -306,9 +306,9 @@ const isConnected = useAppSelector((state: RootState) => state.aviator.isConnect
                             className="h-8 w-8 rounded-full"
                           />
                         ) : (
-                          <div className="mr-2 h-8 w-8 rounded-full bg-gray-700"></div>
+                          <div className="ml-2 h-8 w-8 rounded-full bg-gray-700"></div>
                         )}
-                        <div className="text-sm font-semibold">d***8</div>
+                        <div className="text-sm font-semibold">  {userId}</div>
                       </div>
                       <button
                         className="flex cursor-pointer items-center justify-center gap-1 rounded-full border border-[#414148] bg-[#252528] px-4 py-1.5 text-xs text-[#83878e]"

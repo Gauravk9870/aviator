@@ -46,6 +46,14 @@ export type Bet = {
   x: number;
   timestamp: string;
 };
+export type MyBet = {
+  _id: string;
+  amount: number;
+  cashedOut: boolean;
+  cashOutMultiplier: number;
+  createdAt: string;
+};
+
 export type TopBet = {
   id?: string;
   crashPoint?: number;

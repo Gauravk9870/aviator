@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format, isValid } from "date-fns";
 import { Forward, ShieldCheck, MessageCircle } from "lucide-react";
 import { getTextColorClass } from "../ui/MulticolorText";
-import {  TopBet } from "@/lib/utils";
+import {  MyBet, TopBet } from "@/lib/utils";
 import { setActiveTab } from "@/lib/features/tabsSlice";
 import { RootState } from "@/lib/store";
 import Currency from "./Currency";
@@ -205,7 +205,7 @@ export default function Sidebar() {
               ) : myBets.length > 0 ? (
                 <div className="">
                   <div className="bg-[#1b1c1d]">
-                    {myBets.map((bet) => {
+                    {myBets.map((bet:MyBet) => {
                       const date = new Date(bet.createdAt).toLocaleDateString();
                       const time = new Date(bet.createdAt).toLocaleTimeString();
                       return (
@@ -233,7 +233,7 @@ export default function Sidebar() {
                               <span
                                 className={`py-[2px] px-[6px] rounded-[11px] bg-[#00000080] text-[12px] ml-2 font-bold`}
                               >
-                                {bet.amount}x
+                                {bet.cashOutMultiplier}x
                               </span>
                             )}
                           </div>
