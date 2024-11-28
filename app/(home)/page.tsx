@@ -32,7 +32,7 @@ export default function Home() {
   if (!verified || !isConnected) {
     return (
       <div className="fixed inset-0 flex flex-col items-center justify-center bg-[#0e0e0e] text-white z-50">
-        <img src={gameLogo || ""} alt="Logo" className="w-24 h-24" />
+        <img src={gameLogo || "logo.png"} alt="Logo" className="w-24 h-24 mb-1" />
         <p>Connecting...</p>
       </div>
     );
