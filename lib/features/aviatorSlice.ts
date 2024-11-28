@@ -27,6 +27,7 @@ interface AviatorState {
   userEmail: string | null,
   token: string | null;
   verified: boolean;
+
   gameLogo: string | null;
   poweredByLogo: string | null;
   currentMultiplier: number
@@ -65,6 +66,7 @@ interface AviatorState {
   bet_id: string | null;
   loadingMyBets: boolean;
   loadingTopBets: boolean;
+  loadingActiveSessionBets: boolean;
   activeSessionBets: ActiveSessionBet[]
 }
 
@@ -91,6 +93,8 @@ const initialState: AviatorState = {
   bet_id: null,
   loadingMyBets: false,
   loadingTopBets: false,
+  loadingActiveSessionBets: false,
+
   activeSessionBets: []
 };
 
@@ -345,7 +349,7 @@ export const fetchBetsByUser = createAsyncThunk(
 export const fetchActiveSessionBets = createAsyncThunk<
   ActiveSessionBet[],
   { token: string },
-  { rejectValue: string }
+  { rejectValue: ActiveSessionBet[] }
 >(
   "aviator/fetchActiveSessionBets",
   async ({ token }, { rejectWithValue }) => {
@@ -360,13 +364,14 @@ export const fetchActiveSessionBets = createAsyncThunk<
       if (response.data.status) {
         return response.data.data as ActiveSessionBet[];
       } else {
-        return rejectWithValue(response.data.message);
+        return rejectWithValue([]);
       }
     } catch (error) {
       if (error instanceof AxiosError && error.response) {
-        return rejectWithValue(error.response.data);
+        console.error("API Error:", error.response.data);
+        return rejectWithValue([]);
       }
-      return rejectWithValue("An error occurred while fetching active session bets.");
+      return rejectWithValue([]);
     }
   }
 );
@@ -626,16 +631,21 @@ const aviatorSlice = createSlice({
         state.error = action.payload as string;
       })
       //FETCH ActiveSessionBets BETS
+      // FETCH ACTIVE SESSION BETS
       .addCase(fetchActiveSessionBets.pending, (state) => {
+        state.loadingActiveSessionBets = true;
         state.error = null;
       })
       .addCase(fetchActiveSessionBets.fulfilled, (state, action) => {
+        state.loadingActiveSessionBets = false;
         state.activeSessionBets = action.payload;
-        state.error = null;
       })
       .addCase(fetchActiveSessionBets.rejected, (state, action) => {
-        state.error = action.payload as string;
+        state.loadingActiveSessionBets = false;
+        state.activeSessionBets = action.payload || [];
+        state.error = action.payload ? null : "Failed to fetch session bets.";
       });
+
   },
 });
 

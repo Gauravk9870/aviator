@@ -29,7 +29,8 @@ export default function Sidebar() {
   const activeTab = useAppSelector((state) => state.tabs.activeTab);
   const myBets = useAppSelector((state: RootState) => state.aviator.myBets);
   const topBets = useAppSelector((state: RootState) => state.aviator.topBets);
-  const allBets=useAppSelector((state:RootState)=>state.aviator.activeSessionBets)
+  const allBets=useAppSelector((state:RootState)=>state.aviator.activeSessionBets ||[])
+  console.log(allBets)
   const error = useAppSelector((state: RootState) => state.aviator.error);
   const loadingMyBets = useAppSelector(
     (state: RootState) => state.aviator.loadingMyBets
@@ -123,6 +124,7 @@ export default function Sidebar() {
             </div>
             <div className="  px-4 py-2  text-right"></div>
           </div>  
+          {/* {error && <p className="text-red-500">{error}</p>}   */}
   {loadingMyBets ? (
     <p className="text-center text-sm text-gray-400">Loading...</p>
   ) :  Array.isArray(allBets)&&allBets?.length > 0 ? (
@@ -205,7 +207,7 @@ export default function Sidebar() {
               {error && <p className="text-red-500">{error}</p>}
               {loadingMyBets ? (
                 <p className="text-center text-sm text-gray-400">Loading...</p>
-              ) : myBets.length > 0 ? (
+              ) :Array.isArray(myBets)&& myBets.length > 0 ? (
                 <div className="">
                   <div className="bg-[#1b1c1d]">
                     {myBets.map((bet:MyBet) => {
