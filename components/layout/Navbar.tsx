@@ -153,9 +153,9 @@ const isConnected = useAppSelector((state: RootState) => state.aviator.isConnect
   }, []);
 
   useEffect(() => {
-    if(!isConnected)return
+  
     dispatch(fetchBalance(`${userId}`));
-  }, [dispatch,isConnected]);
+  }, [dispatch]);
 
   useEffect(() => {
     const savedAvatar = localStorage.getItem("selectedAvatar");
@@ -252,7 +252,7 @@ const isConnected = useAppSelector((state: RootState) => state.aviator.isConnect
         <div className="flex items-center gap-4">
         <span className="text-sm  italic flex items-center gap-2">
             {gameLogo && (
-              <img src={gameLogo} alt="Logo" className="h-12 w-auto" />
+              <img src={gameLogo||'logo.png'} alt="Logo" className="h-12 w-auto" />
             )}
           
           </span>
