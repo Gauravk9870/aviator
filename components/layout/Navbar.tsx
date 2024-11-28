@@ -38,7 +38,6 @@ import { RootState } from "@/lib/store";
 
 import Currency from "./Currency";
 import { useAudio } from "@/lib/audioContext";
-import { fetchBalance } from "@/lib/features/currencySlice";
 import { useRouter, useSearchParams } from "next/navigation";
 
 const useMenu = () => {
@@ -130,7 +129,7 @@ export default function Navbar() {
     useState(false);
   const [showGameLimits, setShowGameLimits] = useState(false);
   const [showChangeAvatar, setShowChangeAvatar] = useState(false);
-  const [avatarUrl, setAvatarUrl] = useState<string | null>('./av-1.png');
+  const [avatarUrl, setAvatarUrl] = useState<string | null>("./av-1.png");
   const [returnURL, setReturnURL] = useState<string | null>(null);
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -138,9 +137,10 @@ export default function Navbar() {
   const dispatch = useAppDispatch();
   const { balance } = useAppSelector((state) => state.currency);
   const gameLogo = useAppSelector((state: RootState) => state.aviator.gameLogo);
-const userId=useAppSelector((state: RootState) => state.aviator.user)
-const userEmail=useAppSelector((state: RootState) => state.aviator.userEmail);
-const isConnected = useAppSelector((state: RootState) => state.aviator.isConnected);
+  const userId = useAppSelector((state: RootState) => state.aviator.user);
+  const userEmail = useAppSelector(
+    (state: RootState) => state.aviator.userEmail
+  );
 
   const parseReturnURL = useCallback((url: string | null) => {
     if (!url) return null;
@@ -151,11 +151,6 @@ const isConnected = useAppSelector((state: RootState) => state.aviator.isConnect
       return null;
     }
   }, []);
-
-  useEffect(() => {
-  
-    dispatch(fetchBalance(`${userId}`));
-  }, [dispatch]);
 
   useEffect(() => {
     const savedAvatar = localStorage.getItem("selectedAvatar");
@@ -195,9 +190,6 @@ const isConnected = useAppSelector((state: RootState) => state.aviator.isConnect
     },
     [returnURL, router]
   );
-
-
-  
 
   const menuItems = [
     {
@@ -250,11 +242,10 @@ const isConnected = useAppSelector((state: RootState) => state.aviator.isConnect
     <div className="flex flex-col bg-[#1b1c1d] p-1 text-white">
       <div className="flex justify-between">
         <div className="flex items-center gap-4">
-        <span className="text-sm  italic flex items-center gap-2">
+          <span className="text-sm  italic flex items-center gap-2">
             {gameLogo && (
               <img src={gameLogo||'logo.png'} alt="Logo" className="h-12 w-auto" />
             )}
-          
           </span>
           <button
             onClick={toggleHowToPlay}
@@ -308,7 +299,7 @@ const isConnected = useAppSelector((state: RootState) => state.aviator.isConnect
                         ) : (
                           <div className="ml-2 h-8 w-8 rounded-full bg-gray-700"></div>
                         )}
-                        <div className="text-sm font-semibold">  {userId}</div>
+                        <div className="text-sm font-semibold"> {userId}</div>
                       </div>
                       <button
                         className="flex cursor-pointer items-center justify-center gap-1 rounded-full border border-[#414148] bg-[#252528] px-4 py-1.5 text-xs text-[#83878e]"
