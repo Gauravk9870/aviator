@@ -65,8 +65,10 @@ export default function Sidebar() {
   };
 
   return (
-    <div className="lg:w-96 text-white flex flex-col justify-between bg-[#1b1c1d] rounded-xl p-1 lg:m-0">
-      <Tabs
+<div className="lg:w-96 text-white flex flex-col justify-between bg-[#1b1c1d] rounded-xl p-1 lg:m-0 h-screen max-h-screen">
+
+
+<Tabs
         defaultValue="all-bets"
         value={activeTab}
         onValueChange={handleTabChange}
@@ -96,6 +98,7 @@ export default function Sidebar() {
   value="all-bets"
   className="flex flex-col h-auto overflow-hidden p-0 hide-scrollbar w-full"
 >
+
   
   <div className="flex items-center justify-between border-b-2 border-[#141516] bg-[#1b1c1d] z-10">
     <div className="px-2 py-1">
@@ -483,5 +486,6 @@ export default function Sidebar() {
         </span>
       </div>
     </div>
+
   );
 }
