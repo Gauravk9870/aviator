@@ -164,13 +164,11 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
       dispatch(setConnectionStatus(false));
       setStatus("disconnected");
       stopAll();
-      attemptReconnection();
     };
 
     ws.onerror = (error) => {
       console.error("WebSocket error:", error);
       setStatus("disconnected");
-      attemptReconnection();
     };
 
     socketRef.current = ws;
@@ -257,10 +255,13 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     status === "connecting"
   ) {
     return (
-
       <div className=" w-full h-screen flex items-center justify-center flex-col">
         <div style={{ height: "96px", width: "96px" }}>
-          <img src={gameLogo || "logo.png"} alt="Logo" className=" w-full h-full" />
+          <img
+            src={gameLogo || "logo.png"}
+            alt="Logo"
+            className=" w-full h-full"
+          />
         </div>
         <p className=" text-white text-base">Connecting...</p>
       </div>
