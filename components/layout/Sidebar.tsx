@@ -37,14 +37,18 @@ export default function Sidebar() {
   const loadingTopBets = useAppSelector(
     (state: RootState) => state.aviator.loadingTopBets
   );
+  const isConnected = useAppSelector((state: RootState) => state.aviator.isConnected);
+
   const token = useAppSelector((state) => state.aviator.token ?? "");
   const user = useAppSelector((state) => state.aviator.user ?? "");
+  const poweredByLogo = useAppSelector((state: RootState) => state.aviator.poweredByLogo);
 
   const handleTabChange = (tab: string) => {
     dispatch(setActiveTab(tab));
   };
 
   useEffect(() => {
+    if(!isConnected)return
     if (activeTab === "my-bets") {
       dispatch(fetchBetsByUser({ userId: user, token }));
     } else if (activeTab === "top") {
@@ -53,7 +57,7 @@ export default function Sidebar() {
     }else if(activeTab === "all-bets"){
       dispatch(fetchActiveSessionBets({token}))
     }
-  }, [activeTab, categoryTab, timeTab, dispatch, token, user]);
+  }, [activeTab, categoryTab, timeTab, dispatch, token, user,isConnected]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -92,6 +96,7 @@ export default function Sidebar() {
   value="all-bets"
   className="flex flex-col h-auto overflow-hidden p-0 hide-scrollbar w-full"
 >
+  
   <div className="flex items-center justify-between border-b-2 border-[#141516] bg-[#1b1c1d] z-10">
     <div className="px-2 py-1">
       <h2 className="text-sm font-medium">ALL BETS</h2>
@@ -99,6 +104,22 @@ export default function Sidebar() {
     </div>
   </div>
   <div>
+  <div className="flex justify-between  text-[11px] font-medium text-gray-500  tracking-wider">
+            <div className="  px-4 py-2 flex-1">
+              <span>Date</span>
+            </div>
+            <div className="  px-4 py-2 flex-1 text-left">
+              <span className="">
+                Bet <Currency /> X
+              </span>
+            </div>
+            <div className="  px-4 py-2 flex-1 text-right">
+              <span>
+                Cash out <Currency />
+              </span>
+            </div>
+            <div className="  px-4 py-2  text-right"></div>
+          </div>  
   {loadingMyBets ? (
     <p className="text-center text-sm text-gray-400">Loading...</p>
   ) :  Array.isArray(allBets)&&allBets?.length > 0 ? (
@@ -458,7 +479,7 @@ export default function Sidebar() {
         </span>
         <span className="flex items-center gap-1">
           Powered by
-          <img src="./logo.png" alt="Logo" className="w-5 h-5" />
+          <img src={`${poweredByLogo}`} alt="Logo" className="w-5 h-5" />
         </span>
       </div>
     </div>

@@ -24,8 +24,11 @@ interface Bet {
 
 interface AviatorState {
   user: string | null;
+  userEmail: string | null,
   token: string | null;
-
+  verified: boolean;
+  gameLogo: string | null;
+  poweredByLogo: string | null;
   currentMultiplier: number
   gameStatus: "waiting" | "started" | "crashed"
   multipliersStarted: boolean;
@@ -67,14 +70,16 @@ interface AviatorState {
 
 const initialState: AviatorState = {
   user: null,
+  userEmail: null,
   token: null,
-
+  verified: false,
+  gameLogo: null,
+  poweredByLogo: null,
   currentMultiplier: 1,
   gameStatus: "waiting",
   multipliersStarted: false,
   activeBetsBySection: {},
   pendingBetsBySection: {},
-
   isConnected: false,
   sessionId: null,
   finalMultiplier: null,
@@ -89,7 +94,52 @@ const initialState: AviatorState = {
   activeSessionBets: []
 };
 
+//VERIFY API
+export const verifyToken = createAsyncThunk(
+  "aviator/verifyToken",
+  async (token: string, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(
+        `${config.server}/api/user/verifyToken`,
+        { token }
+      );
+      if (response.data.status) {
+        return true;
+      } else {
+        return rejectWithValue(false);
+      }
+    } catch (error) {
+      return rejectWithValue(false);
+    }
+  }
+);
 
+export const fetchGameLogo = createAsyncThunk(
+  "aviator/fetchGameLogo",
+  async (token: string, { rejectWithValue }) => {
+    try {
+      const response = await fetch(`${config.server}/api/getGameLogo/aviator`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `${token}`,
+        },
+      });
+
+      const data = await response.json();
+      if (data.status) {
+        return {
+          gameLogo: data.data.gameLogo,
+          poweredByLogo: data.data.poweredByLogo,
+        };
+      } else {
+        return rejectWithValue(data.message || "Failed to fetch game logos.");
+      }
+    } catch (error) {
+      return rejectWithValue("An error occurred while fetching game logos.");
+    }
+  }
+);
 
 
 export const placeBet = createAsyncThunk(
@@ -319,6 +369,7 @@ export const fetchActiveSessionBets = createAsyncThunk<
   }
 );
 
+
 const aviatorSlice = createSlice({
   name: "aviator",
   initialState,
@@ -335,6 +386,7 @@ const aviatorSlice = createSlice({
       const { sectionId, userId, amount, token } = action.payload;
       state.pendingBetsBySection[sectionId] = { userId, amount, token };
     },
+
     clearPendingBetBySection: (state, action: PayloadAction<string>) => {
       const sectionId = action.payload;
       delete state.pendingBetsBySection[sectionId];
@@ -380,9 +432,14 @@ const aviatorSlice = createSlice({
     //OLD
     setUser: (state, action: PayloadAction<string | null>) => {
       state.user = action.payload;
+
+    },
+    setEmail: (state, action: PayloadAction<string | null>) => {
+      state.userEmail = action.payload
     },
     setToken: (state, action: PayloadAction<string | null>) => {
       state.token = action.payload;
+
     },
 
     clearTopBets: (state) => {
@@ -486,11 +543,32 @@ const aviatorSlice = createSlice({
         showCashoutNotification(action.meta.arg.currentMultiplier, payout);
         state.error = null;
       })
+      .addCase(verifyToken.pending, (state) => {
+        state.verified = false;
+        state.error = null;
+      })
+      .addCase(verifyToken.fulfilled, (state) => {
+        state.verified = true;
+      })
+      .addCase(verifyToken.rejected, (state) => {
+        state.verified = false;
+        state.error = "Token verification failed.";
+      })
       .addCase(cashOut.rejected, (state, action) => {
         state.error =
           (action.payload as string) || "An error occurred during cash out";
       })
-
+      .addCase(fetchGameLogo.pending, (state) => {
+        state.error = null;
+      })
+      .addCase(fetchGameLogo.fulfilled, (state, action) => {
+        state.gameLogo = action.payload.gameLogo;
+        state.poweredByLogo = action.payload.poweredByLogo;
+        state.error = null;
+      })
+      .addCase(fetchGameLogo.rejected, (state, action) => {
+        state.error = action.payload as string;
+      })
       // FETCH USER BETS
       .addCase(fetchUserBets.pending, (state) => {
         state.error = null;
@@ -562,6 +640,7 @@ const aviatorSlice = createSlice({
 export const {
   setUser,
   setToken,
+  setEmail,
   clearTopBets,
   setPendingBetBySection,
   clearPendingBetBySection,

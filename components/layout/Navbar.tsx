@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   Volume2,
@@ -35,6 +34,8 @@ import {
   setTransitioning,
   closeMenu,
 } from "@/lib/features/menuSlice";
+import { RootState } from "@/lib/store";
+
 import Currency from "./Currency";
 import { useAudio } from "@/lib/audioContext";
 import { fetchBalance } from "@/lib/features/currencySlice";
@@ -132,6 +133,10 @@ export default function Navbar() {
 
   const dispatch = useAppDispatch();
   const { balance } = useAppSelector((state) => state.currency);
+  const gameLogo = useAppSelector((state: RootState) => state.aviator.gameLogo);
+const userId=useAppSelector((state: RootState) => state.aviator.user)
+const userEmail=useAppSelector((state: RootState) => state.aviator.userEmail);
+const isConnected = useAppSelector((state: RootState) => state.aviator.isConnected);
 
   const parseReturnURL = useCallback((url: string | null) => {
     if (!url) return null;
@@ -144,8 +149,9 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
-    dispatch(fetchBalance("8376944575"));
-  }, [dispatch]);
+    if(!isConnected)return
+    dispatch(fetchBalance(`${userId}`));
+  }, [dispatch,isConnected]);
 
   useEffect(() => {
     const savedAvatar = localStorage.getItem("selectedAvatar");
@@ -185,6 +191,9 @@ export default function Navbar() {
     },
     [returnURL, router]
   );
+
+
+  
 
   const menuItems = [
     {
@@ -237,8 +246,11 @@ export default function Navbar() {
     <div className="flex flex-col bg-[#1b1c1d] p-1 text-white">
       <div className="flex justify-between">
         <div className="flex items-center gap-4">
-          <span className="text-2xl font-black text-red-600 italic">
-            Aviator
+        <span className="text-2xl font-black text-red-600 italic flex items-center gap-2">
+            {gameLogo && (
+              <img src={gameLogo} alt="Game Logo" className="h-8 w-auto" />
+            )}
+          
           </span>
           <button
             onClick={toggleHowToPlay}
@@ -366,7 +378,7 @@ export default function Navbar() {
           onClose={toggleChangeAvatar}
           onAvatarSelect={handleAvatarSelect}
           selectedAvatarUrl={avatarUrl}
-          userEmail={"8376944575@gmail.com"}
+          userEmail={`${userEmail}`}
         />
       )}
     </div>

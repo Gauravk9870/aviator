@@ -7,6 +7,7 @@ const _config = {
   ws: process.env.NEXT_PUBLIC_WS_URL,
   gameLimits: process.env.NEXT_PUBLIC_GAMELIMITS,
   howToPlay: process.env.NEXT_PUBLIC_HOWTOPLAY,
-  gamesRule: process.env.NEXT_PUBLIC_GAMERULES
+  gamesRule: process.env.NEXT_PUBLIC_GAMERULES,
+  provablyFairEndpoint: process.env.NEXT_PUBLIC_PROVABLYFAIRSETTINGS
 };
 export const config = Object.freeze(_config);

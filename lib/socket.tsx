@@ -48,7 +48,6 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     const ws = new WebSocket(`${config.ws}`);
 
     ws.onopen = () => {
-      
       dispatch(setConnectionStatus(true));
       ws.send(JSON.stringify({ type: "SUBSCRIBE", gameType: "aviator" }));
       playWelcome();

@@ -9,6 +9,7 @@ import {
 import { getAviatorSetting } from "@/app/services/apis";
 import { config } from "@/lib/config";
 import { useAppSelector } from "@/lib/hooks";
+
 interface GameRulesData {
   _id: string;
   name: string;
@@ -50,7 +51,7 @@ const GameRulesPopup: React.FC<GameRulesPopupProps> = ({ onClose }) => {
       <DialogContent className="sm:max-w-[700px] bg-[#27a409] border-gray-700">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-white">
-            Game Rules
+            Game Rules :
           </DialogTitle>
           <DialogClose className="absolute top-4 right-4 text-white hover:text-gray-400 transition">
             <svg
@@ -71,35 +72,33 @@ const GameRulesPopup: React.FC<GameRulesPopupProps> = ({ onClose }) => {
         </DialogHeader>
 
         <div className="mt-4">
-          {/* Video Embed */}
-          <div className="aspect-video w-full">
-            <iframe
-              width="100%"
-              height="100%"
-              src="https://www.youtube.com/embed/dQw4w9WgXcQ"
-              title="How to play Spribe Aviator"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            ></iframe>
-          </div>
-
           {/* Loading or Game Rules Content */}
-          <div className="mt-6 text-white">
+          <div className="text-white">
             {loading ? (
-              <p>Loading game rules...</p>
+              <p className="text-center text-lg font-medium">Loading game rules...</p>
             ) : (
               gameRulesData && (
                 <div>
-                  <h2 className="text-lg font-semibold mb-2">Game Rules:</h2>
                   <div
+                    className="mb-4 text-justify leading-relaxed text-lg"
                     dangerouslySetInnerHTML={{
                       __html: gameRulesData.settingText,
                     }}
                   />
-                  <p>Minimum Bet: {gameRulesData.minimumBet}</p>
-                  <p>Maximum Bet: {gameRulesData.maximumBet}</p>
-                  <p>Maximum Win Bet: {gameRulesData.maximumWinBet}</p>
+                  <div className="space-y-2">
+                    <p className="font-semibold text-lg">
+                      Minimum Bet:{" "}
+                      <span className="font-normal">{gameRulesData.minimumBet}</span>
+                    </p>
+                    <p className="font-semibold text-lg">
+                      Maximum Bet:{" "}
+                      <span className="font-normal">{gameRulesData.maximumBet}</span>
+                    </p>
+                    <p className="font-semibold text-lg">
+                      Maximum Win Bet:{" "}
+                      <span className="font-normal">{gameRulesData.maximumWinBet}</span>
+                    </p>
+                  </div>
                 </div>
               )
             )}

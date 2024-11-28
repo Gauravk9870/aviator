@@ -15,8 +15,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Aviator -Game Hub 60",
-  description: "Aviator -Game Hub 60",
+  title: "Aviator-DesiAPI",
+  description: "Aviator-DesiAPI",
 };
 
 export default function RootLayout({

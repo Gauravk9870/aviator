@@ -19,6 +19,7 @@ const initialState: CurrencyState = {
 export const fetchBalance = createAsyncThunk(
   'currency/fetchBalance',
   async (userId: string, { rejectWithValue }) => {
+
     try {
       const response = await axios.get(
         `${config.server}/api/user/fetchUserBalance/${userId}`

@@ -16,7 +16,9 @@ import { Input } from "../ui/input";
 
 interface BetSectionProps {
   betAmount: number;
+  activeAmount:number;
   setBetAmount: React.Dispatch<React.SetStateAction<number>>;
+  setActiveAmount:React.Dispatch<React.SetStateAction<number>>
   currentMultiplier: number;
   sectionId: string;
 }
@@ -24,6 +26,8 @@ interface BetSectionProps {
 const BetSection: React.FC<BetSectionProps> = ({
   betAmount,
   setBetAmount,
+  activeAmount,
+  setActiveAmount,
   currentMultiplier,
   sectionId,
 }) => {
@@ -46,9 +50,9 @@ const BetSection: React.FC<BetSectionProps> = ({
     (state) => state.aviator.multipliersStarted
   );
 
-  const handleIncrement = () => setBetAmount((prev) => prev + 1);
+  const handleIncrement = () => setBetAmount((prev) => prev + 10);
   const handleDecrement = () =>
-    setBetAmount((prev) => (prev > 1 ? prev - 1 : 1));
+    setBetAmount((prev) => (prev > 10 ? prev - 10: 10));
 
   const placeBetHandler = async () => {
     setIsBetPlaced(true);
@@ -253,17 +257,29 @@ const BetSection: React.FC<BetSectionProps> = ({
             </button>
           </div>
           <div className="grid grid-cols-2 gap-1 mt-1">
-            {[1, 2, 5, 10].map((amount) => (
-              <button
-                key={amount}
-                className={`text-sm focus:outline-none rounded-3xl ${buttonClass}`}
-                onClick={() => setBetAmount(amount)}
-                disabled={isDisabled}
-              >
-                {amount}
-              </button>
-            ))}
-          </div>
+          {[10, 20, 50, 100].map((amount) => (
+        <button
+          key={amount}
+          className={`text-sm focus:outline-none rounded-3xl ${
+            isDisabled
+              ? "bg-[#141516] text-[#ffffff80] cursor-not-allowed opacity-50"
+              : "bg-[#141516] text-white"
+          }`}
+          onClick={() => {
+            if (activeAmount === amount) {
+              setBetAmount((prev) => prev + amount);
+            } else {
+              setBetAmount(amount);
+              setActiveAmount(amount);
+            }
+          }}
+          disabled={isDisabled}
+        >
+          {amount}
+        </button>
+      ))}
+</div>
+
         </div>
 
         <div className="flex flex-col items-center">{renderButton()}</div>
@@ -281,7 +297,9 @@ interface AutoSectionProps extends BetSectionProps {
 
 const AutoSection: React.FC<AutoSectionProps> = ({
   betAmount,
+  activeAmount,
   setBetAmount,
+  setActiveAmount,
   currentMultiplier,
   sectionId,
   isAutoCashOut,
@@ -357,7 +375,9 @@ const AutoSection: React.FC<AutoSectionProps> = ({
     <div className="flex flex-col gap-2 w-full">
       <BetSection
         betAmount={betAmount}
+        activeAmount={activeAmount}
         setBetAmount={setBetAmount}
+        setActiveAmount={setActiveAmount}
         currentMultiplier={currentMultiplier}
         sectionId={`${sectionId}`}
       />
@@ -407,7 +427,8 @@ const BetControlSection: React.FC<BetControlSectionProps> = ({
   sectionId,
 }) => {
   const { currentMultiplier } = useAppSelector((state) => state.aviator);
-  const [betAmount, setBetAmount] = useState<number>(1.0);
+  const [betAmount, setBetAmount] = useState<number>(10);
+  const [activeAmount, setActiveAmount] = useState<number>(10); 
   const activeBet = useAppSelector(
     (state) =>
       state.aviator.activeBetsBySection[sectionId] ||
@@ -456,7 +477,10 @@ const BetControlSection: React.FC<BetControlSectionProps> = ({
         <TabsContent value="bet" className="w-full">
           <BetSection
             betAmount={betAmount}
+            activeAmount={activeAmount}
             setBetAmount={setBetAmount}
+         setActiveAmount={setActiveAmount}
+
             currentMultiplier={currentMultiplier}
             sectionId={sectionId}
           />
@@ -465,6 +489,9 @@ const BetControlSection: React.FC<BetControlSectionProps> = ({
           <AutoSection
             betAmount={betAmount}
             setBetAmount={setBetAmount}
+            activeAmount={activeAmount}
+        setActiveAmount={setActiveAmount}
+
             currentMultiplier={currentMultiplier}
             sectionId={`${sectionId}`}
             isAutoCashOut={isAutoCashOut}
