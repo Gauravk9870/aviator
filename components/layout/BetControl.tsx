@@ -31,8 +31,6 @@ const BetSection: React.FC<BetSectionProps> = ({
   currentMultiplier,
   sectionId,
 }) => {
-  const [isBetPlaced, setIsBetPlaced] = useState<boolean>(false);
-
   const dispatch = useAppDispatch();
   const token = useAppSelector((state) => state.aviator.token ?? "");
   const user = useAppSelector((state) => state.aviator.user ?? "");
@@ -55,7 +53,6 @@ const BetSection: React.FC<BetSectionProps> = ({
     setBetAmount((prev) => (prev > 10 ? prev - 10: 10));
 
   const placeBetHandler = async () => {
-    setIsBetPlaced(true);
     try {
       await dispatch(
         placeBet({
@@ -67,8 +64,6 @@ const BetSection: React.FC<BetSectionProps> = ({
       ).unwrap();
     } catch (error) {
       console.error(error);
-    } finally {
-      // setIsBetPlaced(false);
     }
   };
 
@@ -98,7 +93,6 @@ const BetSection: React.FC<BetSectionProps> = ({
             token,
           })
         ).unwrap();
-        setIsBetPlaced(false);
       } catch (error) {
         console.error("Error during cash-out:", error);
       }
@@ -179,7 +173,6 @@ const BetSection: React.FC<BetSectionProps> = ({
       <button
         className={`w-[160px] flex items-center justify-center rounded-2xl border shadow-inner bg-[#28a909] h-20`}
         onClick={placeBetHandler}
-        disabled={isBetPlaced}
       >
         <span className="text-lg font-normal uppercase text-shadow text-white">
           Bet
@@ -195,7 +188,6 @@ const BetSection: React.FC<BetSectionProps> = ({
         const pendingBet = pendingBetsBySection[sectionId];
         if (pendingBet) {
           console.log("Trying to place pending bet:", pendingBet.amount);
-          setIsBetPlaced(true);
           dispatch(
             placeBet({
               userId: pendingBet.userId,
