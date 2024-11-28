@@ -479,7 +479,7 @@ export default function Sidebar() {
         </span>
         <span className="flex items-center gap-1">
           Powered by
-          <img src={`${poweredByLogo}`} alt="Logo" className="w-5 h-5" />
+          <img src={`${poweredByLogo}`||"logo.png"} alt="Logo" className="w-5 h-5" />
         </span>
       </div>
     </div>
