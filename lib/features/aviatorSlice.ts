@@ -109,6 +109,7 @@ export const verifyToken = createAsyncThunk(
         return rejectWithValue(false);
       }
     } catch (error) {
+      console.error(error)
       return rejectWithValue(false);
     }
   }
@@ -136,6 +137,7 @@ export const fetchGameLogo = createAsyncThunk(
         return rejectWithValue(data.message || "Failed to fetch game logos.");
       }
     } catch (error) {
+      console.error(error)
       return rejectWithValue("An error occurred while fetching game logos.");
     }
   }

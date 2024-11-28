@@ -22,8 +22,7 @@ import {
   setToken,
   setUser,
   setEmail,
-  verifyToken,
-  fetchGameLogo,
+
 } from "@/lib/features/aviatorSlice";
 import { useAudio } from "@/lib/audioContext";
 import { setBalance } from "./features/currencySlice";
@@ -64,9 +63,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
   const user = useAppSelector((state) => state.aviator.user ?? "");
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const [isInitializing, setIsInitializing] = useState(true); // Track initialization state
-  const isConnected = useAppSelector((state) => state.aviator.isConnected);
-  const gameLogo = useAppSelector((state) => state.aviator.gameLogo);
-const verified =useAppSelector((state) => state.aviator.verified);
+
   useEffect(() => {
     const tokenFromUrl = searchParams.get("token") as string;
     const userFromUrl = searchParams.get("user");
@@ -202,7 +199,7 @@ const verified =useAppSelector((state) => state.aviator.verified);
 
   if (isInitializing) {
     // Render a loading state while waiting for initialization
-    // return <div>Loading...</div>;
+    return <div>Connecting...</div>;
   }
 
   if (!user) {
