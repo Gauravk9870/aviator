@@ -60,6 +60,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
   const [isInitializing, setIsInitializing] = useState(true); // Track initialization state
 
   useEffect(() => {
+
     const tokenFromUrl = searchParams.get("token");
     const userFromUrl = searchParams.get("user");
 
