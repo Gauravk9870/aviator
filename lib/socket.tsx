@@ -22,7 +22,6 @@ import {
   setToken,
   setUser,
   setEmail,
-
 } from "@/lib/features/aviatorSlice";
 import { useAudio } from "@/lib/audioContext";
 import { setBalance } from "./features/currencySlice";
@@ -34,7 +33,7 @@ interface SocketContextType {
 }
 
 interface DecodedToken extends JwtPayload {
-  email: string; 
+  email: string;
 }
 const SocketContext = createContext<SocketContextType | undefined>(undefined);
 
@@ -69,7 +68,6 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     const userFromUrl = searchParams.get("user");
     const decodedToken = jwt.decode(tokenFromUrl) as DecodedToken;
     const userEmail = decodedToken?.userEmail;
-;
     if (tokenFromUrl) {
       dispatch(setToken(tokenFromUrl));
     }
@@ -185,17 +183,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         socketRef.current = null;
       }
     };
-  }, [
-    token,
-    user,
-    dispatch,
-    isSoundEnabled,
-    playWelcome,
-    playStarted,
-    playCrashed,
-    stopAll,
-    isInitializing,
-  ]);
+  }, [token, user, isInitializing]);
 
   if (isInitializing) {
     // Render a loading state while waiting for initialization
