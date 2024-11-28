@@ -12,11 +12,30 @@ body {
   display: none;
 }
 
-/* Hide scrollbar for IE, Edge and Firefox */
-.hide-scrollbar {
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
+/* For modern browsers */
+.hide-scrollbar::-webkit-scrollbar {
+  width: 6px; /* Adjust scrollbar width */
 }
+
+.hide-scrollbar::-webkit-scrollbar-track {
+  background: #141516; /* Scrollbar track color */
+}
+
+.hide-scrollbar::-webkit-scrollbar-thumb {
+  background: #2c2d30; /* Scrollbar thumb color */
+  border-radius: 10px; /* Rounded edges */
+}
+
+.hide-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #427f00; /* Thumb hover color */
+}
+
+/* For Firefox */
+.hide-scrollbar {
+  scrollbar-width: thin; /* Thin scrollbar */
+  scrollbar-color: #2c2d30 #141516; /* thumb color track color */
+}
+
 
 /* Hide increment and decrement buttons for Chrome, Safari, Edge, and Opera */
 input[type="number"]::-webkit-outer-spin-button,
