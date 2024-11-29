@@ -81,7 +81,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const initializeSocket = (token: string, userId: string) => {
     console.log("Initializing WebSocket...");
-    const ws = new WebSocket(`${config.ws}`);
+    const ws = new WebSocket(`${config.ws}`, token);
 
     ws.onopen = () => {
       console.log("WebSocket connected.");
