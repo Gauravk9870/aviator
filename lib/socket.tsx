@@ -66,8 +66,8 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
   const { playWelcome, playStarted, playCrashed, stopAll, isSoundEnabled } =
     useAudio();
   const searchParams = useSearchParams();
-  const token = useAppSelector((state) => state.aviator.token ?? "");
-  const user = useAppSelector((state) => state.aviator.user ?? "");
+  // const token = useAppSelector((state) => state.aviator.token ?? "");
+  // const user = useAppSelector((state) => state.aviator.user ?? "");
   const gameLogo = useAppSelector((state) => state.aviator.gameLogo ?? "");
 
   const [status, setStatus] = useState<
@@ -175,20 +175,20 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     socketRef.current = ws;
   };
 
-  const attemptReconnection = () => {
-    if (reconnectAttempts.current >= 5) {
-      console.error("Maximum reconnection attempts reached.");
-      return;
-    }
+  // const attemptReconnection = () => {
+  //   if (reconnectAttempts.current >= 5) {
+  //     console.error("Maximum reconnection attempts reached.");
+  //     return;
+  //   }
 
-    reconnectAttempts.current += 1;
-    const delay = Math.min(1000 * 2 ** reconnectAttempts.current, 30000);
-    console.log(`Reconnecting in ${delay / 1000} seconds...`);
+  //   reconnectAttempts.current += 1;
+  //   const delay = Math.min(1000 * 2 ** reconnectAttempts.current, 30000);
+  //   console.log(`Reconnecting in ${delay / 1000} seconds...`);
 
-    reconnectTimer.current = setTimeout(() => {
-      initializeSocket(token, user);
-    }, delay);
-  };
+  //   reconnectTimer.current = setTimeout(() => {
+  //     initializeSocket(token, user);
+  //   }, delay);
+  // };
 
   useEffect(() => {
     const tokenFromUrl = searchParams.get("token") as string;
