@@ -76,7 +76,7 @@ export default function Sidebar() {
         defaultValue="all-bets"
         value={activeTab}
         onValueChange={handleTabChange}
-        className="flex flex-col h-[93.5vh] lg:h-[calc(100%-37px)] items-center "
+        className="flex flex-col h-[90.5vh] lg:h-[calc(100%-37px)] items-center "
       >
         <TabsList className="grid w-3/4 grid-cols-3 bg-[#141516] rounded-3xl p-0 h-auto mt-0.2">
           <TabsTrigger
