@@ -107,8 +107,8 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     };
 
     ws.onmessage = (event) => {
-      const data = event.data;
-      console.log("DATA : ", data);
+      const data = JSON.parse(event.data);
+
       switch (data.type) {
         case "STARTED":
           if (isSoundEnabled) playStarted();
