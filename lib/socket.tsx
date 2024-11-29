@@ -126,6 +126,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
           break;
 
         case "MULTIPLIER":
+          console.log('MULTIPLIER')
           if (
             typeof data.currentMultiplier === "string" &&
             !isNaN(parseFloat(data.currentMultiplier))
