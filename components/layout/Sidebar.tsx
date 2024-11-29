@@ -65,8 +65,8 @@ export default function Sidebar() {
   };
 
   return (
-    <div className="lg:w-96 text-white flex flex-col justify-between bg-[#1b1c1d] rounded-xl p-1 lg:m-0">
-      <Tabs
+<div className="lg:w-96 text-white flex flex-col justify-between bg-[#1b1c1d] rounded-xl p-1 lg:m-0 h-screen lg:h-auto">
+        <Tabs
         defaultValue="all-bets"
         value={activeTab}
         onValueChange={handleTabChange}
