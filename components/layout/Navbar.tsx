@@ -141,6 +141,9 @@ export default function Navbar() {
   const userEmail = useAppSelector(
     (state: RootState) => state.aviator.userEmail
   );
+  const userName = useAppSelector(
+    (state: RootState) => state.aviator.userName
+  );
 
   const parseReturnURL = useCallback((url: string | null) => {
     if (!url) return null;
@@ -299,7 +302,7 @@ export default function Navbar() {
                         ) : (
                           <div className="ml-2 h-8 w-8 rounded-full bg-gray-700"></div>
                         )}
-                        <div className="text-sm font-semibold"> {userId}</div>
+                        <div className="text-sm font-semibold"> {userName}</div>
                       </div>
                       <button
                         className="flex cursor-pointer items-center justify-center gap-1 rounded-full border border-[#414148] bg-[#252528] px-4 py-1.5 text-xs text-[#83878e]"
