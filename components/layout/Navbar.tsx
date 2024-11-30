@@ -244,7 +244,7 @@ export default function Navbar() {
         <div className="flex items-center gap-4">
           <span className="text-sm  italic flex items-center gap-2">
             {gameLogo && (
-              <img src={gameLogo} alt="Logo" className="h-12 w-auto" />
+              <img src={gameLogo||'logo.png'} alt="Logo" className="h-12 w-auto" />
             )}
           </span>
           <button
