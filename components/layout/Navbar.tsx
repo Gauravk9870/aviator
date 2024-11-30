@@ -132,6 +132,7 @@ export default function Navbar() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>("./av-1.png");
   const [returnURL, setReturnURL] = useState<string | null>(null);
   const searchParams = useSearchParams();
+  
   const router = useRouter();
 
   const dispatch = useAppDispatch();
@@ -143,7 +144,6 @@ export default function Navbar() {
   const userName = useAppSelector(
     (state: RootState) => state.aviator.userName
   );
-console.log(userName,'userName')
   const parseReturnURL = useCallback((url: string | null) => {
     if (!url) return null;
     try {
