@@ -143,7 +143,7 @@ export default function Navbar() {
   const userName = useAppSelector(
     (state: RootState) => state.aviator.userName
   );
-
+console.log(userName,'userName')
   const parseReturnURL = useCallback((url: string | null) => {
     if (!url) return null;
     try {
