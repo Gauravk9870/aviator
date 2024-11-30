@@ -207,10 +207,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
 
     const decodedToken = jwt.decode(tokenFromUrl) as DecodedToken;
     const userEmail = decodedToken?.userEmail;
-    const userName = useAppSelector(
-      (state) => state.aviator.userName
-    );
-  console.log(userName,'userName')
+    const userName = decodedToken?.userName;
     if (userEmail) {
       dispatch(setEmail(userEmail));
     }
