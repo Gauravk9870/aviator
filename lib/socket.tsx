@@ -24,6 +24,7 @@ import {
   setEmail,
   verifyToken,
   fetchGameLogo,
+  setUserName,
 } from "@/lib/features/aviatorSlice";
 import { useAudio } from "@/lib/audioContext";
 import { fetchBalance, setBalance } from "./features/currencySlice";
@@ -206,11 +207,16 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
 
     const decodedToken = jwt.decode(tokenFromUrl) as DecodedToken;
     const userEmail = decodedToken?.userEmail;
-
+    const userName = useAppSelector(
+      (state) => state.aviator.userName
+    );
+  console.log(userName,'userName')
     if (userEmail) {
       dispatch(setEmail(userEmail));
     }
-
+if(userName){
+dispatch(setUserName(userName))
+}
     setStatus("verifying");
     dispatch(verifyToken(tokenFromUrl))
       .unwrap()
