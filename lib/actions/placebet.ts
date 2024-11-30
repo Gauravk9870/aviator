@@ -15,6 +15,7 @@ export async function placeBet(userId: string, amount: number, token: string) {
         })
 
         const data = await response.json()
+        console.log("PLACE BET : ", data)
 
         if (data.status) {
             return { success: true, bet: data.bet }
