@@ -26,6 +26,7 @@ interface Bet {
 interface AviatorState {
   user: string | null;
   userEmail: string | null,
+  userName: string | null
   token: string | null;
   verified: boolean;
 
@@ -74,6 +75,7 @@ interface AviatorState {
 const initialState: AviatorState = {
   user: null,
   userEmail: null,
+  userName: null,
   token: null,
   verified: false,
   gameLogo: null,
@@ -201,6 +203,7 @@ export const cashOut = createAsyncThunk(
   ) => {
     try {
 
+      console.log(betId, userId, currentMultiplier, 'CASHOUTR')
       const response = await axios.post(
         `${config.server}/api/aviator/cash-out`,
         { betId, userId, currentMultiplier },
@@ -433,6 +436,9 @@ const aviatorSlice = createSlice({
     setEmail: (state, action: PayloadAction<string | null>) => {
       state.userEmail = action.payload
     },
+    setUserName: (state, action: PayloadAction<string | null>) => {
+      state.userName = action.payload
+    },
     setToken: (state, action: PayloadAction<string | null>) => {
       state.token = action.payload;
 
@@ -642,6 +648,7 @@ export const {
   setUser,
   setToken,
   setEmail,
+  setUserName,
   clearTopBets,
   setPendingBetBySection,
   clearPendingBetBySection,
