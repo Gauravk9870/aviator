@@ -3,6 +3,7 @@ import axios, { AxiosError } from "axios";
 import { config } from "../config";
 import showCashoutNotification from "@/components/layout/Notification";
 import { ActiveSessionBet } from "../utils";
+import { placeBet as placeBetServerAction } from "../actions/placebet";
 
 
 interface Bet {
@@ -165,28 +166,16 @@ export const placeBet = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const response = await axios.post(
-        `${config.server}/api/aviator/place-bet`,
-        { userId, amount },
-        {
-          headers: { Authorization: token },
-        }
-      );
-      if (response.data.status) {
-        const bet = response.data.bet;
+      const result = await placeBetServerAction(userId, amount, token);
 
-
-        return { bet, sectionId };
+      if (result.success) {
+        return { bet: result.bet, sectionId };
       } else {
-        console.log(response.data.error)
-        return rejectWithValue(response.data.error);
-
-
+        console.log(result.error);
+        return rejectWithValue(result.error);
       }
     } catch (error) {
-      if (error instanceof AxiosError && error.response) {
-        return rejectWithValue(error.response.data);
-      }
+      console.error("Unexpected error:", error);
       return rejectWithValue("An unexpected error occurred");
     }
   }
