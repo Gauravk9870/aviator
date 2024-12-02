@@ -71,7 +71,7 @@ export default function Sidebar() {
   };
 
   return (
-    <div className="lg:w-96 text-white flex flex-col justify-between bg-[#1b1c1d] rounded-xl p-1 lg:m-0">
+    <div className="lg:w-96 p-2 text-white flex flex-col justify-between bg-[#1b1c1d] rounded-xl p-1 lg:m-0">
       <Tabs
         defaultValue="all-bets"
         value={activeTab}
@@ -335,7 +335,7 @@ export default function Sidebar() {
               </TabsList>
             </Tabs>
           </div>
-          <div className="flex-grow overflow-y-auto hide-scrollbar">
+          <div className="flex-grow overflow-y-auto hide-scrollbar text-center">
             <div className="py-2 min-h-full" key={categoryTab || timeTab}>
               {loadingTopBets ? (
                 <p className="text-center text-sm text-gray-400">Loading...</p>

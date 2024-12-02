@@ -61,7 +61,6 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const dispatch = useAppDispatch();
   const socketRef = useRef<WebSocket | null>(null);
-  const reconnectAttempts = useRef(0);
   const reconnectTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { playWelcome, playStarted, playCrashed, stopAll, isSoundEnabled } =
@@ -85,45 +84,45 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     const ws = new WebSocket(`${config.ws}`, token);
 
     ws.onopen = () => {
-      console.log("WebSocket connected.");
-      reconnectAttempts.current = 0; // Reset attempts on successful connection
+   
+      ws.send(JSON.stringify({ type: "SUBSCRIBE", gameType: config.gameType }));
       setStatus("connected");
       dispatch(setConnectionStatus(true));
-      ws.send(JSON.stringify({ type: "SUBSCRIBE", gameType: "aviator" }));
+      console.log("WebSocket connected.");
+
       if (status === "connected") {
         playWelcome();
       }
-
-      dispatch(fetchBalance(userId))
+      dispatch(fetchBalance({userId,token}))
         .unwrap()
         .catch((error) => {
           console.error("Error fetching balance , ", error);
         });
 
-      dispatch(fetchCrashPoints({ token: token }))
-        .unwrap()
-        .catch((error) => {
-          console.error("Error fetching crash points:", error);
-        });
+        dispatch(fetchCrashPoints({ token: token }))
+          .unwrap()
+          .catch((error) => {
+            console.error("Error fetching crash points:", error);
+          });
     };
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
 
       switch (data.type) {
+        case "SESSION_ID":
+          dispatch(setSessionId(data.sessionId));
+          dispatch(setGameStarted());
+          break;
+
+        case "WAITING_TIME":
+         console.log("WAITING_TIME : ", data);
+          break;
+
         case "STARTED":
           if (isSoundEnabled) playStarted();
           sendMessageToIframe({ type: "Start", data: data.currentValue });
           dispatch(setGameStarted());
-          break;
-
-        case "CRASHED":
-          if (isSoundEnabled) playCrashed();
-          dispatch(setGameCrashed(data.finalMultiplier));
-          sendMessageToIframe({
-            type: "Crashed",
-            data: data.finalMultiplier,
-          });
           break;
 
         case "MULTIPLIER":
@@ -141,10 +140,19 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
           }
           break;
 
-        case "SESSION_ID":
-          dispatch(setSessionId(data.sessionId));
-          dispatch(setGameStarted());
+        case "CRASHED":
+          if (isSoundEnabled) playCrashed();
+          dispatch(setGameCrashed(data.finalMultiplier));
+          sendMessageToIframe({
+            type: "Crashed",
+            data: data.finalMultiplier,
+          });
           break;
+
+        case "RESULT_SHOW_TIME":
+          console.log("RESULT_SHOW_TIME : ",  data);
+          break;
+
 
         case "BETS":
           dispatch(updateBet(data.newBet));
@@ -177,20 +185,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     socketRef.current = ws;
   };
 
-  // const attemptReconnection = () => {
-  //   if (reconnectAttempts.current >= 5) {
-  //     console.error("Maximum reconnection attempts reached.");
-  //     return;
-  //   }
 
-  //   reconnectAttempts.current += 1;
-  //   const delay = Math.min(1000 * 2 ** reconnectAttempts.current, 30000);
-  //   console.log(`Reconnecting in ${delay / 1000} seconds...`);
-
-  //   reconnectTimer.current = setTimeout(() => {
-  //     initializeSocket(token, user);
-  //   }, delay);
-  // };
 
   useEffect(() => {
     const tokenFromUrl = searchParams.get("token") as string;

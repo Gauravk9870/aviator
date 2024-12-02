@@ -208,13 +208,9 @@ const BetSection: React.FC<BetSectionProps> = ({
                 `Failed to place pending bet for section ${sectionId}:`,
                 error
               );
-              if (error && typeof error === "object" && "message" in error) {
-                // setErrorMessage(error.message); // Set error message for UI
-                console.log(error.message);
-              } else {
-                // setErrorMessage("An unexpected error occurred.");
-                console.error("An unexpected error occurred.");
-              }
+              dispatch(removePendingBetBySection(sectionId)); // Remove on error
+              dispatch(removeActiveBetBySection(sectionId)); // Remove active bet as well
+         
             });
         }
       });
