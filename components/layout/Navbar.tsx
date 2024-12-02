@@ -244,10 +244,8 @@ export default function Navbar() {
     <div className="flex flex-col bg-[#1b1c1d] p-1 text-white">
       <div className="flex justify-between">
         <div className="flex items-center gap-4">
-          <span className="text-sm  italic flex items-center gap-2">
-            {gameLogo && (
-              <img src={gameLogo||'logo.png'} alt="Logo" className="h-12 w-auto" />
-            )}
+        <span className="text-2xl font-black text-red-600 italic px-2">
+            Aviator
           </span>
           <button
             onClick={toggleHowToPlay}
@@ -265,9 +263,10 @@ export default function Navbar() {
         </div>
         <div className="flex items-center">
           <div className="px-3">
-            <span className="text-base font-bold text-[#28a909]">
-              {balance}
-            </span>
+          <span className="text-base font-bold text-[#28a909]">
+  {new Intl.NumberFormat('en-US').format(balance)}
+</span>
+
             <Currency />
           </div>
           <div className="flex items-center justify-center border-l-2 border-[#464648]">
