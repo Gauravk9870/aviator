@@ -571,13 +571,15 @@ const aviatorSlice = createSlice({
         // }
         const payout = data.bet.amount * data.bet.cashOutMultiplier;
         showCashoutNotification(action.meta.arg.currentMultiplier, payout);
+        delete state.pendingBetsBySection[sectionId];
+        delete state.activeBetsBySection[sectionId];
 
         state.error = null;
       })
       .addCase(cashOut.rejected, (state, action) => {
         const { message, statusCode } = action.payload as { message: string, statusCode: number };
       
-        state.error = "No active bet found or bet already cashed out.";
+        state.error = message;
         toast(message, {
           position: "top-center",
           style: {

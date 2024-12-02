@@ -208,8 +208,7 @@ const BetSection: React.FC<BetSectionProps> = ({
                 `Failed to place pending bet for section ${sectionId}:`,
                 error
               );
-              dispatch(removePendingBetBySection(sectionId)); // Remove on error
-              dispatch(removeActiveBetBySection(sectionId)); // Remove active bet as well
+           
          
             });
         }
@@ -322,6 +321,7 @@ const AutoSection: React.FC<AutoSectionProps> = ({
   };
 
   useEffect(() => {
+
     if (
       isAutoCashOut &&
       activeBet &&
@@ -329,6 +329,8 @@ const AutoSection: React.FC<AutoSectionProps> = ({
       currentMultiplier >= autoCashOutAmount
     ) {
       console.log(`Auto cashout triggered at multiplier ${currentMultiplier}`);
+    
+
       dispatch(
         cashOut({
           betId: activeBet._id,
@@ -345,9 +347,13 @@ const AutoSection: React.FC<AutoSectionProps> = ({
         .catch((error) => {
           console.error("Error during auto cashout:", error);
         });
+        removeActiveBetBySection(sectionId);
+        removePendingBetBySection(sectionId);
+        setIsAutoCashOut(false);
     }
   }, [
     isAutoCashOut,
+    setIsAutoCashOut,
     currentMultiplier,
     autoCashOutAmount,
     activeBet,
