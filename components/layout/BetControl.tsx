@@ -241,14 +241,15 @@ const BetSection: React.FC<BetSectionProps> = ({
             </button>
             <input
           type="number"
-          className="text-lg text-white font-bold bg-transparent border-none text-center w-16 outline-none"
+          className="text-lg text-white font-bold bg-transparent border-none text-center w-full outline-none"
           value={betAmount}
           onChange={(e) => {
-            const rawValue = e.target.value; 
-            if (/^\d*$/.test(rawValue)) { 
-              setBetAmount(rawValue === "" ? ("" as any) : Math.max(1, Number(rawValue))); 
+            const rawValue = e.target.value;
+            if (/^\d*$/.test(rawValue)) {
+              setBetAmount(rawValue === "" ? ("" as unknown as number) : Math.max(1, Number(rawValue)));
             }
           }}
+          
           
           onBlur={() => {
             setBetAmount((prev) => Math.max(1, Number(prev) || 0));
