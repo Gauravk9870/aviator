@@ -92,7 +92,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
 
       if (status === "connected") {
         playWelcome();
-
+      }
       dispatch(fetchBalance({userId,token}))
         .unwrap()
         .catch((error) => {
@@ -104,7 +104,6 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
           .catch((error) => {
             console.error("Error fetching crash points:", error);
           });
-        }
     };
 
     ws.onmessage = (event) => {

@@ -3,7 +3,8 @@ import axios, { AxiosError } from "axios";
 import { config } from "../config";
 import showCashoutNotification from "@/components/layout/Notification";
 import { ActiveSessionBet } from "../utils";
-import { placeBet as placeBetServerAction } from "../actions/placebet";
+import { placeBet as placeBetServerAction, cashOut as cashOutServerAction } from "@/lib/actions/actions";
+import toast from "react-hot-toast";
 
 
 interface Bet {
@@ -169,8 +170,6 @@ export const placeBet = createAsyncThunk(
   ) => {
     try {
       const result = await placeBetServerAction(userId, amount, token);
-      console.log("Result", result)
-
       if (result.success) {
         return { bet: result.bet, sectionId };
       } else {
@@ -203,23 +202,15 @@ export const cashOut = createAsyncThunk(
   ) => {
     try {
 
-      console.log(betId, userId, currentMultiplier, 'CASHOUTR')
-      const response = await axios.post(
-        `${config.server}/api/aviator/cash-out`,
-        { betId, userId, currentMultiplier },
-        {
-          headers: { Authorization: token },
-        }
-      );
+      const result = await cashOutServerAction(betId, userId, currentMultiplier, sectionId, token);
 
-      if (response.data.status) {
-        const payout = response.data.data.payout;
-
-        return { payout, sectionId };
+      if (result.success) {
+        return { data: result.data, sectionId };
       } else {
-        console.error("API error:", response.data.error);
-        return rejectWithValue(response.data.error);
+        return rejectWithValue({ message: result.error, statusCode: result.statusCode });
       }
+
+
     } catch (error) {
       if (error instanceof AxiosError && error.response) {
         // alert(error.response.data.error);
@@ -517,29 +508,35 @@ const aviatorSlice = createSlice({
 
         // Handle specific error codes
         switch (statusCode) {
-          case 401:
-            state.error = "UserId is not matched with provided token.";
-            break;
-          case 402:
-            state.error = "Insufficient balance to place bet.";
-            break;
+
           case 403:
             // Store the pending bet for the section
             state.pendingBetsBySection[sectionId] = { userId, amount, token };
             state.error = "Bet is pending. Please wait for the next game.";
-            console.warn("Bet is held, will retry when the game starts.");
+            toast(message, {
+              position: "top-center",
+              style: {
+                backgroundColor: '#dc2626',
+                color: 'white',
+              },
+              duration: 3000,
+            });
             break;
-          case 400:
-            state.error = "No new session found.";
-            break;
-          case 405:
-            state.error = "Missing required bet data, userId or amount.";
-            break;
-          case 500:
-            state.error = "An error occurred during place bet.";
-            break;
+
           default:
             state.error = message;
+            toast(message, {
+              position: "top-center",
+              style: {
+                backgroundColor: '#dc2626',
+                color: 'white',
+              },
+              duration: 3000,
+            });
+
+            delete state.pendingBetsBySection[sectionId];
+            delete state.activeBetsBySection[sectionId];
+
             break;
         }
 
@@ -551,15 +548,46 @@ const aviatorSlice = createSlice({
         state.error = null;
       })
       .addCase(cashOut.fulfilled, (state, action) => {
-        const { sectionId, payout } = action.payload;
+        const { sectionId, data } = action.payload;
 
         // Reset the active bet for the specific section
         if (state.activeBetsBySection[sectionId]) {
           delete state.activeBetsBySection[sectionId];
         }
 
+        // {
+        //   "bet": {
+        //     "_id": "674db0cc8756bd9d50b72dc7",
+        //     "userId": "11565",
+        //     "amount": 10,
+        //     "sessionId": "674db0cb8756bd9d50b72db5",
+        //     "cashedOut": true,
+        //     "cashOutMultiplier": 1.18,
+        //     "createdAt": "2024-12-02T13:06:20.805Z",
+        //     "updatedAt": "2024-12-02T13:06:26.850Z",
+        //     "__v": 0
+        //   },
+        //   "userBalance": 40.4
+        // }
+        const payout = data.bet.amount * data.bet.cashOutMultiplier;
         showCashoutNotification(action.meta.arg.currentMultiplier, payout);
+
         state.error = null;
+      })
+      .addCase(cashOut.rejected, (state, action) => {
+        const { message, statusCode } = action.payload as { message: string, statusCode: number };
+      
+        state.error = "No active bet found or bet already cashed out.";
+        toast(message, {
+          position: "top-center",
+          style: {
+            backgroundColor: '#dc2626',
+            color: 'white',
+          },
+          duration: 3000,
+        });
+      
+        console.error("cashOut.rejected: ", state.error, statusCode);
       })
       .addCase(verifyToken.pending, (state) => {
         state.verified = false;
@@ -572,10 +600,7 @@ const aviatorSlice = createSlice({
         state.verified = false;
         state.error = "Token verification failed.";
       })
-      .addCase(cashOut.rejected, (state, action) => {
-        state.error =
-          (action.payload as string) || "An error occurred during cash out";
-      })
+   
       .addCase(fetchGameLogo.pending, (state) => {
         state.error = null;
       })
