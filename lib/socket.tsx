@@ -94,7 +94,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         playWelcome();
       }
 
-      dispatch(fetchBalance(userId))
+      dispatch(fetchBalance({userId,token}))
         .unwrap()
         .catch((error) => {
           console.error("Error fetching balance , ", error);
