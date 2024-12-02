@@ -48,9 +48,9 @@ const BetSection: React.FC<BetSectionProps> = ({
     (state) => state.aviator.multipliersStarted
   );
 
-  const handleIncrement = () => setBetAmount((prev) => prev + 10);
+  const handleIncrement = () => setBetAmount((prev) => prev + 1);
   const handleDecrement = () =>
-    setBetAmount((prev) => (prev > 10 ? prev - 10: 10));
+    setBetAmount((prev) => (prev > 1 ? prev - 1: 1));
 
   const placeBetHandler = async () => {
     try {
@@ -235,7 +235,24 @@ const BetSection: React.FC<BetSectionProps> = ({
             >
               <Minus size={16} stroke="#ffffff80" />
             </button>
-            <span className="text-lg text-white font-bold">{betAmount}</span>
+            <input
+          type="number"
+          className="text-lg text-white font-bold bg-transparent border-none text-center w-16 outline-none"
+          value={betAmount}
+          onChange={(e) => {
+            const rawValue = e.target.value; 
+            if (/^\d*$/.test(rawValue)) { 
+              setBetAmount(rawValue === "" ? ("" as any) : Math.max(1, Number(rawValue))); 
+            }
+          }}
+          
+          onBlur={() => {
+            setBetAmount((prev) => Math.max(1, Number(prev) || 0));
+          }}
+          
+        
+          disabled={isDisabled}
+        />
             <button
               className={`w-4 h-4 flex items-center justify-center border border-[#ffffff80] rounded-full focus:outline-none ${buttonClass}`}
               onClick={handleIncrement}
