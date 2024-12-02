@@ -169,16 +169,16 @@ export const placeBet = createAsyncThunk(
   ) => {
     try {
       const result = await placeBetServerAction(userId, amount, token);
+      console.log("Result", result)
 
       if (result.success) {
         return { bet: result.bet, sectionId };
       } else {
-        console.log(result.error);
-        return rejectWithValue(result.error);
+        return rejectWithValue({ message: result.error, statusCode: result.statusCode });
       }
     } catch (error) {
       console.error("Unexpected error:", error);
-      return rejectWithValue("An unexpected error occurred");
+      return rejectWithValue({ message: "An unexpected error occurred", statusCode: 500 });
     }
   }
 );
@@ -513,21 +513,37 @@ const aviatorSlice = createSlice({
 
       .addCase(placeBet.rejected, (state, action) => {
         const { sectionId, userId, amount, token } = action.meta.arg;
+        const { message, statusCode } = action.payload as { message: string, statusCode: number };
 
-        // Check if the error is "Please wait for the next game."
-        if (
-          action.payload &&
-          typeof action.payload === "object" &&
-          "error" in action.payload &&
-          action.payload.error === "Please wait for the next game."
-        ) {
-          // Store the pending bet for the section
-          state.pendingBetsBySection[sectionId] = { userId, amount, token };
-          state.error = "Bet is pending. Please wait for the next game."; // Set specific error message
-          console.warn("Bet is held, will retry when the game starts.");
-        } else {
-          state.error = action.payload as string;
+        // Handle specific error codes
+        switch (statusCode) {
+          case 401:
+            state.error = "UserId is not matched with provided token.";
+            break;
+          case 402:
+            state.error = "Insufficient balance to place bet.";
+            break;
+          case 403:
+            // Store the pending bet for the section
+            state.pendingBetsBySection[sectionId] = { userId, amount, token };
+            state.error = "Bet is pending. Please wait for the next game.";
+            console.warn("Bet is held, will retry when the game starts.");
+            break;
+          case 400:
+            state.error = "No new session found.";
+            break;
+          case 405:
+            state.error = "Missing required bet data, userId or amount.";
+            break;
+          case 500:
+            state.error = "An error occurred during place bet.";
+            break;
+          default:
+            state.error = message;
+            break;
         }
+
+        console.error("placeBet.rejected :", state.error);
       })
 
       // CASHOUT
