@@ -137,7 +137,6 @@ export default function Navbar() {
 
   const dispatch = useAppDispatch();
   const { balance } = useAppSelector((state) => state.currency);
-  const gameLogo = useAppSelector((state: RootState) => state.aviator.gameLogo);
   const userEmail = useAppSelector(
     (state: RootState) => state.aviator.userEmail
   );
