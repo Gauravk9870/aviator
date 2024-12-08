@@ -16,9 +16,9 @@ import { Input } from "../ui/input";
 
 interface BetSectionProps {
   betAmount: number;
-  activeAmount:number;
+  activeAmount: number;
   setBetAmount: React.Dispatch<React.SetStateAction<number>>;
-  setActiveAmount:React.Dispatch<React.SetStateAction<number>>
+  setActiveAmount: React.Dispatch<React.SetStateAction<number>>;
   currentMultiplier: number;
   sectionId: string;
 }
@@ -50,7 +50,7 @@ const BetSection: React.FC<BetSectionProps> = ({
 
   const handleIncrement = () => setBetAmount((prev) => prev + 1);
   const handleDecrement = () =>
-    setBetAmount((prev) => (prev > 1 ? prev - 1: 1));
+    setBetAmount((prev) => (prev > 1 ? prev - 1 : 1));
 
   const placeBetHandler = async () => {
     try {
@@ -186,6 +186,7 @@ const BetSection: React.FC<BetSectionProps> = ({
       console.log("Preparing to place pending bets for the next round...");
       Object.keys(pendingBetsBySection).forEach((sectionId) => {
         const pendingBet = pendingBetsBySection[sectionId];
+
         if (pendingBet) {
           console.log("Trying to place pending bet:", pendingBet.amount);
           dispatch(
@@ -198,8 +199,10 @@ const BetSection: React.FC<BetSectionProps> = ({
           )
             .unwrap()
             .then(() => {
-              dispatch(clearPendingBetBySection(sectionId)); // Clear on success
+              dispatch(clearPendingBetBySection(sectionId));
+
               console.log("Pending bet placed successfully.");
+              return;
             })
 
             .catch((error) => {
@@ -208,12 +211,11 @@ const BetSection: React.FC<BetSectionProps> = ({
                 `Failed to place pending bet for section ${sectionId}:`,
                 error
               );
-           
-         
             });
         }
       });
     }
+
   }, [gameStatus, multipliersStarted, pendingBetsBySection, dispatch, token]);
 
   const isDisabled = Boolean(activeBet || pendingBet);
@@ -235,24 +237,24 @@ const BetSection: React.FC<BetSectionProps> = ({
               <Minus size={16} stroke="#ffffff80" />
             </button>
             <input
-          type="number"
-          className="text-lg text-white font-bold bg-transparent border-none text-center w-full outline-none"
-          value={betAmount}
-          onChange={(e) => {
-            const rawValue = e.target.value;
-            if (/^\d*$/.test(rawValue)) {
-              setBetAmount(rawValue === "" ? ("" as unknown as number) : Math.max(1, Number(rawValue)));
-            }
-          }}
-          
-          
-          onBlur={() => {
-            setBetAmount((prev) => Math.max(1, Number(prev) || 0));
-          }}
-          
-        
-          disabled={isDisabled}
-        />
+              type="number"
+              className="text-lg text-white font-bold bg-transparent border-none text-center w-full outline-none"
+              value={betAmount}
+              onChange={(e) => {
+                const rawValue = e.target.value;
+                if (/^\d*$/.test(rawValue)) {
+                  setBetAmount(
+                    rawValue === ""
+                      ? ("" as unknown as number)
+                      : Math.max(1, Number(rawValue))
+                  );
+                }
+              }}
+              onBlur={() => {
+                setBetAmount((prev) => Math.max(1, Number(prev) || 0));
+              }}
+              disabled={isDisabled}
+            />
             <button
               className={`w-4 h-4 flex items-center justify-center border border-[#ffffff80] rounded-full focus:outline-none ${buttonClass}`}
               onClick={handleIncrement}
@@ -262,29 +264,28 @@ const BetSection: React.FC<BetSectionProps> = ({
             </button>
           </div>
           <div className="grid grid-cols-2 gap-1 mt-1">
-          {[10, 20, 50, 100].map((amount) => (
-        <button
-          key={amount}
-          className={`text-sm focus:outline-none rounded-3xl ${
-            isDisabled
-              ? "bg-[#141516] text-[#ffffff80] cursor-not-allowed opacity-50"
-              : "bg-[#141516] text-white"
-          }`}
-          onClick={() => {
-            if (activeAmount === amount) {
-              setBetAmount((prev) => prev + amount);
-            } else {
-              setBetAmount(amount);
-              setActiveAmount(amount);
-            }
-          }}
-          disabled={isDisabled}
-        >
-          {amount}
-        </button>
-      ))}
-</div>
-
+            {[10, 20, 50, 100].map((amount) => (
+              <button
+                key={amount}
+                className={`text-sm focus:outline-none rounded-3xl ${
+                  isDisabled
+                    ? "bg-[#141516] text-[#ffffff80] cursor-not-allowed opacity-50"
+                    : "bg-[#141516] text-white"
+                }`}
+                onClick={() => {
+                  if (activeAmount === amount) {
+                    setBetAmount((prev) => prev + amount);
+                  } else {
+                    setBetAmount(amount);
+                    setActiveAmount(amount);
+                  }
+                }}
+                disabled={isDisabled}
+              >
+                {amount}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="flex flex-col items-center">{renderButton()}</div>
@@ -339,7 +340,6 @@ const AutoSection: React.FC<AutoSectionProps> = ({
   };
 
   useEffect(() => {
-
     if (
       isAutoCashOut &&
       activeBet &&
@@ -347,7 +347,6 @@ const AutoSection: React.FC<AutoSectionProps> = ({
       currentMultiplier >= autoCashOutAmount
     ) {
       console.log(`Auto cashout triggered at multiplier ${currentMultiplier}`);
-    
 
       dispatch(
         cashOut({
@@ -365,9 +364,9 @@ const AutoSection: React.FC<AutoSectionProps> = ({
         .catch((error) => {
           console.error("Error during auto cashout:", error);
         });
-        removeActiveBetBySection(sectionId);
-        removePendingBetBySection(sectionId);
-        setIsAutoCashOut(false);
+      removeActiveBetBySection(sectionId);
+      removePendingBetBySection(sectionId);
+      setIsAutoCashOut(false);
     }
   }, [
     isAutoCashOut,
@@ -378,7 +377,6 @@ const AutoSection: React.FC<AutoSectionProps> = ({
     dispatch,
     sectionId,
     token,
-    
   ]);
 
   const isSwitchDisabled = Boolean(activeBet || pendingBet);
@@ -440,7 +438,7 @@ const BetControlSection: React.FC<BetControlSectionProps> = ({
 }) => {
   const { currentMultiplier } = useAppSelector((state) => state.aviator);
   const [betAmount, setBetAmount] = useState<number>(10);
-  const [activeAmount, setActiveAmount] = useState<number>(10); 
+  const [activeAmount, setActiveAmount] = useState<number>(10);
   const activeBet = useAppSelector(
     (state) =>
       state.aviator.activeBetsBySection[sectionId] ||
@@ -491,8 +489,7 @@ const BetControlSection: React.FC<BetControlSectionProps> = ({
             betAmount={betAmount}
             activeAmount={activeAmount}
             setBetAmount={setBetAmount}
-         setActiveAmount={setActiveAmount}
-
+            setActiveAmount={setActiveAmount}
             currentMultiplier={currentMultiplier}
             sectionId={sectionId}
           />
@@ -502,8 +499,7 @@ const BetControlSection: React.FC<BetControlSectionProps> = ({
             betAmount={betAmount}
             setBetAmount={setBetAmount}
             activeAmount={activeAmount}
-        setActiveAmount={setActiveAmount}
-
+            setActiveAmount={setActiveAmount}
             currentMultiplier={currentMultiplier}
             sectionId={`${sectionId}`}
             isAutoCashOut={isAutoCashOut}

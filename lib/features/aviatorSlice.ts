@@ -3,38 +3,38 @@ import axios, { AxiosError } from "axios";
 import { config } from "../config";
 import showCashoutNotification from "@/components/layout/Notification";
 import { ActiveSessionBet } from "../utils";
-import { placeBet as placeBetServerAction, cashOut as cashOutServerAction } from "@/lib/actions/actions";
+import {
+  placeBet as placeBetServerAction,
+  cashOut as cashOutServerAction,
+} from "@/lib/actions/actions";
 import toast from "react-hot-toast";
 
-
 interface Bet {
-  userId: string
-  amount: number
-  sessionId: string
-  cashedOut: boolean
-  cashOutMultiplier: number
-  _id: string
-  createdAt: string
-  updatedAt: string
-  __v: number
-  userName: string
-  userImage: string
-  date: string
+  userId: string;
+  amount: number;
+  sessionId: string;
+  cashedOut: boolean;
+  cashOutMultiplier: number;
+  _id: string;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+  userName: string;
+  userImage: string;
+  date: string;
 }
-
-
 
 interface AviatorState {
   user: string | null;
-  userEmail: string | null,
-  userName: string | null
+  userEmail: string | null;
+  userName: string | null;
   token: string | null;
   verified: boolean;
 
   gameLogo: string | null;
   poweredByLogo: string | null;
-  currentMultiplier: number
-  gameStatus: "waiting" | "started" | "crashed"
+  currentMultiplier: number;
+  gameStatus: "waiting" | "started" | "crashed";
   multipliersStarted: boolean;
   activeBetsBySection: {
     [sectionId: string]: {
@@ -52,17 +52,14 @@ interface AviatorState {
       amount: number;
       token: string;
     };
-
   };
 
-
-
-  isConnected: boolean
-  sessionId: string | null
-  finalMultiplier: number | null
-  multiplierHistory: number[]
-  bets: Bet[]
-  error: string | null
+  isConnected: boolean;
+  sessionId: string | null;
+  finalMultiplier: number | null;
+  multiplierHistory: number[];
+  bets: Bet[];
+  error: string | null;
   myBets: Bet[];
   topBets: Bet[];
 
@@ -70,7 +67,7 @@ interface AviatorState {
   loadingMyBets: boolean;
   loadingTopBets: boolean;
   loadingActiveSessionBets: boolean;
-  activeSessionBets: ActiveSessionBet[]
+  activeSessionBets: ActiveSessionBet[];
 }
 
 const initialState: AviatorState = {
@@ -99,7 +96,7 @@ const initialState: AviatorState = {
   loadingTopBets: false,
   loadingActiveSessionBets: false,
 
-  activeSessionBets: []
+  activeSessionBets: [],
 };
 
 //VERIFY API
@@ -117,7 +114,7 @@ export const verifyToken = createAsyncThunk(
         return rejectWithValue(false);
       }
     } catch (error) {
-      console.error(error)
+      console.error(error);
       return rejectWithValue(false);
     }
   }
@@ -145,12 +142,11 @@ export const fetchGameLogo = createAsyncThunk(
         return rejectWithValue(data.message || "Failed to fetch game logos.");
       }
     } catch (error) {
-      console.error(error)
+      console.error(error);
       return rejectWithValue("An error occurred while fetching game logos.");
     }
   }
 );
-
 
 export const placeBet = createAsyncThunk(
   "aviator/placeBet",
@@ -163,7 +159,7 @@ export const placeBet = createAsyncThunk(
     }: {
       userId: string;
       amount: number;
-      sectionId: string
+      sectionId: string;
       token: string;
     },
     { rejectWithValue }
@@ -171,13 +167,20 @@ export const placeBet = createAsyncThunk(
     try {
       const result = await placeBetServerAction(userId, amount, token);
       if (result.success) {
+        console.log(`PlaceBet count`);
         return { bet: result.bet, sectionId };
       } else {
-        return rejectWithValue({ message: result.error, statusCode: result.statusCode });
+        return rejectWithValue({
+          message: result.error,
+          statusCode: result.statusCode,
+        });
       }
     } catch (error) {
       console.error("Unexpected error:", error);
-      return rejectWithValue({ message: "An unexpected error occurred", statusCode: 500 });
+      return rejectWithValue({
+        message: "An unexpected error occurred",
+        statusCode: 500,
+      });
     }
   }
 );
@@ -192,7 +195,7 @@ export const cashOut = createAsyncThunk(
       sectionId,
       token,
     }: {
-      betId: string
+      betId: string;
       userId: string;
       currentMultiplier: number;
       sectionId: string;
@@ -201,16 +204,22 @@ export const cashOut = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-
-      const result = await cashOutServerAction(betId, userId, currentMultiplier, sectionId, token);
+      const result = await cashOutServerAction(
+        betId,
+        userId,
+        currentMultiplier,
+        sectionId,
+        token
+      );
 
       if (result.success) {
         return { data: result.data, sectionId };
       } else {
-        return rejectWithValue({ message: result.error, statusCode: result.statusCode });
+        return rejectWithValue({
+          message: result.error,
+          statusCode: result.statusCode,
+        });
       }
-
-
     } catch (error) {
       if (error instanceof AxiosError && error.response) {
         // alert(error.response.data.error);
@@ -224,10 +233,16 @@ export const cashOut = createAsyncThunk(
 
 export const fetchUserBets = createAsyncThunk(
   "aviator/fetchUserBets",
-  async ({ userId, token }: {
-    userId: string;
-    token: string;
-  }, { rejectWithValue }) => {
+  async (
+    {
+      userId,
+      token,
+    }: {
+      userId: string;
+      token: string;
+    },
+    { rejectWithValue }
+  ) => {
     try {
       const response = await axios.get(
         `${config.server}/api/aviator/getBets/${userId}`,
@@ -253,9 +268,12 @@ export const fetchCrashPoints = createAsyncThunk(
   "aviator/fetchCrashPoints",
   async ({ token }: { token: string }, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${config.server}/api/aviator/getCrashPoint`, {
-        headers: { Authorization: token },
-      });
+      const response = await axios.get(
+        `${config.server}/api/aviator/getCrashPoint`,
+        {
+          headers: { Authorization: token },
+        }
+      );
 
       if (response.data.status) {
         return response.data.data;
@@ -279,8 +297,12 @@ export const fetchTopBets = createAsyncThunk(
     {
       category,
       filter,
-      token
-    }: { category: "hugeWins" | "biggestWins" | "multipliers"; filter: "day" | "month" | "year", token: string },
+      token,
+    }: {
+      category: "hugeWins" | "biggestWins" | "multipliers";
+      filter: "day" | "month" | "year";
+      token: string;
+    },
     { rejectWithValue }
   ) => {
     try {
@@ -292,6 +314,7 @@ export const fetchTopBets = createAsyncThunk(
       );
 
       if (response.data.status) {
+        console.log(response);
         return response.data.data;
       } else {
         return rejectWithValue(response.data.message);
@@ -307,15 +330,24 @@ export const fetchTopBets = createAsyncThunk(
 
 export const fetchBetsByUser = createAsyncThunk(
   "aviator/fetchBetsByUser",
-  async ({ userId, token }: { userId: string, token: string }, { rejectWithValue }) => {
+  async (
+    { userId, token }: { userId: string; token: string },
+    { rejectWithValue }
+  ) => {
     try {
-      const response = await axios.get(`${config.server}/api/aviator/getBets/${userId}`, {
-        headers: { Authorization: token },
-      });
+      const response = await axios.get(
+        `${config.server}/api/aviator/getBets/${userId}`,
+        {
+          headers: { Authorization: token },
+        }
+      );
 
       if (response.data.status && response.data.data) {
         return response.data.data;
-      } else if (!response.data.status && response.data.message === "No bets found") {
+      } else if (
+        !response.data.status &&
+        response.data.message === "No bets found"
+      ) {
         return []; // No bets found for this user
       } else {
         return rejectWithValue(response.data.message);
@@ -333,32 +365,28 @@ export const fetchActiveSessionBets = createAsyncThunk<
   ActiveSessionBet[],
   { token: string },
   { rejectValue: ActiveSessionBet[] }
->(
-  "aviator/fetchActiveSessionBets",
-  async ({ token }, { rejectWithValue }) => {
-    try {
-      const response = await axios.get(
-        `${config.server}/api/aviator/getActiveSessionBets`,
-        {
-          headers: { Authorization: token },
-        }
-      );
+>("aviator/fetchActiveSessionBets", async ({ token }, { rejectWithValue }) => {
+  try {
+    const response = await axios.get(
+      `${config.server}/api/aviator/getActiveSessionBets`,
+      {
+        headers: { Authorization: token },
+      }
+    );
 
-      if (response.data.status) {
-        return response.data.data as ActiveSessionBet[];
-      } else {
-        return rejectWithValue([]);
-      }
-    } catch (error) {
-      if (error instanceof AxiosError && error.response) {
-        console.error("API Error:", error.response.data);
-        return rejectWithValue([]);
-      }
+    if (response.data.status) {
+      return response.data.data as ActiveSessionBet[];
+    } else {
       return rejectWithValue([]);
     }
+  } catch (error) {
+    if (error instanceof AxiosError && error.response) {
+      console.error("API Error:", error.response.data);
+      return rejectWithValue([]);
+    }
+    return rejectWithValue([]);
   }
-);
-
+});
 
 const aviatorSlice = createSlice({
   name: "aviator",
@@ -396,7 +424,7 @@ const aviatorSlice = createSlice({
     },
 
     setWaiting: (state) => {
-      state.gameStatus = "waiting"
+      state.gameStatus = "waiting";
       state.multipliersStarted = false;
     },
 
@@ -405,8 +433,7 @@ const aviatorSlice = createSlice({
       state.finalMultiplier = action.payload;
       state.multiplierHistory.push(action.payload);
       state.multipliersStarted = false;
-      state.activeBetsBySection = {}
-
+      state.activeBetsBySection = {};
     },
 
     removeActiveBetBySection: (state, action: PayloadAction<string>) => {
@@ -422,17 +449,15 @@ const aviatorSlice = createSlice({
     //OLD
     setUser: (state, action: PayloadAction<string | null>) => {
       state.user = action.payload;
-
     },
     setEmail: (state, action: PayloadAction<string | null>) => {
-      state.userEmail = action.payload
+      state.userEmail = action.payload;
     },
     setUserName: (state, action: PayloadAction<string | null>) => {
-      state.userName = action.payload
+      state.userName = action.payload;
     },
     setToken: (state, action: PayloadAction<string | null>) => {
       state.token = action.payload;
-
     },
 
     clearTopBets: (state) => {
@@ -443,7 +468,6 @@ const aviatorSlice = createSlice({
       state.isConnected = action.payload;
     },
 
-
     setSessionId: (state, action: PayloadAction<string>) => {
       state.sessionId = action.payload;
     },
@@ -451,7 +475,6 @@ const aviatorSlice = createSlice({
     setCurrentMultiplier: (state, action: PayloadAction<number>) => {
       state.currentMultiplier = action.payload;
     },
-
 
     setBets: (state, action: PayloadAction<Bet[]>) => {
       state.bets = action.payload;
@@ -472,7 +495,7 @@ const aviatorSlice = createSlice({
 
     setError: (state, action: PayloadAction<string | null>) => {
       state.error = action.payload;
-      state.gameStatus = "waiting"
+      state.gameStatus = "waiting";
     },
   },
   extraReducers(builder) {
@@ -494,8 +517,8 @@ const aviatorSlice = createSlice({
           _id: bet._id,
         };
 
-        console.log("Bet Added to active bet")
-        console.log(`${sectionId} : ${bet}`)
+        console.log("Bet Added to active bet");
+        console.log(`${sectionId} : ${bet}`);
 
         // Add bet to the bets array
         state.bets.push(action.payload.bet);
@@ -504,11 +527,13 @@ const aviatorSlice = createSlice({
 
       .addCase(placeBet.rejected, (state, action) => {
         const { sectionId, userId, amount, token } = action.meta.arg;
-        const { message, statusCode } = action.payload as { message: string, statusCode: number };
+        const { message, statusCode } = action.payload as {
+          message: string;
+          statusCode: number;
+        };
 
         // Handle specific error codes
         switch (statusCode) {
-
           case 403:
             // Store the pending bet for the section
             state.pendingBetsBySection[sectionId] = { userId, amount, token };
@@ -516,8 +541,8 @@ const aviatorSlice = createSlice({
             toast(message, {
               position: "top-center",
               style: {
-                backgroundColor: '#dc2626',
-                color: 'white',
+                backgroundColor: "#dc2626",
+                color: "white",
               },
               duration: 3000,
             });
@@ -528,8 +553,8 @@ const aviatorSlice = createSlice({
             toast(message, {
               position: "top-center",
               style: {
-                backgroundColor: '#dc2626',
-                color: 'white',
+                backgroundColor: "#dc2626",
+                color: "white",
               },
               duration: 3000,
             });
@@ -577,18 +602,21 @@ const aviatorSlice = createSlice({
         state.error = null;
       })
       .addCase(cashOut.rejected, (state, action) => {
-        const { message, statusCode } = action.payload as { message: string, statusCode: number };
-      
+        const { message, statusCode } = action.payload as {
+          message: string;
+          statusCode: number;
+        };
+
         state.error = message;
         toast(message, {
           position: "top-center",
           style: {
-            backgroundColor: '#dc2626',
-            color: 'white',
+            backgroundColor: "#dc2626",
+            color: "white",
           },
           duration: 3000,
         });
-      
+
         console.error("cashOut.rejected: ", state.error, statusCode);
       })
       .addCase(verifyToken.pending, (state) => {
@@ -602,7 +630,7 @@ const aviatorSlice = createSlice({
         state.verified = false;
         state.error = "Token verification failed.";
       })
-   
+
       .addCase(fetchGameLogo.pending, (state) => {
         state.error = null;
       })
@@ -636,7 +664,8 @@ const aviatorSlice = createSlice({
       })
       .addCase(fetchCrashPoints.rejected, (state, action) => {
         state.error =
-          (action.payload as string) || "An error occurred while fetching crash points.";
+          (action.payload as string) ||
+          "An error occurred while fetching crash points.";
       })
 
       // FETCH BETS BY USER
@@ -683,7 +712,6 @@ const aviatorSlice = createSlice({
         state.activeSessionBets = action.payload || [];
         state.error = action.payload ? null : "Failed to fetch session bets.";
       });
-
   },
 });
 
