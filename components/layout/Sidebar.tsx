@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useEffect, useState } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -7,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format, isValid } from "date-fns";
 import { Forward, ShieldCheck, MessageCircle } from "lucide-react";
 import { getTextColorClass } from "../ui/MulticolorText";
-import { TopBet } from "@/lib/utils";
+import { MyBet, TopBet } from "@/lib/utils";
 import { setActiveTab } from "@/lib/features/tabsSlice";
 import { RootState } from "@/lib/store";
 import Currency from "./Currency";
@@ -32,7 +31,7 @@ export default function Sidebar() {
   const allBets = useAppSelector(
     (state: RootState) => state.aviator.activeSessionBets
   );
-  const error = useAppSelector((state: RootState) => state.aviator.error);
+  // const error = useAppSelector((state: RootState) => state.aviator.error);
   const loadingMyBets = useAppSelector(
     (state: RootState) => state.aviator.loadingMyBets
   );
@@ -171,7 +170,7 @@ export default function Sidebar() {
                         </div>
                         <div className="px-4 py-1 whitespace-nowrap text-right text-xs text-gray-300 flex-1">
                           <span className="text-base text-[#ffffff] font-normal">
-                            {bet.amount * bet.cashOutMultiplier}
+                            {(bet.amount * bet.cashOutMultiplier).toFixed(2)}
                           </span>
                         </div>
                       </div>
@@ -207,20 +206,22 @@ export default function Sidebar() {
           </div>
           <ScrollArea className="flex-1 hide-scrollbar">
             <div className="min-h-full">
-              {error && <p className="text-red-500">{error}</p>}
               {loadingMyBets ? (
                 <p className="text-center text-sm text-gray-400">Loading...</p>
               ) : myBets.length > 0 ? (
                 <div className="">
                   <div className="bg-[#1b1c1d]">
-                    {myBets.map((bet) => {
+                    {myBets.map((bet: MyBet) => {
                       const date = new Date(bet.createdAt).toLocaleDateString();
                       const time = new Date(bet.createdAt).toLocaleTimeString();
+                      const randomColor =
+                        Math.random() < 0.5 ? "text-blue-500" : "text-pink-500"; // Random blue or pink
+
                       return (
                         <div
                           key={bet._id}
                           className={`flex justify-between rounded-lg ${
-                            bet.amount > 0
+                            bet.cashOutMultiplier > 0
                               ? "border border-[#427f00] bg-[#123405]"
                               : "bg-[#141516]"
                           } mb-0.5`}
@@ -239,23 +240,24 @@ export default function Sidebar() {
 
                             {bet.amount > 0 && (
                               <span
-                                className={`py-[2px] px-[6px] rounded-[11px] bg-[#00000080] text-[12px] ml-2 font-bold`}
+                                className={`py-[2px] px-[6px] rounded-[11px] bg-[#00000080] text-[12px] ml-2 font-bold ${
+                                  bet.cashOutMultiplier > 0
+                                    ? "text-purple-500"
+                                    : randomColor
+                                }`}
                               >
-                                {bet.amount}x
+                                {bet.cashOutMultiplier}x
                               </span>
                             )}
                           </div>
-                          <div className=" pl-4 pr-1 py-1 whitespace-nowrap text-right text-xs text-gray-300 flex-1">
+                          <div className="pl-4 pr-1 py-1 whitespace-nowrap text-right text-xs text-gray-300 flex-1">
                             <span className="text-base text-[#ffffff] font-normal">
-                              {bet.cashOutMultiplier * bet.amount}
+                              {(bet.cashOutMultiplier * bet.amount).toFixed(2)}
                             </span>
                           </div>
 
-                          <div className=" px-4 py-1 flex items-center justify-center gap-1">
-                            <ShieldCheck
-                              className=" text-green-500"
-                              size={16}
-                            />
+                          <div className="px-4 py-1 flex items-center justify-center gap-1">
+                            <ShieldCheck className="text-green-500" size={16} />
                             <MessageCircle size={16} stroke="#9ea0a3" />
                           </div>
                         </div>
@@ -424,7 +426,7 @@ export default function Sidebar() {
                                 <p className="text-xs text-[#9ea0a3] text-center">
                                   Win <Currency />:{" "}
                                   <span className="font-semibold">
-                                    {bet.winAmount || "0.00"}
+                                    {bet.winAmount?.toFixed(2) || "0.00"}
                                   </span>
                                 </p>
                               </div>
@@ -439,7 +441,7 @@ export default function Sidebar() {
                               <p>
                                 Round:{" "}
                                 <span className="text-white">
-                                  {bet.x || "N/A"}
+                                  {bet.sessionCrashPoint || "N/A"}x
                                 </span>
                               </p>
                             </div>

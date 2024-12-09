@@ -26,7 +26,7 @@ import HowToPlayPopup from "./HowToPlayPopup";
 import GameRulesPopup from "./GameRulesPopup";
 import ProvablyFairSettingsPopup from "./ProvablyFairSettingsPopup";
 import GameLimitsPopup from "./GameLimitsPopup";
-import ChangeAvatarPopup from "./ChangeAvatarPopup"; // Importing the ChangeAvatarPopup
+import ChangeAvatarPopup, { avatars } from "./ChangeAvatarPopup"; // Importing the ChangeAvatarPopup
 import { setActiveTab } from "@/lib/features/tabsSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import {
@@ -35,7 +35,6 @@ import {
   closeMenu,
 } from "@/lib/features/menuSlice";
 import { RootState } from "@/lib/store";
-
 import Currency from "./Currency";
 import { useAudio } from "@/lib/audioContext";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -129,10 +128,10 @@ export default function Navbar() {
     useState(false);
   const [showGameLimits, setShowGameLimits] = useState(false);
   const [showChangeAvatar, setShowChangeAvatar] = useState(false);
-  const [avatarUrl, setAvatarUrl] = useState<string | null>("./av-1.png");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>("");
   const [returnURL, setReturnURL] = useState<string | null>(null);
   const searchParams = useSearchParams();
-  
+
   const router = useRouter();
 
   const dispatch = useAppDispatch();
@@ -140,9 +139,7 @@ export default function Navbar() {
   const userEmail = useAppSelector(
     (state: RootState) => state.aviator.userEmail
   );
-  const userName = useAppSelector(
-    (state: RootState) => state.aviator.userName
-  );
+  const userName = useAppSelector((state: RootState) => state.aviator.userName);
   const parseReturnURL = useCallback((url: string | null) => {
     if (!url) return null;
     try {
@@ -157,6 +154,10 @@ export default function Navbar() {
     const savedAvatar = localStorage.getItem("selectedAvatar");
     if (savedAvatar) {
       setAvatarUrl(savedAvatar);
+    } else {
+      const randomAvatar = avatars[Math.floor(Math.random() * avatars.length)];
+      setAvatarUrl(randomAvatar);
+      localStorage.setItem("selectedAvatar", randomAvatar);
     }
 
     const return_url = searchParams.get("return_url");
@@ -243,7 +244,7 @@ export default function Navbar() {
     <div className="flex flex-col bg-[#1b1c1d] p-1 text-white">
       <div className="flex justify-between">
         <div className="flex items-center gap-4">
-        <span className="text-2xl font-black text-red-600 italic px-2">
+          <span className="text-2xl font-black text-red-600 italic px-2">
             Aviator
           </span>
           <button
@@ -262,9 +263,9 @@ export default function Navbar() {
         </div>
         <div className="flex items-center">
           <div className="px-3">
-          <span className="text-base font-bold text-[#28a909]">
-  {new Intl.NumberFormat('en-US').format(balance)}
-</span>
+            <span className="text-base font-bold text-[#28a909]">
+              {new Intl.NumberFormat("en-US").format(balance)}
+            </span>
 
             <Currency />
           </div>

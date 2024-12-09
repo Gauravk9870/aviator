@@ -27,8 +27,6 @@ export const fetchBalance = createAsyncThunk(
           headers: { Authorization: token },
         }
       );
-      console.log("FETCH BALANCE : ",response.data);
-
       if (response.data.status) {
         return response.data.userBalance;
       } else {

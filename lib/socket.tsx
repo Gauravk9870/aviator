@@ -84,7 +84,6 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     const ws = new WebSocket(`${config.ws}`, token);
 
     ws.onopen = () => {
-   
       ws.send(JSON.stringify({ type: "SUBSCRIBE", gameType: config.gameType }));
       setStatus("connected");
       dispatch(setConnectionStatus(true));
@@ -93,17 +92,17 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
       if (status === "connected") {
         playWelcome();
       }
-      dispatch(fetchBalance({userId,token}))
+      dispatch(fetchBalance({ userId, token }))
         .unwrap()
         .catch((error) => {
           console.error("Error fetching balance , ", error);
         });
 
-        dispatch(fetchCrashPoints({ token: token }))
-          .unwrap()
-          .catch((error) => {
-            console.error("Error fetching crash points:", error);
-          });
+      dispatch(fetchCrashPoints({ token: token }))
+        .unwrap()
+        .catch((error) => {
+          console.error("Error fetching crash points:", error);
+        });
     };
 
     ws.onmessage = (event) => {
@@ -116,7 +115,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
           break;
 
         case "WAITING_TIME":
-         console.log("WAITING_TIME : ", data);
+          console.log("WAITING_TIME : ", data);
           break;
 
         case "STARTED":
@@ -150,13 +149,13 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
           break;
 
         case "RESULT_SHOW_TIME":
-          console.log("RESULT_SHOW_TIME : ",  data);
+          console.log("RESULT_SHOW_TIME : ", data);
           break;
-
 
         case "BETS":
           dispatch(updateBet(data.newBet));
           dispatch(setBetId(data.newBet._id));
+          dispatch(setBalance(data.userBalance));
           break;
 
         case "CASHED_OUT_BETS":
@@ -185,8 +184,6 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     socketRef.current = ws;
   };
 
-
-
   useEffect(() => {
     const tokenFromUrl = searchParams.get("token") as string;
     const userFromUrl = searchParams.get("user");
@@ -206,9 +203,9 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     if (userEmail) {
       dispatch(setEmail(userEmail));
     }
-if(userName){
-dispatch(setUserName(userName))
-}
+    if (userName) {
+      dispatch(setUserName(userName));
+    }
     setStatus("verifying");
     dispatch(verifyToken(tokenFromUrl))
       .unwrap()
