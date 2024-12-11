@@ -190,7 +190,7 @@ export const placeBet = createAsyncThunk(
             `API call skipped for sessionId: ${sessionId}, sectionId: ${sectionId}. Time difference is less than 3 seconds.`
           );
           return rejectWithValue({
-            message: "Duplicate API call prevented within 3 seconds",
+            message: "Duplicate API call prevented within 2 seconds",
             statusCode: 400,
           });
         } else {
