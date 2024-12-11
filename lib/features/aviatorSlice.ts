@@ -98,6 +98,8 @@ const initialState: AviatorState = {
 
   activeSessionBets: [],
 };
+let sessionTracking: { [sessionId: string]: { [sectionId: string]: boolean } } =
+  {};
 
 //VERIFY API
 export const verifyToken = createAsyncThunk(
@@ -156,18 +158,47 @@ export const placeBet = createAsyncThunk(
       amount,
       sectionId,
       token,
+      sessionIds,
     }: {
       userId: string;
       amount: number;
       sectionId: string;
       token: string;
+      sessionIds: string;
     },
     { rejectWithValue }
   ) => {
     try {
+      const sessionId = sessionIds;
+
+      if (!sessionTracking[sessionId]) {
+        console.log(
+          `New session detected: ${sessionId}. Clearing previous sessions.`
+        );
+        sessionTracking = {};
+      }
+
+      if (sessionTracking[sessionId] && sessionTracking[sessionId][sectionId]) {
+        console.log(
+          `API call skipped for sessionId: ${sessionId}, sectionId: ${sectionId}`
+        );
+        return rejectWithValue({
+          message: "Duplicate API call prevented",
+          statusCode: 400,
+        });
+      }
+
+      if (!sessionTracking[sessionId]) {
+        sessionTracking[sessionId] = {};
+      }
+
+      sessionTracking[sessionId][sectionId] = true;
+
+      console.log(userId, amount, sectionId, token);
       const result = await placeBetServerAction(userId, amount, token);
+
       if (result.success) {
-        console.log(`PlaceBet count`);
+        console.log(`PlaceBet successful for sectionId: ${sectionId}`);
         return { bet: result.bet, sectionId };
       } else {
         return rejectWithValue({
@@ -550,14 +581,14 @@ const aviatorSlice = createSlice({
 
           default:
             state.error = message;
-            toast(message, {
-              position: "top-center",
-              style: {
-                backgroundColor: "#dc2626",
-                color: "white",
-              },
-              duration: 3000,
-            });
+            // toast(message, {
+            //   position: "top-center",
+            //   style: {
+            //     backgroundColor: "#dc2626",
+            //     color: "white",
+            //   },
+            //   duration: 3000,
+            // });
 
             delete state.pendingBetsBySection[sectionId];
             delete state.activeBetsBySection[sectionId];

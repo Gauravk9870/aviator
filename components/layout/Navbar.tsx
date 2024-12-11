@@ -264,7 +264,10 @@ export default function Navbar() {
         <div className="flex items-center">
           <div className="px-3">
             <span className="text-base font-bold text-[#28a909]">
-              {new Intl.NumberFormat("en-US").format(balance)}
+              {new Intl.NumberFormat("en-US", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              }).format(Number(balance || "0.00"))}
             </span>
 
             <Currency />
