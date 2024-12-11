@@ -98,8 +98,9 @@ const initialState: AviatorState = {
 
   activeSessionBets: [],
 };
-let sessionTracking: { [sessionId: string]: { [sectionId: string]: boolean } } =
-  {};
+let sessionTracking: {
+  [sessionId: string]: { [sectionId: string]: { createdTime: number } };
+} = {};
 
 //VERIFY API
 export const verifyToken = createAsyncThunk(
@@ -170,6 +171,7 @@ export const placeBet = createAsyncThunk(
   ) => {
     try {
       const sessionId = sessionIds;
+      const currentTime = new Date().getTime();
 
       if (!sessionTracking[sessionId]) {
         console.log(
@@ -179,24 +181,30 @@ export const placeBet = createAsyncThunk(
       }
 
       if (sessionTracking[sessionId] && sessionTracking[sessionId][sectionId]) {
-        console.log(
-          `API call skipped for sessionId: ${sessionId}, sectionId: ${sectionId}`
-        );
-        return rejectWithValue({
-          message: "Duplicate API call prevented",
-          statusCode: 400,
-        });
+        const lastCreatedTime =
+          sessionTracking[sessionId][sectionId].createdTime;
+        const timeDiff = currentTime - lastCreatedTime;
+
+        if (timeDiff < 2000) {
+          console.log(
+            `API call skipped for sessionId: ${sessionId}, sectionId: ${sectionId}. Time difference is less than 3 seconds.`
+          );
+          return rejectWithValue({
+            message: "Duplicate API call prevented within 3 seconds",
+            statusCode: 400,
+          });
+        } else {
+          console.log(`Section created more than 2 seconds ago. Allowing bet.`);
+        }
       }
 
       if (!sessionTracking[sessionId]) {
         sessionTracking[sessionId] = {};
       }
 
-      sessionTracking[sessionId][sectionId] = true;
+      sessionTracking[sessionId][sectionId] = { createdTime: currentTime };
 
-      console.log(userId, amount, sectionId, token);
       const result = await placeBetServerAction(userId, amount, token);
-
       if (result.success) {
         console.log(`PlaceBet successful for sectionId: ${sectionId}`);
         return { bet: result.bet, sectionId };
@@ -580,15 +588,16 @@ const aviatorSlice = createSlice({
             break;
 
           default:
-            state.error = message;
-            // toast(message, {
-            //   position: "top-center",
-            //   style: {
-            //     backgroundColor: "#dc2626",
-            //     color: "white",
-            //   },
-            //   duration: 3000,
-            // });
+            if (message !== "Duplicate API call prevented within 2 seconds") {
+              toast(message, {
+                position: "top-center",
+                style: {
+                  backgroundColor: "#dc2626",
+                  color: "white",
+                },
+                duration: 3000,
+              });
+            }
 
             delete state.pendingBetsBySection[sectionId];
             delete state.activeBetsBySection[sectionId];
