@@ -156,7 +156,10 @@ export default function Sidebar() {
                         </div>
                         <div className="px-4 py-1 whitespace-nowrap text-left flex-1">
                           <span className="text-base text-[#ffffff] font-normal">
-                            {bet.amount}
+                            {new Intl.NumberFormat("en-US", {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            }).format(bet.amount)}
                           </span>
                           {bet.cashOutMultiplier > 0 && (
                             <span
@@ -235,7 +238,10 @@ export default function Sidebar() {
                           </div>
                           <div className="px-4 py-1 whitespace-nowrap flex flex-row justify-center">
                             <span className="text-base text-[#ffffff] font-normal">
-                              {bet.amount.toFixed(2)}
+                              {new Intl.NumberFormat("en-US", {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              }).format(bet.amount)}
                             </span>
 
                             {bet.amount > 0 && (
@@ -252,7 +258,16 @@ export default function Sidebar() {
                           </div>
                           <div className="pl-4 pr-1 py-1 whitespace-nowrap text-right text-xs text-gray-300 flex-1">
                             <span className="text-base text-[#ffffff] font-normal">
-                              {(bet.cashOutMultiplier * bet.amount).toFixed(2)}
+                              {new Intl.NumberFormat("en-US", {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              }).format(
+                                Number(
+                                  (bet.cashOutMultiplier * bet.amount).toFixed(
+                                    2
+                                  )
+                                )
+                              )}
                             </span>
                           </div>
 
@@ -414,7 +429,14 @@ export default function Sidebar() {
                                 <p className="text-xs text-[#9ea0a3] text-center mb-1">
                                   Bet <Currency />:{" "}
                                   <span className="font-semibold text-white">
-                                    {bet.betAmount?.toFixed(2) || "0.00"}
+                                    {new Intl.NumberFormat("en-US", {
+                                      minimumFractionDigits: 2,
+                                      maximumFractionDigits: 2,
+                                    }).format(
+                                      Number(
+                                        bet.betAmount?.toFixed(2) || "0.00"
+                                      )
+                                    )}
                                   </span>
                                 </p>
                                 <p className="text-xs text-[#9ea0a3] text-center mb-1">
@@ -426,7 +448,14 @@ export default function Sidebar() {
                                 <p className="text-xs text-[#9ea0a3] text-center">
                                   Win <Currency />:{" "}
                                   <span className="font-semibold">
-                                    {bet.winAmount?.toFixed(2) || "0.00"}
+                                    {new Intl.NumberFormat("en-US", {
+                                      minimumFractionDigits: 2,
+                                      maximumFractionDigits: 2,
+                                    }).format(
+                                      Number(
+                                        bet.winAmount?.toFixed(2) || "0.00"
+                                      )
+                                    )}
                                   </span>
                                 </p>
                               </div>

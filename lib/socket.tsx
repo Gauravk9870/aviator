@@ -125,7 +125,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
           break;
 
         case "MULTIPLIER":
-          console.log("MULTIPLIER");
+
           if (
             typeof data.currentMultiplier === "string" &&
             !isNaN(parseFloat(data.currentMultiplier))
@@ -268,7 +268,14 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
 
   if (status === "disconnected") {
     return (
-      <SocketDisconnected message=" You have been disconnected. Check connection and refresh your browser, or go back to landing page " />
+      <>
+        <SocketDisconnected message=" You have been disconnected. Check connection and refresh your browser, or go back to landing page " />
+        <a
+          className="w-40 border border-[#ffbd71] bg-[#d07206] shadow-inner shadow-[inset_0_1px_1px_#ffffff80] text-white text-center text-shadow-[0_1px_2px_rgba(0,0,0,0.5)] hover:cursor-pointer disabled:cursor-not-allowed"
+        >
+          Home
+        </a>
+      </>
     );
   }
 

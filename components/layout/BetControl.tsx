@@ -47,7 +47,9 @@ const BetSection: React.FC<BetSectionProps> = ({
   const multipliersStarted = useAppSelector(
     (state) => state.aviator.multipliersStarted
   );
-
+  const setSessionId = useAppSelector(
+    (state) => state.aviator.sessionId
+  ) as string;
   const handleIncrement = () => setBetAmount((prev) => prev + 1);
   const handleDecrement = () =>
     setBetAmount((prev) => (prev > 1 ? prev - 1 : 1));
@@ -60,6 +62,7 @@ const BetSection: React.FC<BetSectionProps> = ({
           amount: betAmount,
           sectionId: sectionId,
           token: token,
+          sessionIds: setSessionId,
         })
       ).unwrap();
     } catch (error) {
@@ -195,18 +198,15 @@ const BetSection: React.FC<BetSectionProps> = ({
               amount: pendingBet.amount,
               sectionId,
               token: pendingBet.token,
+              sessionIds: setSessionId,
             })
           )
             .unwrap()
             .then(() => {
               dispatch(clearPendingBetBySection(sectionId));
-
               console.log("Pending bet placed successfully.");
-              return;
             })
-
             .catch((error) => {
-              // Log or handle error
               console.error(
                 `Failed to place pending bet for section ${sectionId}:`,
                 error
@@ -215,7 +215,6 @@ const BetSection: React.FC<BetSectionProps> = ({
         }
       });
     }
-
   }, [gameStatus, multipliersStarted, pendingBetsBySection, dispatch, token]);
 
   const isDisabled = Boolean(activeBet || pendingBet);
@@ -437,7 +436,7 @@ const BetControlSection: React.FC<BetControlSectionProps> = ({
   sectionId,
 }) => {
   const { currentMultiplier } = useAppSelector((state) => state.aviator);
-  const [betAmount, setBetAmount] = useState<number>(10);
+  const [betAmount, setBetAmount] = useState<number>(1);
   const [activeAmount, setActiveAmount] = useState<number>(10);
   const activeBet = useAppSelector(
     (state) =>
