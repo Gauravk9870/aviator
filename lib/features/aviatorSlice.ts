@@ -185,16 +185,16 @@ export const placeBet = createAsyncThunk(
           sessionTracking[sessionId][sectionId].createdTime;
         const timeDiff = currentTime - lastCreatedTime;
 
-        if (timeDiff < 2000) {
+        if (timeDiff < 5000) {
           console.log(
             `API call skipped for sessionId: ${sessionId}, sectionId: ${sectionId}. Time difference is less than 3 seconds.`
           );
           return rejectWithValue({
-            message: "Duplicate API call prevented within 2 seconds",
+            message: "Duplicate API call prevented within 5 seconds",
             statusCode: 400,
           });
         } else {
-          console.log(`Section created more than 2 seconds ago. Allowing bet.`);
+          console.log(`Section created more than 5 seconds ago. Allowing bet.`);
         }
       }
 
@@ -588,7 +588,7 @@ const aviatorSlice = createSlice({
             break;
 
           default:
-            if (message !== "Duplicate API call prevented within 2 seconds") {
+            if (message !== "Duplicate API call prevented within 5 seconds") {
               toast(message, {
                 position: "top-center",
                 style: {
